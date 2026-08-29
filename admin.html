@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard | ระบบจัดการค่าป้ายสาขาวิชาคอมพิวเตอร์ศึกษา</title>
-  <meta name="description" content="ระบบจัดการหลังบ้านและตรวจสอบสลิปการชำระเงินสาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น">
+  <meta name="description"
+    content="ระบบจัดการหลังบ้านและตรวจสอบสลิปการชำระเงินสาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น">
   <link rel="icon" type="image/png" href="logo.png">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap"
+    rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -51,21 +55,26 @@
       background-color: #090d16;
       color: #f8fafc;
     }
+
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
+
     .custom-scrollbar::-webkit-scrollbar-track {
       background: #0f172a;
       border-radius: 9999px;
     }
+
     .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #334155;
       border-radius: 9999px;
     }
+
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
       background: #f97316;
     }
+
     /* Cyber Glass Card */
     .cyber-glass {
       background: rgba(15, 23, 42, 0.75);
@@ -76,32 +85,44 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white overflow-x-hidden">
+
+<body
+  class="min-h-screen flex flex-col antialiased bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white overflow-x-hidden">
 
   <!-- ================= ULTRA TECH INTRO SPLASH OVERLAY ================= -->
-  <div id="adminIntroSplash" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black text-white pointer-events-auto">
+  <div id="adminIntroSplash"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black text-white pointer-events-auto">
     <div class="text-center space-y-5 max-w-sm px-6">
       <div class="relative w-24 h-24 mx-auto intro-logo-anim">
-        <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 blur-xl opacity-60 animate-pulse"></div>
-        <div class="relative w-full h-full rounded-3xl bg-slate-900 border border-orange-500/40 p-3 flex items-center justify-center shadow-2xl">
+        <div
+          class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 blur-xl opacity-60 animate-pulse">
+        </div>
+        <div
+          class="relative w-full h-full rounded-3xl bg-slate-900 border border-orange-500/40 p-3 flex items-center justify-center shadow-2xl">
           <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
         </div>
       </div>
       <div class="space-y-2 intro-text-anim">
-        <span class="text-[11px] font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300 uppercase">HOST ADMIN CONTROL PORTAL</span>
+        <span
+          class="text-[11px] font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300 uppercase">HOST
+          ADMIN CONTROL PORTAL</span>
         <h2 class="text-2xl font-extrabold text-white tracking-tight">ระบบควบคุมและจัดการหลังบ้าน</h2>
         <p class="text-xs text-slate-400">สาขาคอมพิวเตอร์ศึกษา มข. (รหัส 69)</p>
       </div>
       <div class="w-48 h-1.5 bg-slate-800 rounded-full mx-auto overflow-hidden">
-        <div id="adminIntroProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 w-0 transition-all duration-700"></div>
+        <div id="adminIntroProgressBar"
+          class="h-full bg-gradient-to-r from-orange-500 to-amber-400 w-0 transition-all duration-700"></div>
       </div>
     </div>
   </div>
 
   <!-- ================= 1. LOGIN SCREEN (SECURE EMAIL + PASSWORD AUTH) ================= -->
-  <div id="loginScreen" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
-    <div class="max-w-md w-full bg-slate-900/90 backdrop-blur-2xl border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6 text-center">
-      <div class="w-18 h-18 mx-auto rounded-3xl bg-white p-2 border border-slate-700 shadow-lg flex items-center justify-center">
+  <div id="loginScreen"
+    class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
+    <div
+      class="max-w-md w-full bg-slate-900/90 backdrop-blur-2xl border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6 text-center">
+      <div
+        class="w-18 h-18 mx-auto rounded-3xl bg-white p-2 border border-slate-700 shadow-lg flex items-center justify-center">
         <img src="logo.png" alt="โลโก้" class="w-12 h-12 object-contain">
       </div>
       <div>
@@ -114,13 +135,9 @@
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1.5">อีเมลแอดมิน (KKU Mail)</label>
           <div class="relative">
-            <input 
-              type="email" 
-              id="adminEmailInput"
-              placeholder="เช่น thitiwut.a@kkumail.com" 
+            <input type="email" id="adminEmailInput" placeholder="เช่น thitiwut.a@kkumail.com"
               class="w-full pl-11 pr-4 py-3 bg-slate-800/90 border border-slate-700 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition"
-              required
-            >
+              required>
             <i data-lucide="mail" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5"></i>
           </div>
         </div>
@@ -128,37 +145,33 @@
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1.5">รหัสผ่านแอดมิน (Password)</label>
           <div class="relative">
-            <input 
-              type="password" 
-              id="adminPasswordInput"
-              placeholder="กรอกรหัสผ่านของคุณ" 
+            <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่านของคุณ"
               class="w-full pl-11 pr-11 py-3 bg-slate-800/90 border border-slate-700 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition"
-              required
-            >
+              required>
             <i data-lucide="lock" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5"></i>
-            <button type="button" onclick="togglePasswordVisibility('adminPasswordInput', 'pwdToggleIcon')" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-white transition">
+            <button type="button" onclick="togglePasswordVisibility('adminPasswordInput', 'pwdToggleIcon')"
+              class="absolute right-3.5 top-3.5 text-slate-400 hover:text-white transition">
               <i data-lucide="eye" id="pwdToggleIcon" class="w-5 h-5"></i>
             </button>
           </div>
         </div>
 
-        <div id="loginErrorMsg" class="hidden text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-2">
+        <div id="loginErrorMsg"
+          class="hidden text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-2">
           <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 flex-shrink-0"></i>
           <span id="loginErrorText">อีเมลหรือรหัสผ่านไม่ถูกต้อง</span>
         </div>
 
-        <button 
-          type="submit" 
-          id="btnLoginSubmit"
-          class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/25 transition transform active:scale-98 flex items-center justify-center gap-2"
-        >
+        <button type="submit" id="btnLoginSubmit"
+          class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/25 transition transform active:scale-98 flex items-center justify-center gap-2">
           <i data-lucide="log-in" class="w-4 h-4"></i>
           <span>เข้าสู่ระบบ Dashboard</span>
         </button>
       </form>
 
       <div class="pt-2">
-        <a href="index.html" class="text-xs text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1">
+        <a href="index.html"
+          class="text-xs text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1">
           <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
           <span>กลับสู่หน้าเว็บไซต์หลัก</span>
         </a>
@@ -168,48 +181,60 @@
 
   <!-- ================= 2. MAIN ADMIN DASHBOARD ================= -->
   <div id="adminDashboard" class="hidden flex-grow flex flex-col">
-    
+
     <!-- Top Header -->
     <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800 shadow-md">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 sm:py-0 sm:h-20 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 sm:py-0 sm:h-20 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white p-1 border border-slate-700 shadow-sm flex items-center justify-center flex-shrink-0">
+            <div
+              class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white p-1 border border-slate-700 shadow-sm flex items-center justify-center flex-shrink-0">
               <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
             </div>
             <div>
               <div class="flex items-center gap-1.5">
                 <span class="text-[11px] font-black text-orange-400 uppercase tracking-wider">COMED KKU 69</span>
-                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-orange-500/20 text-orange-300 border border-orange-500/30">Host Admin</span>
+                <span
+                  class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-orange-500/20 text-orange-300 border border-orange-500/30">Host
+                  Admin</span>
               </div>
               <h1 class="text-sm sm:text-lg font-black text-white">ระบบจัดการหลังบ้าน</h1>
             </div>
           </div>
 
           <div class="sm:hidden flex items-center gap-1.5">
-            <button onclick="refreshDataFromCloud()" class="p-2 rounded-xl bg-sky-950/80 text-sky-400 border border-sky-700/60" title="รีเฟรชข้อมูล">
+            <button onclick="refreshDataFromCloud()"
+              class="p-2 rounded-xl bg-sky-950/80 text-sky-400 border border-sky-700/60" title="รีเฟรชข้อมูล">
               <i data-lucide="rotate-cw" class="w-4 h-4"></i>
             </button>
-            <button onclick="handleAdminLogout()" class="p-2 rounded-xl text-rose-400 bg-rose-500/10 border border-rose-500/20" title="ออกจากระบบ">
+            <button onclick="handleAdminLogout()"
+              class="p-2 rounded-xl text-rose-400 bg-rose-500/10 border border-rose-500/20" title="ออกจากระบบ">
               <i data-lucide="log-out" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
 
         <div class="hidden sm:flex items-center gap-2.5">
-          <button onclick="refreshDataFromCloud()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-sky-400 bg-sky-950/80 hover:bg-sky-900 border border-sky-700/60 transition shadow-sm group">
-            <i data-lucide="rotate-cw" id="adminRefreshIcon" class="w-4 h-4 transition-transform group-hover:rotate-180 duration-500"></i>
+          <button onclick="refreshDataFromCloud()"
+            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-sky-400 bg-sky-950/80 hover:bg-sky-900 border border-sky-700/60 transition shadow-sm group">
+            <i data-lucide="rotate-cw" id="adminRefreshIcon"
+              class="w-4 h-4 transition-transform group-hover:rotate-180 duration-500"></i>
             <span>รีเฟรชข้อมูล</span>
           </button>
-          <a href="index.html" target="_blank" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
+          <a href="index.html" target="_blank"
+            class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
             <i data-lucide="external-link" class="w-4 h-4"></i>
             <span>ดูหน้าเว็บ</span>
           </a>
-          <button onclick="exportToExcel()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/60 transition shadow-sm">
+          <button onclick="exportToExcel()"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/60 transition shadow-sm">
             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i>
             <span>Export Excel</span>
           </button>
-          <button onclick="handleAdminLogout()" class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition" title="ออกจากระบบ">
+          <button onclick="handleAdminLogout()"
+            class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition"
+            title="ออกจากระบบ">
             <i data-lucide="log-out" class="w-5 h-5"></i>
           </button>
         </div>
@@ -218,10 +243,10 @@
 
     <!-- Content -->
     <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 flex-grow">
-      
+
       <!-- Stats Overview 4-Grid Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
+
         <!-- 1. Total Received Money -->
         <div class="admin-stat-card cyber-glass rounded-3xl p-5 shadow-lg border border-slate-800">
           <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
@@ -245,7 +270,8 @@
               <i data-lucide="user-check" class="w-4 h-4"></i>
             </div>
           </div>
-          <div class="text-3xl font-black text-emerald-400 font-mono" id="statPaidCount">0 <span class="text-xs font-normal text-slate-400">คน</span></div>
+          <div class="text-3xl font-black text-emerald-400 font-mono" id="statPaidCount">0 <span
+              class="text-xs font-normal text-slate-400">คน</span></div>
           <div class="text-xs text-slate-500 mt-1 flex justify-between">
             <span>จากทั้งหมด 60 คน</span>
             <span id="statPaidPercent" class="text-emerald-400 font-bold">0%</span>
@@ -260,7 +286,8 @@
               <i data-lucide="user-x" class="w-4 h-4"></i>
             </div>
           </div>
-          <div class="text-3xl font-black text-rose-400 font-mono" id="statUnpaidCount">60 <span class="text-xs font-normal text-slate-400">คน</span></div>
+          <div class="text-3xl font-black text-rose-400 font-mono" id="statUnpaidCount">60 <span
+              class="text-xs font-normal text-slate-400">คน</span></div>
           <div class="text-xs text-slate-500 mt-1 flex justify-between">
             <span>ยอดค้างรับ</span>
             <span id="statUnpaidMoney" class="text-rose-400 font-bold">฿11,400</span>
@@ -268,7 +295,8 @@
         </div>
 
         <!-- 4. Cloud Sync Status -->
-        <div class="admin-stat-card cyber-glass rounded-3xl p-5 shadow-lg border border-slate-800 flex flex-col justify-between">
+        <div
+          class="admin-stat-card cyber-glass rounded-3xl p-5 shadow-lg border border-slate-800 flex flex-col justify-between">
           <div class="flex items-center justify-between text-xs text-slate-400">
             <span class="font-bold">การเชื่อมต่อ Cloud</span>
             <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
@@ -282,7 +310,8 @@
             </div>
             <span class="text-[11px] text-slate-400 block mt-1">ซิงค์อัตโนมัติ 2-Way</span>
           </div>
-          <button onclick="refreshDataFromCloud()" class="w-full py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1 transition">
+          <button onclick="refreshDataFromCloud()"
+            class="w-full py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1 transition">
             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> ซิงค์ข้อมูลล่าสุด
           </button>
         </div>
@@ -290,8 +319,9 @@
       </div>
 
       <!-- Main Management Table Card -->
-      <div id="adminTableContainer" class="cyber-glass rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-800">
-        
+      <div id="adminTableContainer"
+        class="cyber-glass rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-800">
+
         <!-- Controls: Filters, Search & Bulk Actions -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div class="flex items-center gap-2 flex-wrap">
@@ -302,29 +332,37 @@
           </div>
 
           <!-- Status & Management Filter Tabs -->
-          <div class="flex items-center gap-1 p-1 bg-slate-950 rounded-2xl border border-slate-800 text-xs font-bold flex-wrap">
-            <button onclick="setFilter('all')" id="fBtnAll" class="px-3.5 py-2 rounded-xl bg-slate-800 text-white shadow-sm transition">
+          <div
+            class="flex items-center gap-1 p-1 bg-slate-950 rounded-2xl border border-slate-800 text-xs font-bold flex-wrap">
+            <button onclick="setFilter('all')" id="fBtnAll"
+              class="px-3.5 py-2 rounded-xl bg-slate-800 text-white shadow-sm transition">
               ทั้งหมด (60)
             </button>
-            <button onclick="setFilter('paid')" id="fBtnPaid" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-emerald-400 transition">
+            <button onclick="setFilter('paid')" id="fBtnPaid"
+              class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-emerald-400 transition">
               จ่ายแล้ว (<span id="countFPaid">0</span>)
             </button>
-            <button onclick="setFilter('unpaid')" id="fBtnUnpaid" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-rose-400 transition">
+            <button onclick="setFilter('unpaid')" id="fBtnUnpaid"
+              class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-rose-400 transition">
               ยังไม่จ่าย (<span id="countFUnpaid">60</span>)
             </button>
-            <button onclick="setFilter('trash')" id="fBtnTrash" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-amber-400 transition flex items-center gap-1">
+            <button onclick="setFilter('trash')" id="fBtnTrash"
+              class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-amber-400 transition flex items-center gap-1">
               <i data-lucide="trash-2" class="w-3.5 h-3.5 text-amber-500"></i>
               <span>ถังขยะ (<span id="countFTrash">0</span>)</span>
             </button>
-            <button onclick="setFilter('issues')" id="fBtnIssues" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-pink-400 transition flex items-center gap-1">
+            <button onclick="setFilter('issues')" id="fBtnIssues"
+              class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-pink-400 transition flex items-center gap-1">
               <i data-lucide="help-circle" class="w-3.5 h-3.5 text-pink-500"></i>
               <span>ปัญหาผู้ใช้ (<span id="countFIssues">0</span>)</span>
             </button>
-            <button onclick="setFilter('admins')" id="fBtnAdmins" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-indigo-400 transition flex items-center gap-1">
+            <button onclick="setFilter('admins')" id="fBtnAdmins"
+              class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-indigo-400 transition flex items-center gap-1">
               <i data-lucide="shield" class="w-3.5 h-3.5 text-indigo-400"></i>
               <span>จัดการแอดมิน</span>
             </button>
-            <button onclick="setFilter('logs')" id="fBtnLogs" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-sky-400 transition flex items-center gap-1">
+            <button onclick="setFilter('logs')" id="fBtnLogs"
+              class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-sky-400 transition flex items-center gap-1">
               <i data-lucide="activity" class="w-3.5 h-3.5 text-sky-400"></i>
               <span>Logs ระบบ</span>
             </button>
@@ -334,13 +372,9 @@
         <!-- Search Bar -->
         <div class="relative">
           <i data-lucide="search" class="w-5 h-5 text-slate-500 absolute left-4 top-3.5"></i>
-          <input 
-            type="text" 
-            id="adminSearchInput"
-            placeholder="ค้นหาด้วย รหัสนักศึกษา, ชื่อ, นามสกุล, ชื่อเล่น หรือ อีเมล..." 
-            oninput="renderAdminTable()"
-            class="w-full pl-12 pr-4 py-3 bg-slate-950/90 border border-slate-800 rounded-2xl text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition"
-          >
+          <input type="text" id="adminSearchInput"
+            placeholder="ค้นหาด้วย รหัสนักศึกษา, ชื่อ, นามสกุล, ชื่อเล่น หรือ อีเมล..." oninput="renderAdminTable()"
+            class="w-full pl-12 pr-4 py-3 bg-slate-950/90 border border-slate-800 rounded-2xl text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition">
         </div>
 
         <!-- Table Responsive Container -->
@@ -371,14 +405,16 @@
   </div>
 
   <!-- ================= 3. MODAL: SLIP INSPECTOR & STATUS CHANGER ================= -->
-  <div id="modalSlipInspector" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="modalSlipInspector"
+    class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <h3 class="text-base font-black text-white flex items-center gap-2">
           <i data-lucide="receipt" class="w-5 h-5 text-orange-500"></i>
           ตรวจสอบหลักฐานสลิป
         </h3>
-        <button onclick="closeInspectorModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+        <button onclick="closeInspectorModal()"
+          class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -390,11 +426,13 @@
   </div>
 
   <!-- ================= 4. MODAL: ADMIN MANUAL PAYMENT WITH REQUIRED SLIP ATTACHMENT ================= -->
-  <div id="modalAdminUploadSlip" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="modalAdminUploadSlip"
+    class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+          <div
+            class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
             <i data-lucide="upload" class="w-5 h-5"></i>
           </div>
           <div>
@@ -402,7 +440,8 @@
             <p class="text-xs text-slate-400">จำเป็นต้องแนบหลักฐานสลิปเพื่อส่งขึ้น Drive & Sheets</p>
           </div>
         </div>
-        <button onclick="closeAdminUploadModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+        <button onclick="closeAdminUploadModal()"
+          class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -412,26 +451,33 @@
       </div>
 
       <div class="space-y-3">
-        <label class="block text-xs font-bold text-slate-300">เลือกไฟล์ภาพสลิปหลักฐาน <span class="text-rose-400">*จำเป็น</span></label>
-        <div class="relative border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-2xl p-4 text-center cursor-pointer transition" onclick="document.getElementById('adminSlipFileInput').click()">
-          <input type="file" id="adminSlipFileInput" accept="image/*" class="hidden" onchange="handleAdminSlipSelected(event)">
+        <label class="block text-xs font-bold text-slate-300">เลือกไฟล์ภาพสลิปหลักฐาน <span
+            class="text-rose-400">*จำเป็น</span></label>
+        <div
+          class="relative border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-2xl p-4 text-center cursor-pointer transition"
+          onclick="document.getElementById('adminSlipFileInput').click()">
+          <input type="file" id="adminSlipFileInput" accept="image/*" class="hidden"
+            onchange="handleAdminSlipSelected(event)">
           <div id="adminSlipUploadPrompt" class="space-y-1">
             <i data-lucide="image-plus" class="w-8 h-8 text-slate-400 mx-auto"></i>
             <span class="text-xs text-slate-300 font-bold block">คลิกเพื่ออัปโหลดภาพสลิป</span>
             <span class="text-[10px] text-slate-500 block">PNG, JPG, JPEG (ไม่เกิน 10MB)</span>
           </div>
           <div id="adminSlipPreviewContainer" class="hidden space-y-2">
-            <img id="adminSlipPreviewImg" src="" alt="Slip Preview" class="max-h-40 mx-auto rounded-xl border border-slate-700">
+            <img id="adminSlipPreviewImg" src="" alt="Slip Preview"
+              class="max-h-40 mx-auto rounded-xl border border-slate-700">
             <span class="text-[11px] text-emerald-400 font-bold block">แนบไฟล์สลิปเรียบร้อยแล้ว</span>
           </div>
         </div>
       </div>
 
       <div class="flex items-center justify-end gap-2 pt-2">
-        <button type="button" onclick="closeAdminUploadModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition">
+        <button type="button" onclick="closeAdminUploadModal()"
+          class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition">
           ยกเลิก
         </button>
-        <button type="button" id="btnAdminConfirmPay" onclick="submitAdminManualPayment()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 transition">
+        <button type="button" id="btnAdminConfirmPay" onclick="submitAdminManualPayment()"
+          class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 transition">
           <i data-lucide="check" class="w-4 h-4"></i>
           <span>ยืนยันและอัปโหลดขึ้น Cloud</span>
         </button>
@@ -440,11 +486,13 @@
   </div>
 
   <!-- ================= 5. MODAL: ADD / MANAGE ADMIN ACCOUNTS ================= -->
-  <div id="modalAddAdmin" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="modalAddAdmin"
+    class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+          <div
+            class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
             <i data-lucide="user-plus" class="w-5 h-5"></i>
           </div>
           <div>
@@ -452,42 +500,52 @@
             <p class="text-xs text-slate-400">กำหนดสิทธิ์และสร้างรหัสผ่านความปลอดภัย</p>
           </div>
         </div>
-        <button onclick="closeAddAdminModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+        <button onclick="closeAddAdminModal()"
+          class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <form onsubmit="handleCreateAdminSubmit(event)" class="space-y-4 text-xs">
         <div>
-          <label class="block font-bold text-slate-300 mb-1">ชื่อ - นามสกุล / ชื่อเล่น <span class="text-rose-400">*</span></label>
-          <input type="text" id="newAdminNameInput" required placeholder="เช่น สมชาย ใจดี (เจมส์)" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white outline-none focus:border-indigo-500">
+          <label class="block font-bold text-slate-300 mb-1">ชื่อ - นามสกุล / ชื่อเล่น <span
+              class="text-rose-400">*</span></label>
+          <input type="text" id="newAdminNameInput" required placeholder="เช่น สมชาย ใจดี (เจมส์)"
+            class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white outline-none focus:border-indigo-500">
         </div>
 
         <div>
-          <label class="block font-bold text-slate-300 mb-1">อีเมลแอดมิน (KKU Mail) <span class="text-rose-400">*</span></label>
-          <input type="email" id="newAdminEmailInput" required placeholder="เช่น somchai.j@kkumail.com" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white outline-none focus:border-indigo-500">
+          <label class="block font-bold text-slate-300 mb-1">อีเมลแอดมิน (KKU Mail) <span
+              class="text-rose-400">*</span></label>
+          <input type="email" id="newAdminEmailInput" required placeholder="เช่น somchai.j@kkumail.com"
+            class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white outline-none focus:border-indigo-500">
         </div>
 
         <div>
           <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
             <span>รหัสผ่านเริ่มต้น <span class="text-rose-400">*</span></span>
-            <button type="button" onclick="generateRandomPasswordForNewAdmin()" class="text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 text-[11px]">
+            <button type="button" onclick="generateRandomPasswordForNewAdmin()"
+              class="text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 text-[11px]">
               <i data-lucide="dice-5" class="w-3.5 h-3.5"></i> สุ่มรหัสผ่าน
             </button>
           </label>
           <div class="relative">
-            <input type="text" id="newAdminPasswordInput" required placeholder="กรอกรหัสผ่าน หรือกดสุ่มรหัส" class="w-full pl-3.5 pr-10 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white font-mono outline-none focus:border-indigo-500">
-            <button type="button" onclick="togglePasswordVisibility('newAdminPasswordInput', 'newPwdEyeIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-white">
+            <input type="text" id="newAdminPasswordInput" required placeholder="กรอกรหัสผ่าน หรือกดสุ่มรหัส"
+              class="w-full pl-3.5 pr-10 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white font-mono outline-none focus:border-indigo-500">
+            <button type="button" onclick="togglePasswordVisibility('newAdminPasswordInput', 'newPwdEyeIcon')"
+              class="absolute right-3 top-2.5 text-slate-400 hover:text-white">
               <i data-lucide="eye" id="newPwdEyeIcon" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-2">
-          <button type="button" onclick="closeAddAdminModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white font-bold transition">
+          <button type="button" onclick="closeAddAdminModal()"
+            class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white font-bold transition">
             ยกเลิก
           </button>
-          <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold transition flex items-center gap-1.5 shadow-md shadow-indigo-600/25">
+          <button type="submit"
+            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold transition flex items-center gap-1.5 shadow-md shadow-indigo-600/25">
             <i data-lucide="save" class="w-4 h-4"></i>
             <span>บันทึกบัญชีแอดมิน</span>
           </button>
@@ -537,7 +595,7 @@
     try {
       const storedAdmins = localStorage.getItem(ADMIN_ACCOUNTS_KEY);
       adminAccounts = storedAdmins ? JSON.parse(storedAdmins) : DEFAULT_ADMINS;
-    } catch(e) {
+    } catch (e) {
       adminAccounts = DEFAULT_ADMINS;
     }
 
@@ -545,7 +603,7 @@
     try {
       const storedLogs = localStorage.getItem(ADMIN_LOGS_KEY);
       adminLogs = storedLogs ? JSON.parse(storedLogs) : [];
-    } catch(e) {
+    } catch (e) {
       adminLogs = [];
     }
 
@@ -553,7 +611,7 @@
     try {
       const storedIssues = localStorage.getItem(ISSUES_KEY);
       userIssues = storedIssues ? JSON.parse(storedIssues) : [];
-    } catch(e) {
+    } catch (e) {
       userIssues = [];
     }
 
@@ -563,66 +621,66 @@
 
     // รายชื่อนักศึกษาทั้ง 60 คน
     const DEFAULT_STUDENTS = [
-      {"id": "693050120-5", "name": "กชกร แสนอินทร์", "nickname": "มิวสิค", "email": "kodchakon.sa@kkumail.com"},
-      {"id": "693050121-3", "name": "กนกพร คำพิทูล", "nickname": "โดนัท", "email": "kanokporn.kump@kkumail.com"},
-      {"id": "693050122-1", "name": "กรกต บรรเจิดวัฒนกุล", "nickname": "โนว่า", "email": "korakod.b@kkumail.com"},
-      {"id": "693050123-9", "name": "กัญชณิกา นันททิพักษ์", "nickname": "โบนัส", "email": "kanchaniga.n@kkumail.com"},
-      {"id": "693050124-7", "name": "กิตติชัย สิงเนิน", "nickname": "น้ำเต้า", "email": "Kittichai.si@kkumail.com"},
-      {"id": "693050125-5", "name": "ขลุ่ยไทย เคนมี", "nickname": "ขลุ่ย", "email": "kruithai.k@kkumail.com"},
-      {"id": "693050126-3", "name": "จิรทีปต์ ชัยศรี", "nickname": "บีน", "email": "jirathip.c@kkumail.com"},
-      {"id": "693050127-1", "name": "ชัยพงค์ วรรณทวี", "nickname": "มาร์ค", "email": "chaiyaphong.w@kkumail.com"},
-      {"id": "693050128-9", "name": "ธัญชนก สุตะโคตร", "nickname": "เค้ก", "email": "thanchanok.sut@kkumail.com"},
-      {"id": "693050129-7", "name": "ธันยนันท์ สุวัฒนะ", "nickname": "วาน", "email": "thanyanan.su@kkumail.com"},
-      {"id": "693050130-2", "name": "ธีรดนย์ ศรีโพธิ์ชัย", "nickname": "ยูโร", "email": "theeradon.sr@kkumail.com"},
-      {"id": "693050131-0", "name": "บุญญรัตน์ ชะนะพาล", "nickname": "อันอัน", "email": "bunyarat.c@kkumail.com"},
-      {"id": "693050132-8", "name": "ปภาดา เพิ่มพูล", "nickname": "แตงโม", "email": "papada.ph@kkumail.com"},
-      {"id": "693050133-6", "name": "ปุณเมศ บุญสง", "nickname": "คิว", "email": "punnamet.b@kkumail.com"},
-      {"id": "693050134-4", "name": "พรหมพิริยะ หอมจันทร์", "nickname": "โอปอน", "email": "phromphiriya.h@kkumail.com"},
-      {"id": "693050135-2", "name": "พิชชาพร เดชกุล", "nickname": "แพนนี่", "email": "phitchaphon.d@kkumail.com"},
-      {"id": "693050136-0", "name": "พีระพัฒน์ เกียมา", "nickname": "ต้นกล้า", "email": "Phiraphat.ki@kkumail.com"},
-      {"id": "693050137-8", "name": "ภาณุวิชญ์ ขัตติสอน", "nickname": "ไกด์", "email": "panuvich.k@kkumail.com"},
-      {"id": "693050138-6", "name": "ภูธเนศ วงษ์ชาดี", "nickname": "ภู", "email": "phuthanet.wo@kkumail.com"},
-      {"id": "693050139-4", "name": "วชรพล อินธิกาย", "nickname": "เนคไท", "email": "Wacharaphol.i@kkumail.com"},
-      {"id": "693050140-9", "name": "วชิรวิทย์ ทรัพย์เพิ่ม", "nickname": "นิว", "email": "Wachirawit.sap@kkumail.com"},
-      {"id": "693050141-7", "name": "วชิรวิทย์ บุญขันธ์", "nickname": "คิว", "email": "wachirawit.boonk@kkumail.com"},
-      {"id": "693050142-5", "name": "วัชรากร บุญโสม", "nickname": "ออย", "email": "watcharakon.bu@kkumail.com"},
-      {"id": "693050143-3", "name": "ศุกลวัฒน์ พาพลงาม", "nickname": "เปรม", "email": "sukollawat.p@kkumail.com"},
-      {"id": "693050144-1", "name": "อธิชา พิมพ์ทอง", "nickname": "ไอคิว", "email": "athicha.pi@kkumail.com"},
-      {"id": "693050145-9", "name": "เขมนิจ บุตรชน", "nickname": "เขม", "email": "kemmanit.b@kkumail.com"},
-      {"id": "693050146-7", "name": "เพ็ญพิชชา โกมลวรรค", "nickname": "นานา", "email": "panphitcha.k@kkumail.com"},
-      {"id": "693050157-5", "name": "แก่นพนม เฉลิมวงศ์วิวัฒน", "nickname": "ข้าวเหนียว", "email": "kaenpanom.c@kkumail.com"},
-      {"id": "693050148-3", "name": "โสภิตรา หุนสุวงค์", "nickname": "เค้ก", "email": "Sopitra.h@kkumail.com"},
-      {"id": "693050383-3", "name": "ฉัตรรดา กะไรยะ", "nickname": "ฟ่าง", "email": "chatrada.k@kkumail.com"},
-      {"id": "693050384-1", "name": "ชลากร กุลสอนนาน", "nickname": "ต้น", "email": "chalakorn.k@kkumail.com"},
-      {"id": "693050385-9", "name": "ฐิติกานต์ บุญสอน", "nickname": "มะปราง", "email": "thitikan.boo@kkumail.com"},
-      {"id": "693050386-7", "name": "ณัฏฐชัย โพธิ์ทับไทย", "nickname": "โอ้", "email": "nattachai.p@kkumail.com"},
-      {"id": "693050387-5", "name": "ณิชคุณ ชำนาญ", "nickname": "นาโน", "email": "Nichakhun.c@kkumail.com"},
-      {"id": "693050388-3", "name": "ธนาธิป ภูนาเหนือ", "nickname": "ซี", "email": "thanathip.p@kkumail.com"},
-      {"id": "693050389-1", "name": "ธิติวุฒิ อารีเอื้อ", "nickname": "ภูผา", "email": "Thitiwut.a@kkumail.com"},
-      {"id": "693050390-6", "name": "ธีระพล บัวรัตน์", "nickname": "แม็กมิน", "email": "Thiraphon.b@kkumail.com"},
-      {"id": "693050391-4", "name": "ประกฤษฎิ์ เหยียดชัยภูมิ", "nickname": "ต้นกล้า", "email": "prakrit.y@kkumail.com"},
-      {"id": "693050393-0", "name": "พิชามญธุ์ สามสี", "nickname": "หมูหวาน", "email": "pichamon.sam@kkumail.com"},
-      {"id": "693050394-8", "name": "ภูวกร มูลเหลา", "nickname": "เฟส", "email": "phuwakorn.m@kkumail.com"},
-      {"id": "693050395-6", "name": "รัชชานนท์ แสงสว่าง", "nickname": "ภูมิ", "email": "ratchanon.saen@kkumail.com"},
-      {"id": "693050396-4", "name": "วรัญญา อามาตย์", "nickname": "อุ้ม", "email": "waranya.ar@kkumail.com"},
-      {"id": "693050397-2", "name": "วริศรา งามประเสริฐ", "nickname": "นุ่น", "email": "waritsara.ng@kkumail.com"},
-      {"id": "693050398-0", "name": "วิมลสิริ วงศ์คำชาว", "nickname": "แพรวา", "email": "wimonsiri.w@kkumail.com"},
-      {"id": "693050399-8", "name": "วีรภัทร เพชรอ้อม", "nickname": "ตะวัน", "email": "wiraphat.phe@kkumail.com"},
-      {"id": "693050400-9", "name": "สิรวิชญ์ บุญหล้า", "nickname": "อั้ม", "email": "sirawit.b@kkumail.com"},
-      {"id": "693050401-7", "name": "เบญญาภา มีสวัสดิ์", "nickname": "บัวชมพู", "email": "benyapa.mee@kkumail.com"},
-      {"id": "693050534-8", "name": "กัลยรัตน์ ไชยเดช", "nickname": "อเล็ก", "email": "kanyarat.chaid@kkumail.com"},
-      {"id": "693050535-6", "name": "กิตติพัฒน์ เพียรยิ่ง", "nickname": "ปอนด์", "email": "kttiphat.pi@kkumail.com"},
-      {"id": "693050537-2", "name": "ทิติภา มาสุข", "nickname": "ดีดี้", "email": "thitipha.m@kkumail.com"},
-      {"id": "693050538-0", "name": "ภริดา เด่นไชยรัตน์", "nickname": "ต้นอ้อ", "email": "pharida.d@kkumail.com"},
-      {"id": "693050539-8", "name": "ภูมรินทร์ บุญมี", "nickname": "ภูมิ", "email": "poommarin.b@kkumail.com"},
-      {"id": "693050540-3", "name": "รณชัย สายเนตร์", "nickname": "น็อต", "email": "ronnachai.sa@kkumail.com"},
-      {"id": "693050541-1", "name": "อัษฎากร ศรีสังข์", "nickname": "บาส", "email": "adsadakorn.s@kkumail.com"},
-      {"id": "693050562-3", "name": "ชิษณุพงศ์ แสงสีงาม", "nickname": "ไผ่", "email": "chitsanupong.sae@kkumail.com"},
-      {"id": "693050563-1", "name": "ธาราทิพย์ การร้อย", "nickname": "บีม", "email": "tharathip.ka@kkumail.com"},
-      {"id": "693050564-9", "name": "ปุณยพัฒน์ สินโพธิ์", "nickname": "โบนัส", "email": "punyaphat.s@kkumail.com"},
-      {"id": "693050565-7", "name": "พิยดา สารทอง", "nickname": "โซอี้", "email": "phiyada.san@kkumail.com"},
-      {"id": "693050566-5", "name": "สุธีกานต์ บัตเลอร์", "nickname": "เจสซี่", "email": "suthikan.b@kkumail.com"},
-      {"id": "693050567-3", "name": "อาภัสรา นากลาง", "nickname": "เป้ย", "email": "apassara.n@kkumail.com"}
+      { "id": "693050120-5", "name": "กชกร แสนอินทร์", "nickname": "มิวสิค", "email": "kodchakon.sa@kkumail.com" },
+      { "id": "693050121-3", "name": "กนกพร คำพิทูล", "nickname": "โดนัท", "email": "kanokporn.kump@kkumail.com" },
+      { "id": "693050122-1", "name": "กรกต บรรเจิดวัฒนกุล", "nickname": "โนว่า", "email": "korakod.b@kkumail.com" },
+      { "id": "693050123-9", "name": "กัญชณิกา นันททิพักษ์", "nickname": "โบนัส", "email": "kanchaniga.n@kkumail.com" },
+      { "id": "693050124-7", "name": "กิตติชัย สิงเนิน", "nickname": "น้ำเต้า", "email": "Kittichai.si@kkumail.com" },
+      { "id": "693050125-5", "name": "ขลุ่ยไทย เคนมี", "nickname": "ขลุ่ย", "email": "kruithai.k@kkumail.com" },
+      { "id": "693050126-3", "name": "จิรทีปต์ ชัยศรี", "nickname": "บีน", "email": "jirathip.c@kkumail.com" },
+      { "id": "693050127-1", "name": "ชัยพงค์ วรรณทวี", "nickname": "มาร์ค", "email": "chaiyaphong.w@kkumail.com" },
+      { "id": "693050128-9", "name": "ธัญชนก สุตะโคตร", "nickname": "เค้ก", "email": "thanchanok.sut@kkumail.com" },
+      { "id": "693050129-7", "name": "ธันยนันท์ สุวัฒนะ", "nickname": "วาน", "email": "thanyanan.su@kkumail.com" },
+      { "id": "693050130-2", "name": "ธีรดนย์ ศรีโพธิ์ชัย", "nickname": "ยูโร", "email": "theeradon.sr@kkumail.com" },
+      { "id": "693050131-0", "name": "บุญญรัตน์ ชะนะพาล", "nickname": "อันอัน", "email": "bunyarat.c@kkumail.com" },
+      { "id": "693050132-8", "name": "ปภาดา เพิ่มพูล", "nickname": "แตงโม", "email": "papada.ph@kkumail.com" },
+      { "id": "693050133-6", "name": "ปุณเมศ บุญสง", "nickname": "คิว", "email": "punnamet.b@kkumail.com" },
+      { "id": "693050134-4", "name": "พรหมพิริยะ หอมจันทร์", "nickname": "โอปอน", "email": "phromphiriya.h@kkumail.com" },
+      { "id": "693050135-2", "name": "พิชชาพร เดชกุล", "nickname": "แพนนี่", "email": "phitchaphon.d@kkumail.com" },
+      { "id": "693050136-0", "name": "พีระพัฒน์ เกียมา", "nickname": "ต้นกล้า", "email": "Phiraphat.ki@kkumail.com" },
+      { "id": "693050137-8", "name": "ภาณุวิชญ์ ขัตติสอน", "nickname": "ไกด์", "email": "panuvich.k@kkumail.com" },
+      { "id": "693050138-6", "name": "ภูธเนศ วงษ์ชาดี", "nickname": "ภู", "email": "phuthanet.wo@kkumail.com" },
+      { "id": "693050139-4", "name": "วชรพล อินธิกาย", "nickname": "เนคไท", "email": "Wacharaphol.i@kkumail.com" },
+      { "id": "693050140-9", "name": "วชิรวิทย์ ทรัพย์เพิ่ม", "nickname": "นิว", "email": "Wachirawit.sap@kkumail.com" },
+      { "id": "693050141-7", "name": "วชิรวิทย์ บุญขันธ์", "nickname": "คิว", "email": "wachirawit.boonk@kkumail.com" },
+      { "id": "693050142-5", "name": "วัชรากร บุญโสม", "nickname": "ออย", "email": "watcharakon.bu@kkumail.com" },
+      { "id": "693050143-3", "name": "ศุกลวัฒน์ พาพลงาม", "nickname": "เปรม", "email": "sukollawat.p@kkumail.com" },
+      { "id": "693050144-1", "name": "อธิชา พิมพ์ทอง", "nickname": "ไอคิว", "email": "athicha.pi@kkumail.com" },
+      { "id": "693050145-9", "name": "เขมนิจ บุตรชน", "nickname": "เขม", "email": "kemmanit.b@kkumail.com" },
+      { "id": "693050146-7", "name": "เพ็ญพิชชา โกมลวรรค", "nickname": "นานา", "email": "panphitcha.k@kkumail.com" },
+      { "id": "693050157-5", "name": "แก่นพนม เฉลิมวงศ์วิวัฒน", "nickname": "ข้าวเหนียว", "email": "kaenpanom.c@kkumail.com" },
+      { "id": "693050148-3", "name": "โสภิตรา หุนสุวงค์", "nickname": "เค้ก", "email": "Sopitra.h@kkumail.com" },
+      { "id": "693050383-3", "name": "ฉัตรรดา กะไรยะ", "nickname": "ฟ่าง", "email": "chatrada.k@kkumail.com" },
+      { "id": "693050384-1", "name": "ชลากร กุลสอนนาน", "nickname": "ต้น", "email": "chalakorn.k@kkumail.com" },
+      { "id": "693050385-9", "name": "ฐิติกานต์ บุญสอน", "nickname": "มะปราง", "email": "thitikan.boo@kkumail.com" },
+      { "id": "693050386-7", "name": "ณัฏฐชัย โพธิ์ทับไทย", "nickname": "โอ้", "email": "nattachai.p@kkumail.com" },
+      { "id": "693050387-5", "name": "ณิชคุณ ชำนาญ", "nickname": "นาโน", "email": "Nichakhun.c@kkumail.com" },
+      { "id": "693050388-3", "name": "ธนาธิป ภูนาเหนือ", "nickname": "ซี", "email": "thanathip.p@kkumail.com" },
+      { "id": "693050389-1", "name": "ธิติวุฒิ อารีเอื้อ", "nickname": "ภูผา", "email": "Thitiwut.a@kkumail.com" },
+      { "id": "693050390-6", "name": "ธีระพล บัวรัตน์", "nickname": "แม็กมิน", "email": "Thiraphon.b@kkumail.com" },
+      { "id": "693050391-4", "name": "ประกฤษฎิ์ เหยียดชัยภูมิ", "nickname": "ต้นกล้า", "email": "prakrit.y@kkumail.com" },
+      { "id": "693050393-0", "name": "พิชามญธุ์ สามสี", "nickname": "หมูหวาน", "email": "pichamon.sam@kkumail.com" },
+      { "id": "693050394-8", "name": "ภูวกร มูลเหลา", "nickname": "เฟส", "email": "phuwakorn.m@kkumail.com" },
+      { "id": "693050395-6", "name": "รัชชานนท์ แสงสว่าง", "nickname": "ภูมิ", "email": "ratchanon.saen@kkumail.com" },
+      { "id": "693050396-4", "name": "วรัญญา อามาตย์", "nickname": "อุ้ม", "email": "waranya.ar@kkumail.com" },
+      { "id": "693050397-2", "name": "วริศรา งามประเสริฐ", "nickname": "นุ่น", "email": "waritsara.ng@kkumail.com" },
+      { "id": "693050398-0", "name": "วิมลสิริ วงศ์คำชาว", "nickname": "แพรวา", "email": "wimonsiri.w@kkumail.com" },
+      { "id": "693050399-8", "name": "วีรภัทร เพชรอ้อม", "nickname": "ตะวัน", "email": "wiraphat.phe@kkumail.com" },
+      { "id": "693050400-9", "name": "สิรวิชญ์ บุญหล้า", "nickname": "อั้ม", "email": "sirawit.b@kkumail.com" },
+      { "id": "693050401-7", "name": "เบญญาภา มีสวัสดิ์", "nickname": "บัวชมพู", "email": "benyapa.mee@kkumail.com" },
+      { "id": "693050534-8", "name": "กัลยรัตน์ ไชยเดช", "nickname": "อเล็ก", "email": "kanyarat.chaid@kkumail.com" },
+      { "id": "693050535-6", "name": "กิตติพัฒน์ เพียรยิ่ง", "nickname": "ปอนด์", "email": "kttiphat.pi@kkumail.com" },
+      { "id": "693050537-2", "name": "ทิติภา มาสุข", "nickname": "ดีดี้", "email": "thitipha.m@kkumail.com" },
+      { "id": "693050538-0", "name": "ภริดา เด่นไชยรัตน์", "nickname": "ต้นอ้อ", "email": "pharida.d@kkumail.com" },
+      { "id": "693050539-8", "name": "ภูมรินทร์ บุญมี", "nickname": "ภูมิ", "email": "poommarin.b@kkumail.com" },
+      { "id": "693050540-3", "name": "รณชัย สายเนตร์", "nickname": "น็อต", "email": "ronnachai.sa@kkumail.com" },
+      { "id": "693050541-1", "name": "อัษฎากร ศรีสังข์", "nickname": "บาส", "email": "adsadakorn.s@kkumail.com" },
+      { "id": "693050562-3", "name": "ชิษณุพงศ์ แสงสีงาม", "nickname": "ไผ่", "email": "chitsanupong.sae@kkumail.com" },
+      { "id": "693050563-1", "name": "ธาราทิพย์ การร้อย", "nickname": "บีม", "email": "tharathip.ka@kkumail.com" },
+      { "id": "693050564-9", "name": "ปุณยพัฒน์ สินโพธิ์", "nickname": "โบนัส", "email": "punyaphat.s@kkumail.com" },
+      { "id": "693050565-7", "name": "พิยดา สารทอง", "nickname": "โซอี้", "email": "phiyada.san@kkumail.com" },
+      { "id": "693050566-5", "name": "สุธีกานต์ บัตเลอร์", "nickname": "เจสซี่", "email": "suthikan.b@kkumail.com" },
+      { "id": "693050567-3", "name": "อาภัสรา นากลาง", "nickname": "เป้ย", "email": "apassara.n@kkumail.com" }
     ];
 
     let googleAppsScriptUrl = "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
@@ -633,7 +691,7 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       runAdminIntroAnimation();
-      
+
       const loggedEmail = sessionStorage.getItem(ADMIN_SESSION_KEY);
       if (loggedEmail) {
         currentLoggedInAdmin = adminAccounts.find(a => a.email.toLowerCase() === loggedEmail.toLowerCase()) || { email: loggedEmail, name: "Admin" };
@@ -734,7 +792,7 @@
               logDetail: detail
             })
           });
-        } catch(e){}
+        } catch (e) { }
       }
     }
 
@@ -815,7 +873,7 @@
             localStorage.setItem('COMED_KKU69_TRASH_RECORDS', JSON.stringify(trashRecords));
             return;
           }
-        } catch (err) {}
+        } catch (err) { }
       }
 
       const local = localStorage.getItem(STORAGE_KEY);
@@ -842,7 +900,7 @@
 
       document.getElementById('statMoneyReceived').textContent = `฿${moneyReceived.toLocaleString()}`;
       document.getElementById('statMoneyPercent').textContent = `${moneyPercent}%`;
-      
+
       document.getElementById('statPaidCount').innerHTML = `${paidCount} <span class="text-xs font-normal text-slate-400">คน</span>`;
       document.getElementById('statPaidPercent').textContent = `${paidPercent}%`;
 
@@ -914,10 +972,10 @@
             <td class="p-3.5 font-bold text-amber-300 text-xs">${iss.category}</td>
             <td class="p-3.5 text-xs text-slate-300 max-w-xs break-words">${iss.detail || '-'}</td>
             <td class="p-3.5 text-center whitespace-nowrap">
-              ${iss.evidenceUrl && iss.evidenceUrl !== '-' 
-                ? `<a href="${iss.evidenceUrl}" target="_blank" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-xl text-xs font-bold inline-flex items-center gap-1 border border-slate-700 active:scale-95 transition"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> ดูหลักฐาน</a>`
-                : '<span class="text-slate-600 text-xs">-</span>'
-              }
+              ${iss.evidenceUrl && iss.evidenceUrl !== '-'
+            ? `<a href="${iss.evidenceUrl}" target="_blank" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-xl text-xs font-bold inline-flex items-center gap-1 border border-slate-700 active:scale-95 transition"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> ดูหลักฐาน</a>`
+            : '<span class="text-slate-600 text-xs">-</span>'
+          }
             </td>
             <td class="p-3.5 text-center whitespace-nowrap">
               <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${iss.status === 'แก้ไขแล้ว' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}">
@@ -925,12 +983,12 @@
               </span>
             </td>
             <td class="p-3.5 text-center whitespace-nowrap">
-              ${iss.status === 'แก้ไขแล้ว' 
-                ? '<span class="text-xs font-bold text-emerald-400 flex items-center justify-center gap-1"><i data-lucide="check-circle-2" class="w-4 h-4"></i> แก้ไขแล้ว</span>'
-                : `<button onclick="resolveIssue('${iss.id || iss.studentId}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-md active:scale-95">
+              ${iss.status === 'แก้ไขแล้ว'
+            ? '<span class="text-xs font-bold text-emerald-400 flex items-center justify-center gap-1"><i data-lucide="check-circle-2" class="w-4 h-4"></i> แก้ไขแล้ว</span>'
+            : `<button onclick="resolveIssue('${iss.id || iss.studentId}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-md active:scale-95">
                     ทำเครื่องหมายว่าแก้แล้ว
                    </button>`
-              }
+          }
             </td>
           </tr>
         `).join('');
@@ -1049,12 +1107,12 @@
               <td class="p-4 hidden md:table-cell text-slate-400 font-mono text-xs">${item.email || '-'}</td>
               <td class="p-4 text-center"><span class="inline-flex items-center gap-1 text-[11px] font-black text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> อยู่ในถังขยะ</span></td>
               <td class="p-4 text-center">
-                ${item.slipUrl 
-                  ? `<button onclick="inspectSlipDirect('${item.studentId}', '${item.name}', '${item.nickname}', '${item.slipUrl}', '${item.timestamp}', '${item.refCode}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto border border-slate-700">
+                ${item.slipUrl
+              ? `<button onclick="inspectSlipDirect('${item.studentId}', '${item.name}', '${item.nickname}', '${item.slipUrl}', '${item.timestamp}', '${item.refCode}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto border border-slate-700">
                       <i data-lucide="image" class="w-3.5 h-3.5"></i> ดูสลิป
                      </button>`
-                  : '<span class="text-xs text-slate-600">-</span>'
-                }
+              : '<span class="text-xs text-slate-600">-</span>'
+            }
               </td>
               <td class="p-4 text-center">
                 <div class="flex items-center justify-center gap-1.5">
@@ -1103,28 +1161,28 @@
             </td>
             <td class="p-4 hidden md:table-cell text-slate-400 font-mono text-xs">${st.email}</td>
             <td class="p-4 text-center">
-              ${isPaid 
-                ? '<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20"><i data-lucide="check" class="w-3.5 h-3.5"></i> จ่ายแล้ว (฿190)</span>'
-                : '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20"><i data-lucide="x" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>'
-              }
+              ${isPaid
+            ? '<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20"><i data-lucide="check" class="w-3.5 h-3.5"></i> จ่ายแล้ว (฿190)</span>'
+            : '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20"><i data-lucide="x" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>'
+          }
             </td>
             <td class="p-4 text-center">
-              ${isPaid && slipUrl 
-                ? `<button onclick="inspectSlip('${st.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto border border-slate-700">
+              ${isPaid && slipUrl
+            ? `<button onclick="inspectSlip('${st.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto border border-slate-700">
                     <i data-lucide="image" class="w-3.5 h-3.5"></i> ดูสลิป
                    </button>`
-                : '<span class="text-xs text-slate-600">-</span>'
-              }
+            : '<span class="text-xs text-slate-600">-</span>'
+          }
             </td>
             <td class="p-4 text-center">
-              ${isPaid 
-                ? `<button onclick="adminMoveToTrash('${st.id}')" class="px-3 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto">
+              ${isPaid
+            ? `<button onclick="adminMoveToTrash('${st.id}')" class="px-3 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto">
                     <i data-lucide="trash-2" class="w-3 h-3"></i> ย้ายไปถังขยะ
                    </button>`
-                : `<button onclick="openAdminUploadModal('${st.id}')" class="px-3 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto">
+            : `<button onclick="openAdminUploadModal('${st.id}')" class="px-3 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto">
                     <i data-lucide="upload" class="w-3 h-3"></i> ยืนยันชำระ (แนบสลิป)
                    </button>`
-              }
+          }
             </td>
           </tr>
         `;
@@ -1221,7 +1279,7 @@
               source: "Admin Manual Verified"
             })
           });
-        } catch(err){}
+        } catch (err) { }
       }
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
@@ -1324,7 +1382,7 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ action: "update_issue_status", issueId: iss.id || issueId, newStatus: "แก้ไขแล้ว" })
             });
-          } catch(e){}
+          } catch (e) { }
         }
         logAdminAction("แก้ไขปัญหาผู้ใช้", `ทำเครื่องหมายปัญหาของ ${iss.studentId} (${iss.name || ''}) ว่าแก้ไขแล้ว`);
         renderStats();
@@ -1368,7 +1426,7 @@
                 slipUrl: slipUrl
               })
             });
-          } catch(e){}
+          } catch (e) { }
         }
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
@@ -1406,7 +1464,7 @@
                 studentId: studentId
               })
             });
-          } catch(e){}
+          } catch (e) { }
         }
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
@@ -1437,7 +1495,7 @@
                 studentId: studentId
               })
             });
-          } catch(e){}
+          } catch (e) { }
         }
 
         localStorage.setItem('COMED_KKU69_TRASH_RECORDS', JSON.stringify(trashRecords));
@@ -1491,7 +1549,7 @@
       const rawSlipUrl = record.slipUrl || '';
       let drivePreviewUrl = rawSlipUrl;
       let driveViewUrl = rawSlipUrl;
-      
+
       if (rawSlipUrl.includes('drive.google.com')) {
         const idMatch = rawSlipUrl.match(/[-\w]{25,}/);
         if (idMatch) {
@@ -1615,8 +1673,5 @@
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "ComEd69_Payments");
-      XLSX.writeFile(wb, `ComEd69_Payment_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+      XLSX.writeFile(wb, `ComEd69_Payment_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
-  </script>
-</body>
-</html>

@@ -1,11 +1,13 @@
 /**
  * =========================================================================
- * GOOGLE APPS SCRIPT: Auto-Sync, 2-Stage Recycle Bin, Help Desk Issues & Admin Logs
+ * GOOGLE APPS SCRIPT: Complete Auto-Sync Engine for COMED KKU 69
+ * (Payments, Google Drive Images, Issues, Trash & Logs)
  * =========================================================================
  */
 
 const GOOGLE_DRIVE_FOLDER_ID = "1KaE-6GyKd0mafFBYTp-fAlAG4YAJWrFa6xxUov59JvktlP5fVBQDKzJEBlc1b2GWDcuNYxJI";
 
+// ฟังก์ชันหาหรือสร้างโฟลเดอร์ใน Google Drive
 function getOrCreateFolder(name) {
   try {
     const parentFolder = DriveApp.getFolderById(GOOGLE_DRIVE_FOLDER_ID);
@@ -16,12 +18,12 @@ function getOrCreateFolder(name) {
     const newFolder = parentFolder.createFolder(name);
     newFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     return newFolder;
-  } catch(e) {
+  } catch (e) {
     return DriveApp.getRootFolder();
   }
 }
 
-// 1. GET: อ่านข้อมูล Payments, Trash, Issues, Logs
+// 1. GET: อ่านข้อมูลทั้งหมด (Active Payments, Trash, Issues, Logs)
 function doGet(e) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -33,7 +35,7 @@ function doGet(e) {
       logs: []
     };
 
-    // อ่านชีต Issues (ถ้ามี)
+    // อ่านชีต Issues_ปัญหาผู้ใช้
     const issueSheet = ss.getSheetByName("Issues_ปัญหาผู้ใช้");
     if (issueSheet) {
       const issueData = issueSheet.getDataRange().getValues();
@@ -55,7 +57,7 @@ function doGet(e) {
       }
     }
 
-    // อ่านชีต Logs (ถ้ามี)
+    // อ่านชีต Admin_Logs
     const logSheet = ss.getSheetByName("Admin_Logs");
     if (logSheet) {
       const logData = logSheet.getDataRange().getValues();
@@ -72,6 +74,7 @@ function doGet(e) {
       }
     }
 
+    // อ่านชีต Payments ทั่วไป และชีต Trash_ถังขยะ
     for (let sheet of sheets) {
       const sheetName = sheet.getName();
       if (sheetName === "Issues_ปัญหาผู้ใช้" || sheetName === "Admin_Logs") continue;
@@ -131,7 +134,7 @@ function doGet(e) {
         if (timeCol !== -1 && row[timeCol]) {
           try {
             timeStr = Utilities.formatDate(new Date(row[timeCol]), "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss");
-          } catch(err) {
+          } catch (err) {
             timeStr = String(row[timeCol]);
           }
         }
@@ -169,7 +172,7 @@ function doGet(e) {
   }
 }
 
-// 2. POST: ชำระเงิน, ถังขยะ, ปัญหาผู้ใช้ (Issues), บันทึก Logs
+// 2. POST: จัดการส่งสลิป, ย้ายไปถังขยะ, กู้คืน, ลบถาวร, แจ้งปัญหาผู้ใช้, บันทึก Logs
 function doPost(e) {
   const lock = LockService.getScriptLock();
   lock.tryLock(30000);
@@ -218,28 +221,6 @@ function doPost(e) {
     }
 
     // ----------------------------------------------------
-    // CASE: บันทึก Logs ของ Admin
-    // ----------------------------------------------------
-    if (action === "log_admin") {
-      let logSheet = ss.getSheetByName("Admin_Logs");
-      if (!logSheet) {
-        logSheet = ss.insertSheet("Admin_Logs");
-        logSheet.appendRow(["วัน-เวลา", "อีเมลแอดมิน", "กิจกรรม", "รายละเอียด"]);
-        logSheet.setFrozenRows(1);
-      }
-
-      const timeStr = Utilities.formatDate(new Date(), "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss");
-      logSheet.appendRow([
-        timeStr,
-        data.adminEmail || "Admin",
-        data.logAction || "-",
-        data.logDetail || "-"
-      ]);
-
-      return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // ----------------------------------------------------
     // CASE: อัปเดตสถานะปัญหา (Update Issue Status)
     // ----------------------------------------------------
     if (action === "update_issue_status") {
@@ -252,22 +233,48 @@ function doPost(e) {
             break;
           }
         }
+        SpreadsheetApp.flush();
       }
       return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
     }
 
     // ----------------------------------------------------
-    // CASE 1: ย้ายไปยังถังขยะ (Move to Trash)
+    // CASE: บันทึก Logs ของ Admin
+    // ----------------------------------------------------
+    if (action === "log_admin") {
+      let logSheet = ss.getSheetByName("Admin_Logs");
+      if (!logSheet) {
+        logSheet = ss.insertSheet("Admin_Logs");
+        logSheet.appendRow(["วัน-เวลา", "อีเมลแอดมิน", "กิจกรรม", "รายละเอียด"]);
+        logSheet.setFrozenRows(1);
+        logSheet.getRange(1, 1, 1, 4).setBackground("#334155").setFontColor("#ffffff").setFontWeight("bold");
+      }
+
+      const timeStr = Utilities.formatDate(new Date(), "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss");
+      logSheet.appendRow([
+        timeStr,
+        data.adminEmail || "Admin",
+        data.logAction || "-",
+        data.logDetail || "-"
+      ]);
+
+      SpreadsheetApp.flush();
+      return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ----------------------------------------------------
+    // CASE: ย้ายไปยังถังขยะ (Move to Trash)
     // ----------------------------------------------------
     if (action === "move_to_trash") {
       let trashSheet = ss.getSheetByName("Trash_ถังขยะ");
       if (!trashSheet) {
         trashSheet = ss.insertSheet("Trash_ถังขยะ");
         trashSheet.appendRow([
-          "รหัสนักศึกษา", "ชื่อ-นามสกุล", "ชื่อเล่น", "อีเมล", 
+          "รหัสนักศึกษา", "ชื่อ-นามสกุล", "ชื่อเล่น", "อีเมล",
           "สถานะเดิม", "ยอดเงิน", "ลิงก์สลิป", "เวลายกเลิก", "รหัสอ้างอิง", "ชีตเดิม"
         ]);
         trashSheet.setFrozenRows(1);
+        trashSheet.getRange(1, 1, 1, 10).setBackground("#e11d48").setFontColor("#ffffff").setFontWeight("bold");
       }
 
       const sheets = ss.getSheets();
@@ -276,7 +283,7 @@ function doPost(e) {
       for (let sheet of sheets) {
         if (sheet.getName() === "Trash_ถังขยะ" || sheet.getName() === "Issues_ปัญหาผู้ใช้" || sheet.getName() === "Admin_Logs") continue;
         const vals = sheet.getDataRange().getValues();
-        
+
         for (let i = vals.length - 1; i >= 1; i--) {
           let isMatch = false;
           let rowSlip = "";
@@ -301,7 +308,7 @@ function doPost(e) {
       }
 
       const slipToMove = (movedRows.length > 0 && movedRows[0].slip) ? movedRows[0].slip : (data.slipUrl || "");
-      
+
       if (slipToMove && slipToMove.includes("drive.google.com")) {
         const idMatch = slipToMove.match(/[-\w]{25,}/);
         if (idMatch) {
@@ -309,7 +316,7 @@ function doPost(e) {
             const file = DriveApp.getFileById(idMatch[0]);
             const trashFolder = getOrCreateFolder("Trash_Slips_ถังขยะ");
             file.moveTo(trashFolder);
-          } catch(err){}
+          } catch (err) { }
         }
       }
 
@@ -326,11 +333,12 @@ function doPost(e) {
         "Auto-Moved"
       ]);
 
+      SpreadsheetApp.flush();
       return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Moved to Trash" })).setMimeType(ContentService.MimeType.JSON);
     }
 
     // ----------------------------------------------------
-    // CASE 2: ลบถาวร (Delete Permanently)
+    // CASE: ลบถาวร (Delete Permanently)
     // ----------------------------------------------------
     if (action === "delete_permanently") {
       let trashSheet = ss.getSheetByName("Trash_ถังขยะ");
@@ -356,27 +364,24 @@ function doPost(e) {
               if (idMatch) {
                 try {
                   DriveApp.getFileById(idMatch[0]).setTrashed(true);
-                } catch(err){}
+                } catch (err) { }
               }
             }
             trashSheet.deleteRow(i + 1);
           }
         }
+        SpreadsheetApp.flush();
       }
-      return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Permanently Deleted" })).setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Deleted permanently" })).setMimeType(ContentService.MimeType.JSON);
     }
 
     // ----------------------------------------------------
-    // CASE 3: กู้คืนจากถังขยะ (Restore)
+    // CASE: กู้คืนจากถังขยะ (Restore from Trash)
     // ----------------------------------------------------
     if (action === "restore") {
+      let paySheet = ss.getSheetByName("การชำระเงิน_COMED69") || ss.getSheets()[0];
       let trashSheet = ss.getSheetByName("Trash_ถังขยะ");
-      let paySheet = ss.getSheetByName("Payments");
-      if (!paySheet) {
-        paySheet = ss.insertSheet("Payments");
-        paySheet.appendRow(["รหัสนักศึกษา", "ชื่อ-นามสกุล", "ชื่อเล่น", "อีเมล", "สถานะ", "ยอดเงิน (บาท)", "ลิงก์สลิปใน Drive", "วัน-เวลาที่ชำระ", "รหัสอ้างอิง", "แหล่งที่มา"]);
-        paySheet.setFrozenRows(1);
-      }
+      let restoredItem = null;
 
       if (trashSheet) {
         const vals = trashSheet.getDataRange().getValues();
@@ -394,61 +399,86 @@ function doPost(e) {
           }
 
           if (isMatch) {
-            const row = vals[i];
-            const slipUrl = rowSlip || String(row[6] || "");
-            
-            if (slipUrl.includes("drive.google.com")) {
-              const idMatch = slipUrl.match(/[-\w]{25,}/);
-              if (idMatch) {
-                try {
-                  const file = DriveApp.getFileById(idMatch[0]);
-                  const mainFolder = DriveApp.getFolderById(GOOGLE_DRIVE_FOLDER_ID);
-                  file.moveTo(mainFolder);
-                } catch(err){}
-              }
-            }
-
-            paySheet.appendRow([
-              row[0] || data.studentId, row[1] || data.name, row[2] || data.nickname, row[3] || data.email, 
-              "ชำระเงินแล้ว", 190, slipUrl, row[7] || Utilities.formatDate(new Date(), "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss"), 
-              row[8] || ("TXN-COMED-" + targetDigits), "Restored"
-            ]);
+            restoredItem = {
+              row: vals[i],
+              slip: rowSlip || data.slipUrl || ""
+            };
             trashSheet.deleteRow(i + 1);
+            break;
           }
         }
       }
-      return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Restored" })).setMimeType(ContentService.MimeType.JSON);
-    }
 
-    // ----------------------------------------------------
-    // CASE 4: ชำระเงิน / อัปโหลดสลิปปกติ (Pay หรือ Admin Verified)
-    // ----------------------------------------------------
-    let paySheet = ss.getSheetByName("Payments");
-    if (!paySheet) {
-      paySheet = ss.insertSheet("Payments");
-      paySheet.appendRow(["รหัสนักศึกษา", "ชื่อ-นามสกุล", "ชื่อเล่น", "อีเมล", "สถานะ", "ยอดเงิน (บาท)", "ลิงก์สลิปใน Drive", "วัน-เวลาที่ชำระ", "รหัสอ้างอิง", "แหล่งที่มา"]);
-      paySheet.setFrozenRows(1);
-    }
+      const slipToRestore = restoredItem ? restoredItem.slip : (data.slipUrl || "");
 
-    let driveFileUrl = "";
-    if (data.slipBase64) {
-      let folder;
-      try {
-        folder = DriveApp.getFolderById(GOOGLE_DRIVE_FOLDER_ID);
-      } catch (err) {
-        folder = DriveApp.getRootFolder();
+      if (slipToRestore && slipToRestore.includes("drive.google.com")) {
+        const idMatch = slipToRestore.match(/[-\w]{25,}/);
+        if (idMatch) {
+          try {
+            const file = DriveApp.getFileById(idMatch[0]);
+            const slipsFolder = getOrCreateFolder("Payment_Slips_หลักฐานการโอน");
+            file.moveTo(slipsFolder);
+          } catch (err) { }
+        }
       }
 
-      const parts = data.slipBase64.split(';base64,');
-      const contentType = parts[0].replace('data:', '');
-      const base64Data = parts[1] || data.slipBase64;
-      const decodedBlob = Utilities.newBlob(Utilities.base64Decode(base64Data), contentType, "Slip_" + data.studentId + "_" + new Date().getTime() + ".png");
+      paySheet.appendRow([
+        data.studentId,
+        data.name || (restoredItem ? restoredItem.row[1] : ""),
+        data.nickname || (restoredItem ? restoredItem.row[2] : ""),
+        data.email || (restoredItem ? restoredItem.row[3] : ""),
+        "ชำระเงินแล้ว",
+        190,
+        slipToRestore,
+        Utilities.formatDate(new Date(), "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss"),
+        "TXN-RESTORE-" + targetDigits,
+        "Restored from Trash"
+      ]);
 
-      const file = folder.createFile(decodedBlob);
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      driveFileUrl = file.getUrl();
-    } else if (data.slipUrl) {
-      driveFileUrl = data.slipUrl;
+      SpreadsheetApp.flush();
+      return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Restored successfully" })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ----------------------------------------------------
+    // CASE DEFAULT: ชำระเงิน & อัปโหลดสลิป (Payment & Slip Upload)
+    // ----------------------------------------------------
+    let driveFileUrl = data.slipUrl || "";
+
+    if (data.slipBase64 && data.slipBase64.startsWith("data:image")) {
+      try {
+        const slipsFolder = getOrCreateFolder("Payment_Slips_หลักฐานการโอน");
+        const parts = data.slipBase64.split(",");
+        const contentType = parts[0].match(/:(.*?);/)[1];
+        const decodedData = Utilities.base64Decode(parts[1]);
+        const cleanDigits = targetDigits || "STUDENT";
+        const fileName = "Slip_" + cleanDigits + "_" + Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyyMMdd_HHmmss") + ".png";
+        
+        const blob = Utilities.newBlob(decodedData, contentType, fileName);
+        const uploadedFile = slipsFolder.createFile(blob);
+        uploadedFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        
+        driveFileUrl = uploadedFile.getUrl();
+      } catch (fileErr) {
+        driveFileUrl = "Error uploading file: " + fileErr.toString();
+      }
+    }
+
+    let paySheet = ss.getSheetByName("การชำระเงิน_COMED69");
+    if (!paySheet) {
+      paySheet = ss.getSheets()[0];
+      if (paySheet.getName() === "Trash_ถังขยะ" || paySheet.getName() === "Issues_ปัญหาผู้ใช้" || paySheet.getName() === "Admin_Logs") {
+        paySheet = ss.insertSheet("การชำระเงิน_COMED69");
+      }
+    }
+
+    // สร้าง Header ถ้าชีตว่าง
+    if (paySheet.getLastRow() === 0) {
+      paySheet.appendRow([
+        "รหัสนักศึกษา", "ชื่อ-นามสกุล", "ชื่อเล่น", "อีเมล",
+        "สถานะ", "ยอดเงิน", "ลิงก์สลิป", "วัน-เวลาที่ชำระ", "รหัสอ้างอิง", "ช่องทาง"
+      ]);
+      paySheet.setFrozenRows(1);
+      paySheet.getRange(1, 1, 1, 10).setBackground("#ea580c").setFontColor("#ffffff").setFontWeight("bold");
     }
 
     const values = paySheet.getDataRange().getValues();
@@ -466,8 +496,8 @@ function doPost(e) {
 
     if (rowIndex > 0) {
       paySheet.getRange(rowIndex, 1, 1, 10).setValues([[
-        data.studentId, data.name || values[rowIndex-1][1], data.nickname || values[rowIndex-1][2], data.email || values[rowIndex-1][3],
-        "ชำระเงินแล้ว", 190, driveFileUrl || values[rowIndex-1][6], timestamp, refCode, data.source || "Website"
+        data.studentId, data.name || values[rowIndex - 1][1], data.nickname || values[rowIndex - 1][2], data.email || values[rowIndex - 1][3],
+        "ชำระเงินแล้ว", 190, driveFileUrl || values[rowIndex - 1][6], timestamp, refCode, data.source || "Website"
       ]]);
     } else {
       paySheet.appendRow([
@@ -475,6 +505,7 @@ function doPost(e) {
       ]);
     }
 
+    SpreadsheetApp.flush();
     return ContentService.createTextOutput(JSON.stringify({
       success: true,
       slipUrl: driveFileUrl,
