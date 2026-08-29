@@ -369,8 +369,8 @@
         </a>
       </div>
 
-      <!-- ================= REAL-TIME STATS DASHBOARD BANNER ================= -->
-      <div class="glass-card bg-white/90 backdrop-blur-xl rounded-3xl p-5 sm:p-7 border border-orange-200/80 shadow-lg shadow-orange-500/5 space-y-6">
+      <!-- ================= UNIFIED REAL-TIME STATS DASHBOARD BANNER ================= -->
+      <div class="glass-card bg-white/95 backdrop-blur-xl rounded-3xl p-5 sm:p-7 border border-orange-200 shadow-md shadow-orange-500/5 space-y-5">
         
         <!-- Header & Refresh Info -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
@@ -379,83 +379,68 @@
               <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
             </div>
             <div>
-              <h3 class="text-base sm:text-lg font-black text-slate-900 leading-tight">ความคืบหน้าการชำระเงินรวม (COMED 69)</h3>
-              <p class="text-xs text-slate-500">ค่าทำป้ายสาขาวิชาเอก • เป้าหมาย 60 คน (฿11,400.00)</p>
+              <h3 class="text-base sm:text-lg font-black text-slate-900 leading-tight">สรุปความคืบหน้าการชำระเงิน (COMED KKU 69)</h3>
+              <p class="text-xs text-slate-500">ค่าทำป้ายสาขาวิชาเอก ฿190 • เป้าหมาย 60 คน (ยอดรวม ฿11,400.00)</p>
             </div>
           </div>
 
           <div class="flex items-center gap-2 self-start sm:self-auto">
             <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-[11px] font-mono text-slate-600">
               <i data-lucide="clock" class="w-3.5 h-3.5 text-orange-500"></i>
-              <span>อัปเดตล่าสุด: <strong id="statsLastUpdatedText" class="text-slate-800 font-bold">กำลังโหลด...</strong></span>
+              <span>อัปเดต: <strong id="statsLastUpdatedText" class="text-slate-800 font-bold">กำลังโหลด...</strong></span>
             </div>
-            <button onclick="fetchIndexRealtimeStats()" class="p-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200 transition active:scale-95" title="รีเฟรชข้อมูล">
+            <button onclick="fetchIndexRealtimeStats()" class="p-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200 transition active:scale-95 cursor-pointer" title="รีเฟรชข้อมูล">
               <i data-lucide="rotate-cw" id="statsRefreshIcon" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
 
-        <!-- 2 Main Stat Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          
-          <!-- Stat 1: Total Amount Collected / Target Amount -->
-          <div class="p-5 rounded-2xl bg-gradient-to-br from-orange-50/80 via-white to-amber-50/50 border border-orange-200/80 space-y-3 relative overflow-hidden">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-orange-800 uppercase tracking-wider flex items-center gap-1.5">
-                <i data-lucide="wallet" class="w-4 h-4 text-orange-600"></i>
-                <span>ยอดเงินที่ชำระแล้ว / ยอดเป้าหมาย</span>
+        <!-- Single Unified Stats Card with 2 Columns + Combined Progress Bar -->
+        <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-200/80 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
+            
+            <!-- Left: Total Amount -->
+            <div class="space-y-1.5 sm:pr-4">
+              <span class="text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                <i data-lucide="wallet" class="w-4 h-4 text-orange-500"></i>
+                <span>ยอดเงินที่ได้รับแล้ว</span>
               </span>
-              <span id="statAmountPercentBadge" class="px-2.5 py-0.5 rounded-full bg-orange-500 text-white font-black text-xs shadow-sm">
-                0%
-              </span>
-            </div>
-
-            <div class="flex items-baseline gap-2">
-              <span id="statAmountPaid" class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">฿0.00</span>
-              <span id="statAmountTarget" class="text-xs sm:text-sm font-bold text-slate-400">/ ฿11,400.00 บาท</span>
-            </div>
-
-            <!-- Progress Bar -->
-            <div class="space-y-1.5">
-              <div class="w-full h-3 bg-slate-200/80 rounded-full overflow-hidden p-0.5 border border-slate-200">
-                <div id="statAmountProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-1000 shadow-sm" style="width: 0%;"></div>
-              </div>
-              <div class="flex justify-between text-[10px] text-slate-400 font-semibold">
-                <span>ความคืบหน้ายอดเงิน</span>
-                <span id="statAmountPercentText">0.0%</span>
+              <div class="flex items-baseline gap-2">
+                <span id="statAmountPaid" class="text-2xl sm:text-3xl font-black text-orange-600 tracking-tight">฿0.00</span>
+                <span id="statAmountTarget" class="text-xs font-bold text-slate-400">/ ฿11,400.00</span>
+                <span id="statAmountPercentBadge" class="ml-auto px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-700 font-black text-xs border border-orange-200">
+                  0%
+                </span>
               </div>
             </div>
+
+            <!-- Right: Student Count -->
+            <div class="space-y-1.5 pt-3 sm:pt-0 sm:pl-6">
+              <span class="text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                <i data-lucide="users" class="w-4 h-4 text-emerald-500"></i>
+                <span>จำนวนนักศึกษาที่ชำระแล้ว</span>
+              </span>
+              <div class="flex items-baseline gap-2">
+                <span id="statStudentsPaid" class="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight">0</span>
+                <span class="text-xs font-bold text-slate-400">/ 60 คน (คงเหลือ <strong id="statStudentsRemaining" class="text-rose-600 font-bold">60</strong>)</span>
+                <span id="statStudentPercentBadge" class="ml-auto px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-black text-xs border border-emerald-200">
+                  0%
+                </span>
+              </div>
+            </div>
+
           </div>
 
-          <!-- Stat 2: Student Count Paid / Total Students -->
-          <div class="p-5 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/50 border border-emerald-200/80 space-y-3 relative overflow-hidden">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
-                <i data-lucide="users" class="w-4 h-4 text-emerald-600"></i>
-                <span>จำนวนผู้ชำระแล้ว / นักศึกษาทั้งหมด</span>
-              </span>
-              <span id="statStudentPercentBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-black text-xs shadow-sm">
-                0%
-              </span>
+          <!-- Unified Dual Progress Bar -->
+          <div class="space-y-1.5 pt-1 border-t border-slate-200/60">
+            <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden p-0.5 border border-slate-200">
+              <div id="statAmountProgressBar" class="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-500 rounded-full transition-all duration-1000" style="width: 0%;"></div>
             </div>
-
-            <div class="flex items-baseline gap-2">
-              <span id="statStudentsPaid" class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">0</span>
-              <span class="text-xs sm:text-sm font-bold text-slate-400">/ 60 คน (คงเหลือ <strong id="statStudentsRemaining" class="text-rose-600 font-bold">60</strong> คน)</span>
-            </div>
-
-            <!-- Progress Bar -->
-            <div class="space-y-1.5">
-              <div class="w-full h-3 bg-slate-200/80 rounded-full overflow-hidden p-0.5 border border-slate-200">
-                <div id="statStudentProgressBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-1000 shadow-sm" style="width: 0%;"></div>
-              </div>
-              <div class="flex justify-between text-[10px] text-slate-400 font-semibold">
-                <span>อัตราการชำระของรุ่น 69</span>
-                <span id="statStudentPercentText">0.0%</span>
-              </div>
+            <div class="flex justify-between text-[11px] text-slate-400 font-semibold">
+              <span id="statAmountPercentText">ความคืบหน้า 0.0%</span>
+              <span id="statStudentPercentText">ชำระแล้ว 0/60 คน</span>
             </div>
           </div>
-
         </div>
 
       </div>
@@ -1309,13 +1294,13 @@
             icon.innerHTML = '<i data-lucide="clock" class="w-4 h-4"></i>';
             title.textContent = `รอการชำระเงิน (${user.nickname || user.name})`;
             sub.textContent = "ยังไม่พบการแนบสลิปของคุณ";
-            btn.className = "px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[11px] rounded-xl transition shadow-sm";
+            btn.className = "px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[11px] rounded-xl transition shadow-sm cursor-pointer";
             btn.innerHTML = '<span>ไปชำระเงิน</span>';
-            btn.onclick = () => window.location.href = "payment.html";
+            btn.onclick = () => window.location.href = "payment.html?auto=pay";
 
-            payBtn.className = "flex-grow py-3 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm text-center shadow-md shadow-orange-500/25 transition flex items-center justify-center gap-2";
+            payBtn.className = "flex-grow py-3 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm text-center shadow-md shadow-orange-500/25 transition flex items-center justify-center gap-2 cursor-pointer";
             payBtn.innerHTML = '<i data-lucide="upload" class="w-4 h-4"></i><span>คลิกเพื่อแนบสลิปชำระเงิน</span>';
-            payBtn.onclick = null;
+            payBtn.onclick = () => window.location.href = "payment.html?auto=pay";
           }
         }
       } catch (err) {
