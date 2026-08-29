@@ -2632,70 +2632,62 @@
       const mobStatus = document.getElementById('mobileNavStatus');
 
       if (tab === 'payment') {
-        tabPayment.classList.remove('hidden');
-        tabStatus.classList.add('hidden');
+        if (tabPayment) tabPayment.classList.remove('hidden');
+        if (tabStatus) tabStatus.classList.add('hidden');
 
-        if (navPayment) navPayment.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm';
-        if (navStatus) navStatus.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900';
+        if (navPayment) {
+          navPayment.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm cursor-pointer';
+        }
+        if (navStatus) {
+          navStatus.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 cursor-pointer';
+        }
 
         if (mobPayment) {
-          mobPayment.className = 'flex-1 py-2 px-2 rounded-2xl text-orange-400 bg-white/10 font-black text-xs transition-all duration-200 transform active:scale-90 flex flex-col items-center gap-1';
-          mobPayment.innerHTML = `
-            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30">
-              <i data-lucide="credit-card" class="w-4 h-4"></i>
-            </div>
-            <span>ชำระเงิน</span>
-          `;
+          mobPayment.className = 'flex-1 py-1.5 px-1 rounded-2xl text-orange-400 bg-white/10 font-black text-[11px] transition-all flex flex-col items-center gap-1';
         }
         if (mobStatus) {
-          mobStatus.className = 'flex-1 py-2 px-2 rounded-2xl text-slate-400 font-bold text-xs transition-all duration-200 transform active:scale-90 flex flex-col items-center gap-1 hover:text-white';
-          mobStatus.innerHTML = `
-            <div class="w-8 h-8 rounded-xl bg-white/5 text-slate-400 flex items-center justify-center">
-              <i data-lucide="clipboard-list" class="w-4 h-4"></i>
-            </div>
-            <span>รายชื่อ</span>
-          `;
+          mobStatus.className = 'flex-1 py-1.5 px-1 rounded-2xl text-slate-400 font-bold text-[11px] transition-all flex flex-col items-center gap-1 hover:text-white';
         }
 
         // GSAP Bouncy Spring Slide-Up Fade
-        gsap.fromTo(tabPayment,
-          { opacity: 0, y: 30, scale: 0.98 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.4)" }
-        );
+        if (typeof gsap !== 'undefined' && tabPayment) {
+          gsap.fromTo(tabPayment,
+            { opacity: 0, y: 20, scale: 0.99 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "power2.out" }
+          );
+        }
       } else {
-        tabPayment.classList.add('hidden');
-        tabStatus.classList.remove('hidden');
+        if (tabPayment) tabPayment.classList.add('hidden');
+        if (tabStatus) tabStatus.classList.remove('hidden');
 
-        if (navStatus) navStatus.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm';
-        if (navPayment) navPayment.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900';
+        if (navStatus) {
+          navStatus.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm cursor-pointer';
+        }
+        if (navPayment) {
+          navPayment.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900 cursor-pointer';
+        }
 
         if (mobPayment) {
-          mobPayment.className = 'flex-1 py-2 px-2 rounded-2xl text-slate-400 font-bold text-xs transition-all duration-200 transform active:scale-90 flex flex-col items-center gap-1 hover:text-white';
-          mobPayment.innerHTML = `
-            <div class="w-8 h-8 rounded-xl bg-white/5 text-slate-400 flex items-center justify-center">
-              <i data-lucide="credit-card" class="w-4 h-4"></i>
-            </div>
-            <span>ชำระเงิน</span>
-          `;
+          mobPayment.className = 'flex-1 py-1.5 px-1 rounded-2xl text-slate-400 font-bold text-[11px] transition-all flex flex-col items-center gap-1 hover:text-white';
         }
         if (mobStatus) {
-          mobStatus.className = 'flex-1 py-2 px-2 rounded-2xl text-emerald-400 bg-white/10 font-black text-xs transition-all duration-200 transform active:scale-90 flex flex-col items-center gap-1';
-          mobStatus.innerHTML = `
-            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
-              <i data-lucide="clipboard-list" class="w-4 h-4"></i>
-            </div>
-            <span>รายชื่อ</span>
-          `;
+          mobStatus.className = 'flex-1 py-1.5 px-1 rounded-2xl text-emerald-400 bg-white/10 font-black text-[11px] transition-all flex flex-col items-center gap-1';
         }
 
-        renderStatusTable();
+        if (typeof renderStatusTable === 'function') {
+          renderStatusTable();
+        }
         // GSAP Bouncy Spring Slide-Up Fade
-        gsap.fromTo(tabStatus,
-          { opacity: 0, y: 30, scale: 0.98 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.4)" }
-        );
+        if (typeof gsap !== 'undefined' && tabStatus) {
+          gsap.fromTo(tabStatus,
+            { opacity: 0, y: 20, scale: 0.99 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "power2.out" }
+          );
+        }
       }
-      lucide.createIcons();
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
     }
 
     function getFallbackStudents() {
