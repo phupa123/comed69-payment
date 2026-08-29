@@ -243,6 +243,10 @@
           </div>
 
           <div class="sm:hidden flex items-center gap-1.5">
+            <button onclick="openExportModal()"
+              class="p-2 rounded-xl bg-emerald-950/80 text-emerald-400 border border-emerald-700/60" title="ส่งออก Excel">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            </button>
             <button onclick="refreshDataFromCloud()"
               class="p-2 rounded-xl bg-sky-950/80 text-sky-400 border border-sky-700/60" title="รีเฟรชข้อมูล">
               <i data-lucide="rotate-cw" class="w-4 h-4"></i>
@@ -271,13 +275,13 @@
             <i data-lucide="external-link" class="w-4 h-4"></i>
             <span>หน้าหลักสาขา</span>
           </a>
-          <button onclick="exportToExcel()"
-            class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/60 transition shadow-sm">
+          <button onclick="openExportModal()"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/60 transition shadow-sm cursor-pointer">
             <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i>
             <span>Export Excel</span>
           </button>
           <button onclick="handleAdminLogout()"
-            class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition"
+            class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
             title="ออกจากระบบ">
             <i data-lucide="log-out" class="w-5 h-5"></i>
           </button>
@@ -595,6 +599,116 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ================= 5. CUSTOM EXCEL EXPORT CONFIG MODAL ================= -->
+  <div id="modalExportExcelConfig"
+    class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div id="exportModalCard"
+      class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-6">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shadow-md border border-emerald-500/30">
+            <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">ส่งออกรายงาน Excel (Custom Report)</h3>
+            <p class="text-xs text-slate-400">เลือกรูปแบบการจัดเรียง และสีไฮไลท์เพื่อการอ่านที่ง่ายขึ้น</p>
+          </div>
+        </div>
+        <button onclick="closeExportModal()"
+          class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        
+        <!-- 1. Data Filter & Sorting Option -->
+        <div class="space-y-1.5">
+          <label class="block font-bold text-slate-200">รูปแบบการจัดเรียงและกลุ่มข้อมูล (Custom Sort & Filter)</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-orange-500/50 cursor-pointer transition">
+              <input type="radio" name="exportSortOption" value="default" checked class="text-orange-500 focus:ring-orange-500">
+              <div>
+                <span class="font-bold text-white block">1. ปกติ (ตามรหัสนักศึกษา)</span>
+                <span class="text-[10px] text-slate-400">เรียงตามรหัส นศ. 60 คน</span>
+              </div>
+            </label>
+
+            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition">
+              <input type="radio" name="exportSortOption" value="paid_top" class="text-emerald-500 focus:ring-emerald-500">
+              <div>
+                <span class="font-bold text-emerald-400 block">2. เรียงคนที่จ่ายไว้บน</span>
+                <span class="text-[10px] text-slate-400">จ่ายแล้วอยู่บนสุด</span>
+              </div>
+            </label>
+
+            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/50 cursor-pointer transition">
+              <input type="radio" name="exportSortOption" value="paid_bottom" class="text-amber-500 focus:ring-amber-500">
+              <div>
+                <span class="font-bold text-amber-400 block">3. เรียงคนที่จ่ายไว้ล่าง</span>
+                <span class="text-[10px] text-slate-400">ยังไม่จ่ายอยู่บน</span>
+              </div>
+            </label>
+
+            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition">
+              <input type="radio" name="exportSortOption" value="paid_only" class="text-emerald-500 focus:ring-emerald-500">
+              <div>
+                <span class="font-bold text-emerald-400 block">4. เอาเฉพาะคนจ่าย</span>
+                <span class="text-[10px] text-slate-400">เฉพาะผู้ที่ชำระแล้ว</span>
+              </div>
+            </label>
+
+            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-rose-500/50 cursor-pointer transition col-span-1 sm:col-span-2">
+              <input type="radio" name="exportSortOption" value="unpaid_only" class="text-rose-500 focus:ring-rose-500">
+              <div>
+                <span class="font-bold text-rose-400 block">5. เอาเฉพาะคนยังไม่จ่าย</span>
+                <span class="text-[10px] text-slate-400">รายชื่อผู้ที่ยังค้างชำระเงิน</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. Style & Format Option (Highlight Mode) -->
+        <div class="space-y-1.5 pt-2 border-t border-slate-800">
+          <label class="block font-bold text-slate-200">รูปแบบการแสดงสี (Highlight & Colors)</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 cursor-pointer transition">
+              <input type="radio" name="exportColorStyle" value="highlight" checked class="text-emerald-500 focus:ring-emerald-500">
+              <div>
+                <span class="font-bold text-emerald-400 block">✨ แบบ Highlight สี</span>
+                <span class="text-[10px] text-slate-400">จ่ายแล้ว = เขียว, ยังไม่จ่าย = แดง</span>
+              </div>
+            </label>
+
+            <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-600 cursor-pointer transition">
+              <input type="radio" name="exportColorStyle" value="plain" class="text-slate-400 focus:ring-slate-400">
+              <div>
+                <span class="font-bold text-white block">📄 แบบปกติ (Clean)</span>
+                <span class="text-[10px] text-slate-400">ตารางสะอาดมาตรฐาน</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+        <button type="button" onclick="closeExportModal()"
+          class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white font-bold text-xs transition cursor-pointer">
+          ยกเลิก
+        </button>
+        <button type="button" onclick="executeCustomExcelExport()"
+          class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-600/30 cursor-pointer transform active:scale-95">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>ดาวน์โหลดไฟล์ Excel (.xlsx)</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -1851,10 +1965,35 @@
       }, 3000);
     }
 
-    async function exportToExcel() {
+    function openExportModal() {
+      const modal = document.getElementById('modalExportExcelConfig');
+      const card = document.getElementById('exportModalCard');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(card,
+          { opacity: 0, scale: 0.85, y: 25 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: "back.out(1.6)" }
+        );
+      }
+      lucide.createIcons();
+    }
+
+    function closeExportModal() {
+      const modal = document.getElementById('modalExportExcelConfig');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function executeCustomExcelExport() {
+      // Get User Selections
+      const sortOpt = document.querySelector('input[name="exportSortOption"]:checked')?.value || 'default';
+      const colorStyle = document.querySelector('input[name="exportColorStyle"]:checked')?.value || 'highlight';
+
+      closeExportModal();
+
       // 1. Show loading toast
       const loadingToast = (typeof showLoadingToast === 'function') 
-        ? showLoadingToast("📊 กำลังดึงข้อมูลล่าสุดจาก Google Cloud เพื่อ Export Excel...") 
+        ? showLoadingToast("📊 กำลังประมวลผลข้อมูลและเตรียมไฟล์ Excel...") 
         : null;
 
       // 2. Fetch fresh real-time data from Cloud & LocalStorage
@@ -1862,84 +2001,235 @@
         await loadAllPayments(true);
       } catch(e) {}
 
-      // Refresh in-memory records
       try {
         const local = localStorage.getItem(STORAGE_KEY);
         if (local) paymentRecords = JSON.parse(local);
       } catch(e) {}
 
-      // 3. Prepare detailed dataset
-      let paidCount = 0;
-      let totalAmount = 0;
-
-      const data = studentDatabase.map((st, idx) => {
+      // 3. Prepare base dataset
+      let dataset = studentDatabase.map((st, idx) => {
         const record = paymentRecords[st.id];
-        const isPaid = record && record.paid;
-        if (isPaid) {
-          paidCount++;
-          totalAmount += (record.amount || 190);
-        }
-
+        const isPaid = !!(record && record.paid);
         return {
-          "ลำดับ": idx + 1,
-          "รหัสนักศึกษา": st.id,
-          "ชื่อ - นามสกุล": st.name,
-          "ชื่อเล่น": `น้อง${st.nickname}`,
-          "อีเมล (KKU Mail)": st.email,
-          "สถานะการชำระ": isPaid ? "ชำระเงินแล้ว" : "ยังไม่ชำระเงิน",
-          "ยอดเงิน (บาท)": isPaid ? (record.amount || 190) : 0,
-          "วัน-เวลาที่ชำระ": record?.timestamp || "-",
-          "รหัสอ้างอิง": record?.refCode || "-",
-          "ลิงก์ภาพสลิป": record?.slipUrl || "-"
+          originalIndex: idx + 1,
+          id: st.id,
+          name: st.name,
+          nickname: `น้อง${st.nickname}`,
+          email: st.email,
+          isPaid: isPaid,
+          statusText: isPaid ? "ชำระเงินแล้ว" : "ยังไม่ชำระเงิน",
+          statusVisual: isPaid ? "✅ ชำระเงินแล้ว" : "❌ ยังไม่ชำระเงิน",
+          amount: isPaid ? (record.amount || 190) : 0,
+          timestamp: record?.timestamp || "-",
+          refCode: record?.refCode || "-",
+          slipUrl: record?.slipUrl || "-"
         };
       });
 
-      // 4. Create Workbook and Sheets
-      const wb = XLSX.utils.book_new();
+      // 4. Apply Custom Filtering and Sorting
+      if (sortOpt === 'paid_top') {
+        // คนที่จ่ายไว้บน
+        dataset.sort((a, b) => (b.isPaid - a.isPaid));
+      } else if (sortOpt === 'paid_bottom') {
+        // คนที่จ่ายไว้ล่าง
+        dataset.sort((a, b) => (a.isPaid - b.isPaid));
+      } else if (sortOpt === 'paid_only') {
+        // เอาเฉพาะคนจ่าย
+        dataset = dataset.filter(d => d.isPaid);
+      } else if (sortOpt === 'unpaid_only') {
+        // เอาเฉพาะคนยังไม่จ่าย
+        dataset = dataset.filter(d => !d.isPaid);
+      } // default = keep original student order
 
-      // Sheet 1: Main Payments Table
-      const wsPayments = XLSX.utils.json_to_sheet(data);
+      // 5. Format Data for Export
+      let paidCount = 0;
+      let totalAmount = 0;
+
+      const excelData = dataset.map((item, index) => {
+        if (item.isPaid) {
+          paidCount++;
+          totalAmount += item.amount;
+        }
+
+        const statusDisplay = (colorStyle === 'highlight') ? item.statusVisual : item.statusText;
+
+        return {
+          "ลำดับ": index + 1,
+          "รหัสนักศึกษา": item.id,
+          "ชื่อ - นามสกุล": item.name,
+          "ชื่อเล่น": item.nickname,
+          "อีเมล (KKU Mail)": item.email,
+          "สถานะการชำระเงิน": statusDisplay,
+          "ยอดเงิน (บาท)": item.amount,
+          "วัน-เวลาที่ชำระ": item.timestamp,
+          "รหัสอ้างอิง": item.refCode,
+          "ลิงก์ภาพสลิป": item.slipUrl
+        };
+      });
+
+      // 6. If Highlight style is selected, generate XML-based styled spreadsheet (Color Cell Formatting)
+      if (colorStyle === 'highlight') {
+        exportStyledExcelHtml(dataset, sortOpt, paidCount, totalAmount, loadingToast);
+        return;
+      }
+
+      // 7. Standard SheetJS Export (Clean Plain Mode)
+      const wb = XLSX.utils.book_new();
+      const wsPayments = XLSX.utils.json_to_sheet(excelData);
       
-      // Auto column widths
       wsPayments['!cols'] = [
         { wch: 8 },  // ลำดับ
         { wch: 16 }, // รหัสนักศึกษา
-        { wch: 26 }, // ชื่อ - นามสกุล
+        { wch: 28 }, // ชื่อ - นามสกุล
         { wch: 12 }, // ชื่อเล่น
-        { wch: 30 }, // อีเมล
-        { wch: 16 }, // สถานะ
+        { wch: 32 }, // อีเมล
+        { wch: 20 }, // สถานะ
         { wch: 14 }, // ยอดเงิน
-        { wch: 22 }, // วันเวลา
+        { wch: 24 }, // วันเวลา
         { wch: 20 }, // รหัสอ้างอิง
-        { wch: 40 }  // ลิงก์สลิป
+        { wch: 45 }  // ลิงก์สลิป
       ];
       XLSX.utils.book_append_sheet(wb, wsPayments, "รายชื่อและการชำระเงิน");
 
-      // Sheet 2: Summary Sheet
-      const unpaidCount = studentDatabase.length - paidCount;
+      // Summary Sheet
+      const unpaidTotal = studentDatabase.length - (Object.values(paymentRecords).filter(p => p && p.paid).length);
       const summaryData = [
         { "รายการ": "สาขาวิชา", "รายละเอียด": "คอมพิวเตอร์ศึกษา (รหัส 69) คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น" },
         { "รายการ": "โครงการ / รายการ", "รายละเอียด": "ค่าทำป้ายสาขาวิชาเอก คนละ ฿190" },
-        { "รายการ": "จำนวนนักศึกษาทั้งหมด", "รายละเอียด": `${studentDatabase.length} คน` },
-        { "รายการ": "ชำระเงินแล้ว", "รายละเอียด": `${paidCount} คน` },
-        { "รายการ": "ยังไม่ชำระเงิน", "รายละเอียด": `${unpaidCount} คน` },
-        { "รายการ": "ยอดเงินที่ได้รับแล้วทั้งหมด", "รายละเอียด": `฿${totalAmount.toLocaleString()} บาท` },
-        { "รายการ": "ยอดเงินค้างรับ", "รายละเอียด": `฿${(unpaidCount * 190).toLocaleString()} บาท` },
+        { "รายการ": "รูปแบบรายงาน", "รายละเอียด": getExportModeTitle(sortOpt) },
+        { "รายการ": "จำนวนรายการในรายงาน", "รายละเอียด": `${excelData.length} คน` },
+        { "รายการ": "ชำระเงินแล้ว (ในรายงาน)", "รายละเอียด": `${paidCount} คน` },
+        { "รายการ": "ยังไม่ชำระเงิน (ในรายงาน)", "รายละเอียด": `${excelData.length - paidCount} คน` },
+        { "รายการ": "ยอดเงินรวมในรายงาน", "รายละเอียด": `฿${totalAmount.toLocaleString()} บาท` },
         { "รายการ": "วันที่ส่งออกรายงาน (Export Date)", "รายละเอียด": new Date().toLocaleString('th-TH') }
       ];
       const wsSummary = XLSX.utils.json_to_sheet(summaryData);
       wsSummary['!cols'] = [{ wch: 30 }, { wch: 65 }];
       XLSX.utils.book_append_sheet(wb, wsSummary, "สรุปภาพรวม");
 
-      // 5. Download File
       const nowStr = new Date().toISOString().slice(0, 10);
-      XLSX.writeFile(wb, `ComEd69_Payment_Report_${nowStr}.xlsx`);
+      XLSX.writeFile(wb, `ComEd69_Report_${sortOpt}_${nowStr}.xlsx`);
 
-      // 6. Dismiss toast and notify success
       if (loadingToast) loadingToast.remove();
       if (typeof showToastNotification === 'function') {
-        showToastNotification(`✨ ส่งออกรายงาน Excel สำเร็จ! (ชำระแล้ว ${paidCount}/${studentDatabase.length} คน)`);
+        showToastNotification(`✨ ส่งออกรายงาน Excel สำเร็จ (${excelData.length} รายการ)`);
       }
+    }
+
+    // Helper: Export Excel with Color Highlights (Green = Paid, Red = Unpaid)
+    function exportStyledExcelHtml(dataset, sortOpt, paidCount, totalAmount, loadingToast) {
+      const modeTitle = getExportModeTitle(sortOpt);
+      const nowStr = new Date().toLocaleString('th-TH');
+      const filenameDate = new Date().toISOString().slice(0, 10);
+
+      let rowsHtml = '';
+      dataset.forEach((item, idx) => {
+        const bgStatus = item.isPaid ? '#dcfce7' : '#fee2e2'; // Light Green vs Light Red
+        const textStatus = item.isPaid ? '#15803d' : '#b91c1c'; // Deep Green vs Deep Red
+        const bgRow = (idx % 2 === 0) ? '#ffffff' : '#f8fafc';
+        
+        rowsHtml += `
+          <tr style="background-color: ${bgRow};">
+            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px;">${idx + 1}</td>
+            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px; font-weight: bold; mso-number-format:'\\@';">${item.id}</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px;">${item.name}</td>
+            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px;">${item.nickname}</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px;">${item.email}</td>
+            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px; background-color: ${bgStatus}; color: ${textStatus}; font-weight: bold;">
+              ${item.isPaid ? '✔ ชำระเงินแล้ว' : '✖ ยังไม่ชำระเงิน'}
+            </td>
+            <td style="text-align: right; border: 1px solid #cbd5e1; padding: 8px; font-weight: bold; ${item.isPaid ? 'color:#15803d;' : 'color:#64748b;'}">
+              ${item.amount.toLocaleString()} ฿
+            </td>
+            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px; color: #475569;">${item.timestamp}</td>
+            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px; font-family: monospace; color: #64748b;">${item.refCode}</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px;">
+              ${item.slipUrl !== '-' ? `<a href="${item.slipUrl}" target="_blank" style="color: #ea580c; text-decoration: underline;">เปิดดูสลิป</a>` : '-'}
+            </td>
+          </tr>
+        `;
+      });
+
+      const fullHtml = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+          <!--[if gte mso 9]>
+          <xml>
+            <x:ExcelWorkbook>
+              <x:ExcelWorksheets>
+                <x:ExcelWorksheet>
+                  <x:Name>รายชื่อและการชำระเงิน</x:Name>
+                  <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+                </x:ExcelWorksheet>
+              </x:ExcelWorksheets>
+            </x:ExcelWorkbook>
+          </xml>
+          <![endif]-->
+          <style>
+            table { border-collapse: collapse; font-family: 'Prompt', 'Segoe UI', Tahoma, sans-serif; font-size: 13px; }
+            th { background-color: #0f172a; color: #ffffff; font-weight: bold; border: 1px solid #334155; padding: 10px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <h2 style="color: #0f172a; margin-bottom: 4px;">รายงานการชำระเงินค่าทำป้ายสาขาวิชาเอก | COMED KKU 69</h2>
+          <p style="color: #475569; font-size: 12px; margin-top: 0;">
+            <strong>รูปแบบ:</strong> ${modeTitle} | <strong>ออกรายงานเมื่อ:</strong> ${nowStr} | 
+            <strong style="color: #15803d;">ชำระแล้ว: ${paidCount} คน (฿${totalAmount.toLocaleString()})</strong> | 
+            <strong style="color: #b91c1c;">ยังไม่ชำระ: ${dataset.length - paidCount} คน</strong>
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 50px;">ลำดับ</th>
+                <th style="width: 130px;">รหัสนักศึกษา</th>
+                <th style="width: 200px;">ชื่อ - นามสกุล</th>
+                <th style="width: 100px;">ชื่อเล่น</th>
+                <th style="width: 240px;">อีเมล (KKU Mail)</th>
+                <th style="width: 150px;">สถานะการชำระ</th>
+                <th style="width: 110px;">ยอดเงิน (บาท)</th>
+                <th style="width: 170px;">วัน-เวลาที่ชำระ</th>
+                <th style="width: 140px;">รหัสอ้างอิง</th>
+                <th style="width: 160px;">ลิงก์ภาพสลิป</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob([fullHtml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ComEd69_Report_Highlight_${sortOpt}_${filenameDate}.xls`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      if (loadingToast) loadingToast.remove();
+      if (typeof showToastNotification === 'function') {
+        showToastNotification(`✨ ส่งออกรายงาน Excel แบบ Highlight สำเร็จ (${dataset.length} รายการ)`);
+      }
+    }
+
+    function getExportModeTitle(opt) {
+      switch(opt) {
+        case 'paid_top': return 'เรียงคนที่ชำระเงินแล้วไว้ด้านบน';
+        case 'paid_bottom': return 'เรียงคนที่ชำระเงินแล้วไว้ด้านล่าง';
+        case 'paid_only': return 'เฉพาะผู้ที่ชำระเงินแล้ว';
+        case 'unpaid_only': return 'เฉพาะผู้ที่ยังไม่ชำระเงิน';
+        default: return 'ปกติ (เรียงตามลำดับรหัสนักศึกษา 60 คน)';
+      }
+    }
+
+    // Default fallback
+    async function exportToExcel() {
+      openExportModal();
     }
   </script>
 </body>
