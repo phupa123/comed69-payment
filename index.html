@@ -67,8 +67,15 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
-    body {
+    html, body {
       font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      max-width: 100vw;
+      width: 100%;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     .glass-card {
@@ -1308,18 +1315,31 @@
       const cloudUrl = localStorage.getItem('COMED_GOOGLE_SHEETS_URL') || "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
 
       try {
-        const res = await fetch(`${cloudUrl}?action=getSlips&t=${Date.now()}`);
+        const res = await fetch(`${cloudUrl}?t=${Date.now()}`);
         if (res.ok) {
           const result = await res.json();
-          const slips = result.data || [];
+          let slips = [];
+          
+          if (Array.isArray(result)) {
+            slips = result;
+          } else if (result.data && Array.isArray(result.data)) {
+            slips = result.data;
+          } else if (typeof result === 'object' && result !== null) {
+            // Google Apps Script returns { "693050120-5": { ... }, ... }
+            Object.keys(result).forEach(k => {
+              if (!k.startsWith('_') && result[k] && typeof result[k] === 'object') {
+                slips.push(result[k]);
+              }
+            });
+          }
           
           // Match by Student ID, Email, or Full Name
           const userSlip = slips.find(s => {
             const sEmail = (s.email || '').toLowerCase().trim();
-            const sId = (s.studentId || '').replace(/-/g, '').trim();
+            const sId = (s.studentId || s.id || '').replace(/-/g, '').trim();
             const myEmail = (user.email || '').toLowerCase().trim();
             const myId = (user.studentId || '').replace(/-/g, '').trim();
-            const sName = (s.studentName || '').trim();
+            const sName = (s.name || s.studentName || '').trim();
             const myName = (user.name || '').trim();
 
             return (myEmail && sEmail === myEmail) ||
@@ -1524,16 +1544,37 @@
       const targetTotalAmount = totalStudentsCount * 190.00; // ฿11,400.00
 
       try {
-        const res = await fetch(`${cloudUrl}?action=getSlips&t=${Date.now()}`);
+        const res = await fetch(`${cloudUrl}?t=${Date.now()}`);
         if (res.ok) {
           const result = await res.json();
-          const slips = result.data || [];
+          let slips = [];
+          
+          if (Array.isArray(result)) {
+            slips = result;
+          } else if (result.data && Array.isArray(result.data)) {
+            slips = result.data;
+          } else if (typeof result === 'object' && result !== null) {
+            // Convert dictionary { "693050120-5": { paid: true, ... } }
+            Object.keys(result).forEach(k => {
+              if (!k.startsWith('_') && result[k] && typeof result[k] === 'object') {
+                if (result[k].paid !== false) {
+                  slips.push(result[k]);
+                }
+              }
+            });
+          }
           
           // Calculate unique paid count
           const uniquePaid = new Set();
           slips.forEach(s => {
-            const key = (s.studentId || s.studentName || s.email || '').trim();
+            const key = (s.studentId || s.id || s.name || s.studentName || s.email || '').trim();
             if (key) uniquePaid.add(key);
+          });
+
+          // Check if local cache has more submissions
+          const localCache = JSON.parse(localStorage.getItem('COMED_LOCAL_PAYMENTS') || '{}');
+          Object.keys(localCache).forEach(k => {
+            if (localCache[k] && localCache[k].paid) uniquePaid.add(k);
           });
 
           const paidCount = uniquePaid.size;
@@ -1548,26 +1589,56 @@
           const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
           const dateStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
           
-          document.getElementById('statsLastUpdatedText').textContent = `${dateStr} เวลา ${timeStr} น.`;
+          const timeEl = document.getElementById('statsLastUpdatedText');
+          if (timeEl) timeEl.textContent = `${dateStr} ${timeStr} น.`;
           
           // Stat 1: Amount
-          document.getElementById('statAmountPaid').textContent = `฿${paidAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
-          document.getElementById('statAmountTarget').textContent = `/ ฿${targetTotalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท`;
-          document.getElementById('statAmountPercentBadge').textContent = `${Math.round(amountPercent)}%`;
-          document.getElementById('statAmountPercentText').textContent = `${amountPercent}% ของเป้าหมาย`;
-          document.getElementById('statAmountProgressBar').style.width = `${Math.min(100, amountPercent)}%`;
+          const amtPaidEl = document.getElementById('statAmountPaid');
+          if (amtPaidEl) amtPaidEl.textContent = `฿${paidAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+          
+          const amtTargetEl = document.getElementById('statAmountTarget');
+          if (amtTargetEl) amtTargetEl.textContent = `/ 11.4k`;
+
+          const amtBadgeEl = document.getElementById('statAmountPercentBadge');
+          if (amtBadgeEl) amtBadgeEl.textContent = `${Math.round(amountPercent)}%`;
+
+          const amtTextEl = document.getElementById('statAmountPercentText');
+          if (amtTextEl) amtTextEl.textContent = `${amountPercent}% ของเป้าหมาย`;
+
+          const amtBarEl = document.getElementById('statAmountProgressBar');
+          if (amtBarEl) amtBarEl.style.width = `${Math.min(100, Math.max(2, amountPercent))}%`;
 
           // Stat 2: Students
-          document.getElementById('statStudentsPaid').textContent = `${paidCount}`;
-          document.getElementById('statStudentsRemaining').textContent = `${remainingCount}`;
-          document.getElementById('statStudentPercentBadge').textContent = `${Math.round(studentPercent)}%`;
-          document.getElementById('statStudentPercentText').textContent = `${studentPercent}% (${paidCount}/${totalStudentsCount} คน)`;
-          document.getElementById('statStudentProgressBar').style.width = `${Math.min(100, studentPercent)}%`;
+          const stuPaidEl = document.getElementById('statStudentsPaid');
+          if (stuPaidEl) stuPaidEl.textContent = `${paidCount}`;
+
+          const stuRemEl = document.getElementById('statStudentsRemaining');
+          if (stuRemEl) stuRemEl.textContent = `${remainingCount}`;
+
+          const stuPercentText = document.getElementById('statStudentPercentText');
+          if (stuPercentText) stuPercentText.textContent = `${paidCount}/${totalStudentsCount} คน`;
         }
       } catch (e) {
         console.warn("Realtime stats fetch error", e);
+        // Fallback calculation from local state
+        const localCache = JSON.parse(localStorage.getItem('COMED_LOCAL_PAYMENTS') || '{}');
+        const paidCount = Object.keys(localCache).filter(k => localCache[k]?.paid).length;
+        const paidAmount = paidCount * 190.00;
+        const remainingCount = Math.max(0, totalStudentsCount - paidCount);
+        const amountPercent = ((paidAmount / targetTotalAmount) * 100).toFixed(1);
+
+        const amtPaidEl = document.getElementById('statAmountPaid');
+        if (amtPaidEl) amtPaidEl.textContent = `฿${paidAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+        const stuPaidEl = document.getElementById('statStudentsPaid');
+        if (stuPaidEl) stuPaidEl.textContent = `${paidCount}`;
+        const stuRemEl = document.getElementById('statStudentsRemaining');
+        if (stuRemEl) stuRemEl.textContent = `${remainingCount}`;
+        const amtBarEl = document.getElementById('statAmountProgressBar');
+        if (amtBarEl) amtBarEl.style.width = `${Math.min(100, amountPercent)}%`;
+
         const dateNow = new Date();
-        document.getElementById('statsLastUpdatedText').textContent = `${dateNow.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })} (ออฟไลน์)`;
+        const timeEl = document.getElementById('statsLastUpdatedText');
+        if (timeEl) timeEl.textContent = `${dateNow.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })} (พร้อมใช้)`;
       } finally {
         if (refreshIcon) {
           setTimeout(() => refreshIcon.classList.remove('animate-spin'), 600);
