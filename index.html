@@ -161,15 +161,24 @@
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
-      <div class="flex items-center gap-1 p-1 bg-slate-100/90 rounded-2xl border border-slate-200 shadow-inner">
-        <button id="navTabPayment" onclick="switchMainTab('payment')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm">
-          <i data-lucide="credit-card" class="w-4 h-4 text-orange-500"></i>
-          <span>ชำระเงิน & แจ้งสลิป</span>
-        </button>
-        <button id="navTabStatus" onclick="switchMainTab('status')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900">
-          <i data-lucide="clipboard-check" class="w-4 h-4"></i>
-          <span>ตรวจสอบรายชื่อ</span>
+      <!-- Navigation Tabs & Refresh Button -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 p-1 bg-slate-100/90 rounded-2xl border border-slate-200 shadow-inner">
+          <button id="navTabPayment" onclick="switchMainTab('payment')" class="flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm">
+            <i data-lucide="credit-card" class="w-4 h-4 text-orange-500"></i>
+            <span class="hidden sm:inline">ชำระเงิน & แจ้งสลิป</span>
+            <span class="sm:hidden">ชำระเงิน</span>
+          </button>
+          <button id="navTabStatus" onclick="switchMainTab('status')" class="flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900">
+            <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">ตรวจสอบรายชื่อ</span>
+            <span class="sm:hidden">รายชื่อ</span>
+          </button>
+        </div>
+
+        <!-- Quick Refresh Button -->
+        <button id="btnQuickRefresh" onclick="manualRefreshData()" class="p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:text-orange-600 hover:border-orange-300 shadow-sm hover:shadow-glow-orange transition group flex items-center justify-center" title="รีเฟรชข้อมูลล่าสุด">
+          <i data-lucide="rotate-cw" id="refreshIcon" class="w-4 h-4 transition-transform group-hover:rotate-180 duration-500"></i>
         </button>
       </div>
 
@@ -942,13 +951,21 @@
       loadFromLocal();
     }
 
-    function loadFromLocal() {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        paymentRecords = stored ? JSON.parse(stored) : {};
-      } catch (e) {
-        paymentRecords = {};
+    async function manualRefreshData() {
+      const icon = document.getElementById('refreshIcon');
+      if (icon) icon.classList.add('animate-spin');
+
+      await loadPaymentRecords();
+      refreshProgressStats();
+      renderStatusTable();
+
+      if (currentSelectedStudent) {
+        selectStudent(currentSelectedStudent);
       }
+
+      setTimeout(() => {
+        if (icon) icon.classList.remove('animate-spin');
+      }, 600);
     }
 
     function saveLocalBackup() {
@@ -1370,45 +1387,38 @@
         refCode: refCode
       };
 
-      let savedSuccessfully = false;
+      // บันทึกลงหน่วยความจำและ LocalStorage ทันที
+      paymentRecords[studentId] = {
+        paid: true,
+        timestamp: timestamp,
+        slipUrl: tempSlipDataUrl,
+        refCode: refCode,
+        amount: 190
+      };
+      saveLocalBackup();
 
-      // 1. Send to Google Apps Script (if configured)
+      // 1. Send to Google Apps Script (Cloud)
       if (googleAppsScriptUrl) {
         try {
-          const cloudRes = await fetch(googleAppsScriptUrl, {
+          await fetch(googleAppsScriptUrl, {
             method: 'POST',
-            mode: 'no-cors', // Apps Script standard CORS handling
+            mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
-          savedSuccessfully = true;
         } catch (e) {
           console.warn("Cloud Sync warning", e);
         }
       }
 
-      // 2. Send to Local Python Server
+      // 2. Send to Local Backend Server (if available)
       try {
-        const res = await fetch('/api/pay', {
+        fetch('/api/pay', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
-        if (res.ok) {
-          const result = await res.json();
-          paymentRecords[studentId] = {
-            paid: true,
-            timestamp: result.timestamp,
-            slipUrl: result.slipUrl,
-            refCode: result.refCode,
-            amount: 190
-          };
-          savedSuccessfully = true;
-        }
-      } catch (e) {
-        console.warn("Local server offline", e);
-      }
+      } catch (e) {}
 
       // 3. Fallback to LocalStorage memory
       if (!paymentRecords[studentId]) {

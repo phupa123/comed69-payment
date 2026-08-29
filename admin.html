@@ -148,6 +148,10 @@
         </div>
 
         <div class="flex items-center gap-3">
+          <button onclick="refreshDataFromCloud()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-sky-400 bg-sky-950/80 hover:bg-sky-900 border border-sky-700/60 transition shadow-sm group">
+            <i data-lucide="rotate-cw" id="adminRefreshIcon" class="w-4 h-4 transition-transform group-hover:rotate-180 duration-500"></i>
+            <span>รีเฟรชข้อมูล</span>
+          </button>
           <a href="index.html" target="_blank" class="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
             <i data-lucide="external-link" class="w-4 h-4"></i>
             <span>ดูหน้าเว็บ</span>
@@ -940,10 +944,32 @@
     }
 
     async function refreshDataFromCloud() {
+      const icon = document.getElementById('adminRefreshIcon');
+      if (icon) icon.classList.add('animate-spin');
+
       await loadAllPayments();
       renderStats();
       renderAdminTable();
-      alert("ซิงค์ข้อมูลล่าสุดจาก Google Cloud สำเร็จเรียบร้อยแล้ว!");
+
+      setTimeout(() => {
+        if (icon) icon.classList.remove('animate-spin');
+      }, 600);
+
+      // Animated Toast Popup Notification
+      showToastNotification("✨ ซิงค์ข้อมูลล่าสุดจาก Google Cloud สำเร็จเรียบร้อยแล้ว!");
+    }
+
+    function showToastNotification(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-6 right-6 z-50 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-2xl shadow-2xl border border-emerald-400/40 flex items-center gap-2.5 backdrop-blur-xl';
+      toast.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 text-white"></i><span>${msg}</span>`;
+      document.body.appendChild(toast);
+      lucide.createIcons();
+
+      gsap.fromTo(toast, { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.5)" });
+      setTimeout(() => {
+        gsap.to(toast, { opacity: 0, y: 20, scale: 0.9, duration: 0.3, onComplete: () => toast.remove() });
+      }, 3000);
     }
 
     function exportToExcel() {
