@@ -15,15 +15,15 @@ const LINE_TARGET_USER_ID = "U39c507609d6f5e67d64c35a4a7708ea6";
 function sendLineSlipNotification(name, nickname, studentId, slipUrl, timestamp, refCode) {
   if (!LINE_CHANNEL_ACCESS_TOKEN || !LINE_TARGET_USER_ID) return;
   try {
-    const textMsg = `🔔 ได้รับสลิปชำระเงินใหม่!\n` +
-      `━━━━━━━━━━━━━━━\n` +
-      `👤 ชื่อ: ${name} (น้อง${nickname})\n` +
+    const textMsg = `🔔 [แจ้งเตือน] สลิปชำระเงินใหม่!\n` +
+      `━━━━━━━━━━━━━━━━\n` +
+      `👤 ชื่อ: ${name} (${nickname ? 'น้อง' + nickname : '-'})\n` +
       `🆔 รหัสนักศึกษา: ${studentId}\n` +
       `💵 ยอดเงิน: ฿190.00 บาท\n` +
       `🕒 วัน-เวลา: ${timestamp}\n` +
       `🔖 รหัสอ้างอิง: ${refCode}\n` +
-      `━━━━━━━━━━━━━━━\n` +
-      (slipUrl && slipUrl.startsWith("http") ? `🖼️ ลิงก์สลิป: ${slipUrl}` : ``);
+      `━━━━━━━━━━━━━━━━\n` +
+      (slipUrl && slipUrl.startsWith("http") ? `🖼️ เปิดดูสลิป: ${slipUrl}` : ``);
 
     const messages = [
       {
@@ -59,6 +59,40 @@ function sendLineSlipNotification(name, nickname, studentId, slipUrl, timestamp,
     });
   } catch (err) {
     Logger.log("LINE Notification Error: " + err.toString());
+  }
+}
+
+// ฟังก์ชันส่งการแจ้งเตือนเมื่อมีคนแจ้งปัญหาผู้ใช้เข้า LINE
+function sendLineIssueNotification(issueId, studentId, name, category, contact, detail, timeStr) {
+  if (!LINE_CHANNEL_ACCESS_TOKEN || !LINE_TARGET_USER_ID) return;
+  try {
+    const textMsg = `⚠️ [แจ้งเตือน] มีผู้ใช้แจ้งปัญหาใหม่!\n` +
+      `━━━━━━━━━━━━━━━━\n` +
+      `📌 รหัสปัญหา: ${issueId}\n` +
+      `👤 ผู้แจ้ง: ${name} (${studentId || '-'})\n` +
+      `🏷️ หัวข้อ: ${category}\n` +
+      `📞 ช่องทางติดต่อ: ${contact}\n` +
+      `📝 รายละเอียด: ${detail}\n` +
+      `🕒 เวลา: ${timeStr}\n` +
+      `━━━━━━━━━━━━━━━━\n` +
+      `👉 แอดมินสามารถเปิดดูได้ที่หน้า Dashboard`;
+
+    UrlFetchApp.fetch("https://api.line.me/v2/bot/message/push", {
+      "method": "post",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + LINE_CHANNEL_ACCESS_TOKEN
+      },
+      "payload": JSON.stringify({
+        "to": LINE_TARGET_USER_ID,
+        "messages": [
+          { "type": "text", "text": textMsg }
+        ]
+      }),
+      "muteHttpExceptions": true
+    });
+  } catch (err) {
+    Logger.log("LINE Issue Alert Error: " + err.toString());
   }
 }
 
@@ -272,6 +306,18 @@ function doPost(e) {
       ]);
 
       SpreadsheetApp.flush();
+
+      // Trigger Instant LINE Notification to Admin
+      sendLineIssueNotification(
+        issueId,
+        data.studentId,
+        data.name,
+        data.category || "ทั่วไป",
+        data.contact || "-",
+        data.detail || "-",
+        timeStr
+      );
+
       return ContentService.createTextOutput(JSON.stringify({ success: true, issueId: issueId })).setMimeType(ContentService.MimeType.JSON);
     }
 
