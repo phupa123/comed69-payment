@@ -180,7 +180,7 @@
   <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
 
     <!-- HERO & COUNTDOWN & STATS SECTION (MODERN LUXURY TECH AESTHETICS) -->
-    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-6 sm:p-10 shadow-2xl border border-slate-800">
+    <section class="hero-card-animate relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-6 sm:p-10 shadow-2xl border border-slate-800">
       
       <!-- Glowing Orbs & Tech Geometry -->
       <div class="absolute -right-16 -top-16 w-96 h-96 bg-gradient-to-br from-orange-500/25 to-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -301,7 +301,7 @@
     <div id="tabContentPayment" class="space-y-6">
       
       <!-- Search & Autocomplete Card -->
-      <div class="premium-glass rounded-3xl p-6 sm:p-10 shadow-card-premium relative overflow-hidden">
+      <div class="search-card-animate premium-glass rounded-3xl p-6 sm:p-10 shadow-card-premium relative overflow-hidden">
         
         <!-- Subtle background deco -->
         <div class="absolute right-0 top-0 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -901,6 +901,11 @@
       refreshProgressStats();
       renderStatusTable();
 
+      // GSAP Page Entrance Animation
+      gsap.from("header", { y: -30, opacity: 0, duration: 0.6, ease: "power3.out" });
+      gsap.from(".hero-card-animate", { y: 25, opacity: 0, duration: 0.7, delay: 0.15, ease: "power3.out" });
+      gsap.from(".search-card-animate", { y: 25, opacity: 0, duration: 0.7, delay: 0.25, ease: "power3.out" });
+
       // Init Lucide icons
       lucide.createIcons();
     }
@@ -1284,7 +1289,16 @@
 
     function processUploadedFile(file) {
       if (!file.type.startsWith('image/')) {
-        alert("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น (JPG, PNG)");
+        alert("⚠️ กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น (JPG, PNG, WebP)");
+        return;
+      }
+
+      // ตรวจสอบขนาดไฟล์ไม่เกิน 10MB (10 * 1024 * 1024 bytes)
+      const MAX_FILE_SIZE = 10 * 1024 * 1024;
+      if (file.size > MAX_FILE_SIZE) {
+        const sizeInMb = (file.size / (1024 * 1024)).toFixed(2);
+        alert(`⚠️ ขนาดไฟล์ของคุณ (${sizeInMb} MB) เกินขีดจำกัดที่กำหนด 10 MB!\nกรุณาเลือกไฟล์สลิปที่มีขนาดไม่เกิน 10 MB`);
+        document.getElementById('slipFileInput').value = '';
         return;
       }
       
@@ -1298,7 +1312,7 @@
         const previewContainer = document.getElementById('slipPreviewContainer');
         previewContainer.classList.remove('hidden');
         
-        gsap.fromTo(previewContainer, { opacity: 0, scale: 0.98 }, { opacity: 1, scale: 1, duration: 0.3 });
+        gsap.fromTo(previewContainer, { opacity: 0, y: 15, scale: 0.98 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.4)" });
         lucide.createIcons();
       };
       reader.readAsDataURL(file);
@@ -1674,7 +1688,7 @@
       document.getElementById('modalStudentDetail').classList.add('hidden');
     }
 
-    // --- TAB SWITCHER ---
+    // --- TAB SWITCHER WITH GSAP FADE TRANSITIONS ---
     function switchMainTab(tab) {
       const tabPayment = document.getElementById('tabContentPayment');
       const tabStatus = document.getElementById('tabContentStatus');
@@ -1687,6 +1701,8 @@
 
         navPayment.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm';
         navStatus.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900';
+
+        gsap.fromTo(tabPayment, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
       } else {
         tabPayment.classList.add('hidden');
         tabStatus.classList.remove('hidden');
@@ -1695,6 +1711,7 @@
         navPayment.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900';
         
         renderStatusTable();
+        gsap.fromTo(tabStatus, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
       }
       lucide.createIcons();
     }

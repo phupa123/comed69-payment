@@ -40,26 +40,39 @@
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- GSAP for Ultra-Smooth Animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <!-- SheetJS for Excel Export -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
     body {
       font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
-      background-color: #f8fafc;
-      color: #0f172a;
+      background-color: #090d16;
+      color: #f8fafc;
     }
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: #f1f5f9;
+      background: #0f172a;
       border-radius: 9999px;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
+      background: #334155;
       border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #f97316;
+    }
+    /* Cyber Glass Card */
+    .cyber-glass {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
   </style>
 </head>
@@ -157,7 +170,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         <!-- 1. Total Received Money -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-lg">
+        <div class="admin-stat-card cyber-glass rounded-3xl p-5 shadow-lg border border-slate-800">
           <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
             <span class="font-bold">ยอดเงินที่ได้รับแล้ว</span>
             <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
@@ -172,7 +185,7 @@
         </div>
 
         <!-- 2. Paid Count -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-lg">
+        <div class="admin-stat-card cyber-glass rounded-3xl p-5 shadow-lg border border-slate-800">
           <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
             <span class="font-bold">ชำระเงินแล้ว</span>
             <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
@@ -187,7 +200,7 @@
         </div>
 
         <!-- 3. Unpaid Count -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-lg">
+        <div class="admin-stat-card cyber-glass rounded-3xl p-5 shadow-lg border border-slate-800">
           <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
             <span class="font-bold">ยังไม่ชำระเงิน</span>
             <div class="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
@@ -202,7 +215,7 @@
         </div>
 
         <!-- 4. Cloud Sync Status -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-lg flex flex-col justify-between">
+        <div class="admin-stat-card cyber-glass rounded-3xl p-5 shadow-lg border border-slate-800 flex flex-col justify-between">
           <div class="flex items-center justify-between text-xs text-slate-400">
             <span class="font-bold">การเชื่อมต่อ Cloud</span>
             <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
@@ -224,7 +237,7 @@
       </div>
 
       <!-- Main Management Table Card -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+      <div id="adminTableContainer" class="cyber-glass rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 border border-slate-800">
         
         <!-- Controls: Filters, Search & Bulk Actions -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -420,11 +433,17 @@
 
     async function showDashboard() {
       document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('adminDashboard').classList.remove('hidden');
+      const dash = document.getElementById('adminDashboard');
+      dash.classList.remove('hidden');
 
       studentDatabase = DEFAULT_STUDENTS;
       renderStats();
       renderAdminTable();
+
+      // GSAP Dashboard Stagger Animations
+      gsap.fromTo("header", { y: -25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" });
+      gsap.fromTo(".admin-stat-card", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power3.out" });
+      gsap.fromTo("#adminTableContainer", { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, delay: 0.2, ease: "power3.out" });
 
       await loadAllPayments();
       renderStats();
