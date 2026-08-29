@@ -296,6 +296,27 @@
           </button>
         </div>
 
+        <!-- User Auth Profile Widget (Sync with index.html) -->
+        <div id="navUserGuest" class="flex items-center">
+          <a href="index.html" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-700 font-bold text-xs border border-orange-200 transition">
+            <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">เข้าสู่ระบบ KKU</span>
+          </a>
+        </div>
+
+        <div id="navUserLoggedIn" class="hidden items-center gap-2">
+          <div class="flex items-center gap-2 p-1.5 pr-2.5 rounded-2xl bg-orange-50 border border-orange-200">
+            <img id="navUserAvatar" src="" alt="Avatar" class="w-7 h-7 rounded-xl object-cover border border-orange-300">
+            <div class="text-left hidden md:block">
+              <span id="navUserName" class="text-xs font-bold text-slate-800 block leading-tight">ชื่อผู้ใช้</span>
+              <span id="navUserPaymentTag" class="text-[10px] text-emerald-600 font-bold block leading-tight">เช็คสถานะ...</span>
+            </div>
+            <button onclick="handlePaymentLogout()" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition" title="ออกจากระบบ">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
         <!-- Quick Refresh Button -->
         <button id="btnQuickRefresh" onclick="manualRefreshData()"
           class="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-white border border-slate-200 text-slate-600 hover:text-orange-600 hover:border-orange-300 shadow-sm hover:shadow-glow-orange transition group flex items-center justify-center"
@@ -2584,6 +2605,95 @@
         { "id": "693050567-3", "name": "อาภัสรา นากลาง", "nickname": "เป้ย", "email": "apassara.n@kkumail.com" }
       ];
     }
+
+    // ================= USER SESSION & PAYMENT SYNC =================
+    function checkPaymentUserSession() {
+      try {
+        const session = localStorage.getItem('COMED_USER_SESSION');
+        const guestNav = document.getElementById('navUserGuest');
+        const loggedNav = document.getElementById('navUserLoggedIn');
+        const avatarEl = document.getElementById('navUserAvatar');
+        const nameEl = document.getElementById('navUserName');
+        const tagEl = document.getElementById('navUserPaymentTag');
+
+        if (session) {
+          const user = JSON.parse(session);
+          if (guestNav) guestNav.classList.add('hidden');
+          if (loggedNav) {
+            loggedNav.classList.remove('hidden');
+            loggedNav.classList.add('flex');
+          }
+          if (avatarEl) avatarEl.src = user.avatar;
+          if (nameEl) nameEl.textContent = user.nickname ? `${user.name} (${user.nickname})` : user.name;
+
+          // Check if already paid
+          syncUserPaymentTag(user);
+
+          // Auto-select user in student search dropdown if not yet selected
+          autoSelectStudentForUser(user);
+        } else {
+          if (guestNav) guestNav.classList.remove('hidden');
+          if (loggedNav) {
+            loggedNav.classList.add('hidden');
+            loggedNav.classList.remove('flex');
+          }
+        }
+      } catch(e) {}
+    }
+
+    function syncUserPaymentTag(user) {
+      const tagEl = document.getElementById('navUserPaymentTag');
+      if (!tagEl) return;
+
+      const myId = (user.studentId || '').replace(/-/g, '').trim();
+      const myEmail = (user.email || '').toLowerCase().trim();
+      const myName = (user.name || '').trim();
+
+      const isPaid = (window.cachedSubmissions || []).some(s => {
+        const sEmail = (s.email || '').toLowerCase().trim();
+        const sId = (s.studentId || '').replace(/-/g, '').trim();
+        const sName = (s.studentName || '').trim();
+        return (myEmail && sEmail === myEmail) ||
+               (myId && sId && sId === myId) ||
+               (myName && sName && sName.includes(myName));
+      });
+
+      if (isPaid) {
+        tagEl.className = "text-[10px] text-emerald-600 font-bold block leading-tight flex items-center gap-1";
+        tagEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>ชำระเงินแล้ว ฿190';
+      } else {
+        tagEl.className = "text-[10px] text-amber-600 font-bold block leading-tight flex items-center gap-1";
+        tagEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>ยังไม่ชำระเงิน';
+      }
+    }
+
+    function autoSelectStudentForUser(user) {
+      if (!user) return;
+      const myId = (user.studentId || '').replace(/-/g, '').trim();
+      const myName = (user.name || '').trim();
+      const student = (students || []).find(st => {
+        return (myId && st.id.replace(/-/g, '') === myId) || (myName && st.name.includes(myName));
+      });
+      if (student && typeof selectStudent === 'function' && !selectedStudent) {
+        selectStudent(student);
+      }
+    }
+
+    function handlePaymentLogout() {
+      if (confirm("คุณต้องการออกจากระบบหรือไม่?")) {
+        localStorage.removeItem('COMED_USER_SESSION');
+        window.location.reload();
+      }
+    }
+
+    // Call after initial fetch
+    const originalRenderSubmissions = renderSubmissions;
+    renderSubmissions = function(submissions) {
+      if (typeof originalRenderSubmissions === 'function') {
+        originalRenderSubmissions(submissions);
+      }
+      checkPaymentUserSession();
+    };
   </script>
 </body>
 
