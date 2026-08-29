@@ -244,6 +244,67 @@
     </div>
   </div>
 
+  <!-- ================= LUXURY USER PROFILE & STATUS MODAL ================= -->
+  <div id="modalMyPaymentProfile" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
+    <div id="myPaymentProfileCard" class="relative bg-white rounded-[2.5rem] max-w-md w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-orange-200 text-center space-y-6 overflow-hidden">
+      
+      <!-- Top Decorative Glow bar -->
+      <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400"></div>
+
+      <div class="flex justify-between items-center -mt-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-xs font-black border border-orange-200">
+          <i data-lucide="user-check" class="w-3.5 h-3.5 text-orange-500"></i>
+          <span>ข้อมูลนักศึกษา (COMED 69)</span>
+        </span>
+        <button onclick="closeMyProfileModal()" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-700 bg-slate-100 rounded-xl transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Avatar & Name -->
+      <div class="space-y-3">
+        <div class="relative w-20 h-20 mx-auto">
+          <img id="myProfileModalAvatar" src="" alt="Avatar" class="w-full h-full rounded-2xl object-cover border-2 border-orange-300 shadow-md">
+        </div>
+        <div>
+          <h3 id="myProfileModalName" class="text-xl font-black text-slate-900">ชื่อนักศึกษา</h3>
+          <p id="myProfileModalEmail" class="text-xs text-orange-600 font-mono font-bold">email@kkumail.com</p>
+        </div>
+      </div>
+
+      <!-- Detailed Info Card -->
+      <div class="bg-slate-50 rounded-2xl p-4 text-xs space-y-2.5 border border-slate-200 text-left">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500">รหัสนักศึกษา:</span>
+          <span id="myProfileModalID" class="font-mono font-bold text-slate-800">-</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500">ชื่อเล่น:</span>
+          <span id="myProfileModalNickname" class="font-bold text-slate-800">-</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500">รายการ:</span>
+          <span class="font-bold text-slate-800">ค่าทำป้ายสาขาวิชาเอก (฿190)</span>
+        </div>
+        <div class="border-t border-slate-200 pt-2 flex justify-between items-center">
+          <span class="text-slate-500">สถานะการชำระเงิน:</span>
+          <span id="myProfileModalStatusBadge" class="font-black text-xs px-2.5 py-1 rounded-full bg-slate-200 text-slate-700">กำลังตรวจสอบ...</span>
+        </div>
+      </div>
+
+      <div class="pt-1 flex gap-2">
+        <button onclick="scrollToUploadForm()" class="flex-1 py-3 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs rounded-2xl transition flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/25">
+          <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+          <span>ไปยังจุดแนบสลิป</span>
+        </button>
+        <button onclick="handlePaymentLogout()" class="px-4 py-3 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs rounded-2xl transition border border-rose-200">
+          ออกจากระบบ
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- TOP HEADER / NAV BAR WITH LOGO -->
   <header
     class="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-sm transition-all duration-300">
@@ -305,13 +366,16 @@
         </div>
 
         <div id="navUserLoggedIn" class="hidden items-center gap-2">
-          <div class="flex items-center gap-2 p-1.5 pr-2.5 rounded-2xl bg-orange-50 border border-orange-200">
-            <img id="navUserAvatar" src="" alt="Avatar" class="w-7 h-7 rounded-xl object-cover border border-orange-300">
+          <div onclick="openMyProfileModal()" class="flex items-center gap-2 p-1.5 pr-2.5 rounded-2xl bg-orange-50 hover:bg-orange-100/80 border border-orange-200 cursor-pointer transition shadow-sm group">
+            <img id="navUserAvatar" src="" alt="Avatar" class="w-7 h-7 rounded-xl object-cover border border-orange-300 group-hover:scale-105 transition">
             <div class="text-left hidden md:block">
-              <span id="navUserName" class="text-xs font-bold text-slate-800 block leading-tight">ชื่อผู้ใช้</span>
+              <div class="flex items-center gap-1">
+                <span id="navUserName" class="text-xs font-bold text-slate-800 block leading-tight">ชื่อผู้ใช้</span>
+                <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 group-hover:text-orange-600 transition"></i>
+              </div>
               <span id="navUserPaymentTag" class="text-[10px] text-emerald-600 font-bold block leading-tight">เช็คสถานะ...</span>
             </div>
-            <button onclick="handlePaymentLogout()" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition" title="ออกจากระบบ">
+            <button onclick="event.stopPropagation(); handlePaymentLogout()" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition ml-1" title="ออกจากระบบ">
               <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -2676,7 +2740,71 @@
       });
       if (student && typeof selectStudent === 'function' && !selectedStudent) {
         selectStudent(student);
+        
+        // If coming from direct pay click, smoothly scroll down to slip upload zone
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('auto') === 'pay') {
+          setTimeout(scrollToUploadForm, 600);
+        }
       }
+    }
+
+    function scrollToUploadForm() {
+      closeMyProfileModal();
+      switchMainTab('payment');
+      const uploadArea = document.getElementById('dropZone');
+      if (uploadArea) {
+        uploadArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Pulse Effect
+        uploadArea.classList.add('ring-4', 'ring-orange-500', 'ring-offset-2');
+        setTimeout(() => {
+          uploadArea.classList.remove('ring-4', 'ring-orange-500', 'ring-offset-2');
+        }, 2000);
+      }
+    }
+
+    function openMyProfileModal() {
+      const session = localStorage.getItem('COMED_USER_SESSION');
+      if (!session) return;
+      const user = JSON.parse(session);
+      const modal = document.getElementById('modalMyPaymentProfile');
+      const card = document.getElementById('myPaymentProfileCard');
+
+      document.getElementById('myProfileModalAvatar').src = user.avatar;
+      document.getElementById('myProfileModalName').textContent = user.name || '-';
+      document.getElementById('myProfileModalNickname').textContent = user.nickname ? `น้อง${user.nickname}` : '-';
+      document.getElementById('myProfileModalID').textContent = user.studentId || '-';
+      document.getElementById('myProfileModalEmail').textContent = user.email || '-';
+
+      const myId = (user.studentId || '').replace(/-/g, '').trim();
+      const myEmail = (user.email || '').toLowerCase().trim();
+      const isPaid = (window.cachedSubmissions || []).some(s => {
+        return ((s.email || '').toLowerCase().trim() === myEmail) ||
+               ((s.studentId || '').replace(/-/g, '').trim() === myId);
+      });
+
+      const badge = document.getElementById('myProfileModalStatusBadge');
+      if (isPaid) {
+        badge.className = "font-black text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300";
+        badge.textContent = "ชำระเงินเรียบร้อยแล้ว (฿190.00)";
+      } else {
+        badge.className = "font-black text-xs px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
+        badge.textContent = "ยังไม่ได้ชำระเงิน (รอแนบสลิป)";
+      }
+
+      modal.classList.remove('hidden');
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(card, 
+          { opacity: 0, scale: 0.8, y: 30 }, 
+          { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.6)" }
+        );
+      }
+      lucide.createIcons();
+    }
+
+    function closeMyProfileModal() {
+      const modal = document.getElementById('modalMyPaymentProfile');
+      if (modal) modal.classList.add('hidden');
     }
 
     function handlePaymentLogout() {

@@ -314,6 +314,37 @@
     </div>
   </header>
 
+  <!-- ================= MOBILE BOTTOM FLOATING NAVIGATION DOCK ================= -->
+  <div class="lg:hidden fixed bottom-3 left-3 right-3 z-40 bg-slate-900/90 backdrop-blur-2xl border border-white/20 rounded-3xl p-1.5 flex items-center justify-around shadow-[0_12px_40px_rgba(0,0,0,0.4)]">
+    <a href="#payments-list" class="flex-1 py-2 px-1 rounded-2xl text-orange-400 font-bold text-[11px] transition-all flex flex-col items-center gap-1 hover:text-white">
+      <div class="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center">
+        <i data-lucide="bell-ring" class="w-4 h-4"></i>
+      </div>
+      <span>ต้องชำระ</span>
+    </a>
+
+    <a href="#curriculum" class="flex-1 py-2 px-1 rounded-2xl text-slate-400 font-bold text-[11px] transition-all flex flex-col items-center gap-1 hover:text-white">
+      <div class="w-8 h-8 rounded-xl bg-white/5 text-slate-400 flex items-center justify-center">
+        <i data-lucide="book-open" class="w-4 h-4"></i>
+      </div>
+      <span>หลักสูตร</span>
+    </a>
+
+    <a href="#students" class="flex-1 py-2 px-1 rounded-2xl text-slate-400 font-bold text-[11px] transition-all flex flex-col items-center gap-1 hover:text-white">
+      <div class="w-8 h-8 rounded-xl bg-white/5 text-slate-400 flex items-center justify-center">
+        <i data-lucide="users" class="w-4 h-4"></i>
+      </div>
+      <span>ทำเนียบ</span>
+    </a>
+
+    <a href="payment.html?auto=pay" class="flex-1 py-2 px-1 rounded-2xl text-orange-400 bg-orange-500/15 font-black text-[11px] transition-all flex flex-col items-center gap-1">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30">
+        <i data-lucide="credit-card" class="w-4 h-4"></i>
+      </div>
+      <span>แนบสลิป</span>
+    </a>
+  </div>
+
   <!-- ================= SECTION 0: ACTIVE PAYMENTS (หมวดหมู่รายการที่ต้องชำระตอนนี้) ================= -->
   <section id="payments-list" class="bg-gradient-to-b from-orange-500/10 via-amber-500/5 to-transparent pt-10 pb-16 px-4 sm:px-6 lg:px-8 border-b border-orange-200/50">
     <div class="max-w-7xl mx-auto space-y-6">
@@ -390,7 +421,7 @@
           </div>
 
           <div class="pt-1 flex items-center gap-2">
-            <a id="card1PayBtn" href="payment.html" class="flex-grow py-3 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm text-center shadow-md shadow-orange-500/25 transition flex items-center justify-center gap-2">
+            <a id="card1PayBtn" href="payment.html?auto=pay" class="flex-grow py-3 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm text-center shadow-md shadow-orange-500/25 transition flex items-center justify-center gap-2">
               <i data-lucide="upload" class="w-4 h-4"></i>
               <span>คลิกเพื่อแนบสลิปชำระเงิน</span>
             </a>
