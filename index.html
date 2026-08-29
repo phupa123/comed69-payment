@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบชำระเงินค่าทำป้ายสาขาวิชาเอก | สาขาคอมพิวเตอร์ศึกษา มข.</title>
+  <meta name="description" content="ระบบบันทึกและตรวจสอบการชำระเงินค่าทำป้ายสาขาวิชาเอกคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น">
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              300: '#fdba74',
+              400: '#fb923c',
+              500: '#f97316', // Orange theme matching logo
+              600: '#ea580c',
+              700: '#c2410c',
+              800: '#9a3412',
+              900: '#7c2d12',
+              blue: '#0284c7',
+              kku: '#A73B24'
+            }
+          },
+          boxShadow: {
+            'glow-orange': '0 0 35px -5px rgba(249, 115, 22, 0.45)',
+            'glow-blue': '0 0 35px -5px rgba(2, 132, 199, 0.4)',
+            'card-premium': '0 20px 40px -15px rgba(0, 0, 0, 0.07), 0 0 1px 1px rgba(0, 0, 0, 0.04)',
+            'card-glass': '0 8px 32px 0 rgba(31, 38, 135, 0.1)',
+            'dropdown': '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          },
+          backgroundImage: {
+            'mesh-gradient': 'radial-gradient(at 10% 20%, rgba(249, 115, 22, 0.12) 0px, transparent 50%), radial-gradient(at 90% 10%, rgba(2, 132, 199, 0.12) 0px, transparent 50%), radial-gradient(at 50% 90%, rgba(234, 88, 12, 0.08) 0px, transparent 50%)',
+            'glass-gradient': 'linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75))',
+            'card-shine': 'linear-gradient(110deg, transparent, rgba(255, 255, 255, 0.4), transparent)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- GSAP for Smooth Animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Dynamic Mesh Background */
+    .bg-mesh-canvas {
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(249, 115, 22, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 85% 20%, rgba(2, 132, 199, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(245, 158, 11, 0.06) 0%, transparent 50%);
+    }
+
+    /* Premium Glassmorphism */
+    .premium-glass {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 0 1px 1px rgba(226, 232, 240, 0.6);
+    }
+
+    .premium-glass-dark {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Shimmer Effect for Progress & Cards */
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+    .animate-shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    .animate-shimmer::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 3s infinite;
+    }
+
+    /* Floating Animation */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(1deg); }
+    }
+    .animate-float {
+      animation: floatSlow 6s ease-in-out infinite;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #f97316;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-orange-500 selection:text-white bg-mesh-canvas">
+
+  <!-- TOP HEADER / NAV BAR WITH LOGO -->
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 shadow-sm transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- LOGO & BRANDING -->
+      <div class="flex items-center gap-3.5 cursor-pointer group" onclick="switchMainTab('payment')">
+        <div class="relative w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-orange-50 via-white to-sky-50 shadow-md border border-orange-200/60 p-1.5 flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:shadow-glow-orange">
+          <img src="logo.png" alt="โลโก้สาขาวิชาคอมพิวเตอร์ศึกษา" class="w-full h-full object-contain">
+          <div class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-600 uppercase block leading-tight">COMED KKU 69</span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> พร้อมเชื่อมต่อ Cloud
+            </span>
+          </div>
+          <h1 class="text-base sm:text-lg font-extrabold text-slate-800 tracking-tight leading-tight">ระบบชำระเงินค่าป้ายสาขาวิชาเอก</h1>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex items-center gap-1 p-1 bg-slate-100/90 rounded-2xl border border-slate-200 shadow-inner">
+        <button id="navTabPayment" onclick="switchMainTab('payment')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm">
+          <i data-lucide="credit-card" class="w-4 h-4 text-orange-500"></i>
+          <span>ชำระเงิน & แจ้งสลิป</span>
+        </button>
+        <button id="navTabStatus" onclick="switchMainTab('status')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900">
+          <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+          <span>ตรวจสอบรายชื่อ</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
+
+    <!-- HERO & COUNTDOWN & STATS SECTION (MODERN LUXURY TECH AESTHETICS) -->
+    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-6 sm:p-10 shadow-2xl border border-slate-800">
+      
+      <!-- Glowing Orbs & Tech Geometry -->
+      <div class="absolute -right-16 -top-16 w-96 h-96 bg-gradient-to-br from-orange-500/25 to-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-16 -bottom-16 w-96 h-96 bg-gradient-to-tr from-sky-500/20 to-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <!-- Watermark Floating Logo -->
+      <div class="absolute right-4 bottom-2 opacity-15 pointer-events-none w-72 h-72 hidden md:block animate-float">
+        <img src="logo.png" alt="watermark" class="w-full h-full object-contain filter invert drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+      </div>
+
+      <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Left: Info & Announcement -->
+        <div class="lg:col-span-7 space-y-4">
+          
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 backdrop-blur-md border border-orange-400/40 text-xs text-orange-300 font-bold shadow-sm">
+              <i data-lucide="tag" class="w-3.5 h-3.5 text-orange-400"></i>
+              <span>ค่าทำป้ายสาขาวิชาเอก คนละ ฿190</span>
+            </span>
+
+            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-500/20 backdrop-blur-md border border-sky-400/30 text-xs text-sky-300 font-semibold">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>ชั้นปีที่ 1 (รหัส 69)</span>
+            </span>
+          </div>
+
+          <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+            สาขาวิชาคอมพิวเตอร์ศึกษา<br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-amber-200 to-white font-medium text-lg sm:text-2xl block mt-1.5">
+              คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น
+            </span>
+          </h2>
+
+          <!-- Countdown Timer Glass Card -->
+          <div class="bg-white/5 backdrop-blur-xl border border-white/15 rounded-3xl p-4 sm:p-5 inline-block w-full max-w-lg shadow-xl shadow-black/40">
+            <div class="flex items-center justify-between text-xs text-slate-300 mb-3">
+              <span class="flex items-center gap-2 font-bold text-amber-300">
+                <i data-lucide="timer" class="w-4 h-4 animate-spin text-amber-400" style="animation-duration: 10s;"></i>
+                กำหนดชำระถึง 5 ก.ย. 2569 เวลา 13:59 น.
+              </span>
+              <span id="countdownStatusBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> กำลังเปิดรับชำระ
+              </span>
+            </div>
+
+            <!-- Countdown 4-Grid Cards -->
+            <div class="grid grid-cols-4 gap-2.5 text-center" id="countdownGrid">
+              <div class="bg-black/40 rounded-2xl py-2.5 px-1 border border-white/10 shadow-inner">
+                <span id="cdDays" class="text-2xl sm:text-3xl font-extrabold font-mono text-white block">00</span>
+                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">วัน</span>
+              </div>
+              <div class="bg-black/40 rounded-2xl py-2.5 px-1 border border-white/10 shadow-inner">
+                <span id="cdHours" class="text-2xl sm:text-3xl font-extrabold font-mono text-white block">00</span>
+                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">ชั่วโมง</span>
+              </div>
+              <div class="bg-black/40 rounded-2xl py-2.5 px-1 border border-white/10 shadow-inner">
+                <span id="cdMins" class="text-2xl sm:text-3xl font-extrabold font-mono text-white block">00</span>
+                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">นาที</span>
+              </div>
+              <div class="bg-black/40 rounded-2xl py-2.5 px-1 border border-white/10 shadow-inner">
+                <span id="cdSecs" class="text-2xl sm:text-3xl font-extrabold font-mono text-amber-400 block">00</span>
+                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">วินาที</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Dynamic Live Progress Dashboard Cards -->
+        <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+          
+          <!-- Money Progress Card -->
+          <div class="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/15 rounded-3xl p-5 shadow-lg transition-all hover:border-orange-400/40 group">
+            <div class="flex items-center justify-between text-xs text-slate-300 mb-2">
+              <span class="flex items-center gap-2 font-bold text-slate-200">
+                <div class="w-6 h-6 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+                  <i data-lucide="wallet" class="w-3.5 h-3.5"></i>
+                </div>
+                ยอดเงินที่ได้รับแล้ว
+              </span>
+              <span id="moneyPercentBadge" class="font-black text-amber-300 text-sm bg-amber-500/20 px-2.5 py-0.5 rounded-full border border-amber-400/30">0%</span>
+            </div>
+            <div class="flex items-baseline gap-2 mb-3">
+              <span id="totalMoneyPaid" class="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight">฿0</span>
+              <span id="targetMoney" class="text-xs text-slate-400 font-semibold">/ ฿11,400 (เป้าหมาย)</span>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-black/50 rounded-full h-3 overflow-hidden p-0.5 border border-white/10">
+              <div id="moneyProgressBar" class="bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400 h-full rounded-full transition-all duration-700 ease-out animate-shimmer" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- People Count Progress Card -->
+          <div class="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/15 rounded-3xl p-5 shadow-lg transition-all hover:border-sky-400/40 group">
+            <div class="flex items-center justify-between text-xs text-slate-300 mb-2">
+              <span class="flex items-center gap-2 font-bold text-slate-200">
+                <div class="w-6 h-6 rounded-lg bg-sky-500/20 flex items-center justify-center text-sky-400">
+                  <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                </div>
+                จำนวนเพื่อนที่ชำระแล้ว
+              </span>
+              <span id="peoplePercentBadge" class="font-black text-sky-300 text-sm bg-sky-500/20 px-2.5 py-0.5 rounded-full border border-sky-400/30">0%</span>
+            </div>
+            <div class="flex items-baseline gap-2 mb-3">
+              <span id="totalPeoplePaid" class="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight">0</span>
+              <span id="targetPeople" class="text-xs text-slate-400 font-semibold">/ 60 คนทั้งหมด</span>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-black/50 rounded-full h-3 overflow-hidden p-0.5 border border-white/10">
+              <div id="peopleProgressBar" class="bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-400 h-full rounded-full transition-all duration-700 ease-out animate-shimmer" style="width: 0%"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: TAB PAYMENT & SLIP UPLOAD -->
+    <div id="tabContentPayment" class="space-y-6">
+      
+      <!-- Search & Autocomplete Card -->
+      <div class="premium-glass rounded-3xl p-6 sm:p-10 shadow-card-premium relative overflow-hidden">
+        
+        <!-- Subtle background deco -->
+        <div class="absolute right-0 top-0 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-2xl mx-auto space-y-6 relative z-10">
+          
+          <div class="text-center space-y-2">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-tr from-orange-100 via-orange-50 to-amber-100 text-orange-600 mb-2 shadow-sm border border-orange-200/80">
+              <img src="logo.png" alt="โลโก้" class="w-10 h-10 object-contain">
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">ค้นหาข้อมูลเพื่อบันทึกการชำระเงิน</h2>
+            <p class="text-xs sm:text-sm text-slate-500">
+              พิมพ์ <span class="text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded">รหัสนักศึกษา</span> (มีหรือไม่มีขีดก็ได้), <span class="text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded">อีเมล KKU</span> หรือ <span class="text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded">ชื่อ-นามสกุล / ชื่อเล่น</span>
+            </p>
+          </div>
+
+          <!-- Input Group with Auto-formatting -->
+          <div class="relative" id="searchContainer">
+            <label for="smartSearchInput" class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2 flex items-center justify-between">
+              <span>ช่องค้นหาอัจฉริยะ (Smart Search & Auto-dash)</span>
+              <span class="text-[11px] font-normal text-orange-600">เช่น 693050120-5 หรือ โดนัท</span>
+            </label>
+            <div class="relative flex items-center">
+              <div class="absolute left-4 text-slate-400 pointer-events-none">
+                <i data-lucide="search" class="w-5 h-5"></i>
+              </div>
+              <input 
+                type="text" 
+                id="smartSearchInput"
+                autocomplete="off"
+                placeholder="กรอกรหัสนักศึกษา 693050XXX-1 หรือ ชื่อ นามสกุล อีเมล..." 
+                class="w-full pl-12 pr-28 py-4 bg-white/90 border-2 border-slate-200 rounded-2xl text-slate-900 text-base font-semibold placeholder-slate-400 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 shadow-sm transition-all outline-none"
+              >
+              <!-- Quick Paste / Clear Button -->
+              <div class="absolute right-2.5 flex items-center gap-1.5">
+                <button type="button" id="btnClearSearch" onclick="clearSearchInput()" class="hidden p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+                <button type="button" onclick="pasteFromClipboard()" class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-orange-700 bg-orange-50 hover:bg-orange-100 rounded-xl transition border border-orange-200 shadow-sm">
+                  <i data-lucide="clipboard" class="w-3.5 h-3.5"></i>
+                  <span>วางรหัส</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Autocomplete Dropdown List -->
+            <div id="autocompleteDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-dropdown border border-slate-200 z-50 max-h-72 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Quick Selector Hints -->
+          <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+            <span>✨ ระบบจะใส่เครื่องหมายขีด (-) ให้อัตโนมัติเมื่อพิมพ์ตัวเลข</span>
+            <span id="matchCountHint" class="hidden font-bold text-orange-600"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student Profile Card (Appears when selected) -->
+      <div id="studentProfileCard" class="hidden premium-glass rounded-3xl p-6 sm:p-10 shadow-card-premium border-2 border-orange-200/80 transition-all">
+        <div class="max-w-4xl mx-auto space-y-6">
+          
+          <!-- Top Profile Header -->
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-slate-200/80">
+            <div class="flex items-center gap-4">
+              <div class="w-18 h-18 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-tr from-orange-600 via-amber-500 to-orange-400 flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-orange-500/30 border-2 border-white">
+                <span id="profileAvatarText">ข</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2.5 flex-wrap">
+                  <h3 id="profileFullName" class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">ชื่อ นามสกุล</h3>
+                  <span id="profileNickname" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300/80 shadow-sm">
+                    ชื่อเล่น: -
+                  </span>
+                </div>
+                <div class="flex items-center gap-2 text-xs sm:text-sm text-slate-500 mt-1.5 font-mono">
+                  <i data-lucide="id-card" class="w-4 h-4 text-orange-600"></i>
+                  <span id="profileStudentId" class="font-extrabold text-slate-800">693050XXX-X</span>
+                  <span>•</span>
+                  <i data-lucide="mail" class="w-4 h-4 text-sky-600"></i>
+                  <span id="profileEmail" class="text-slate-600">xxx@kkumail.com</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Status Tag -->
+            <div id="profileStatusBadgeContainer">
+              <!-- Injected dynamically: Paid or Unpaid -->
+            </div>
+          </div>
+
+          <!-- Academic Info Grid (Enhanced Design) -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 py-4 border-b border-slate-200/80 text-xs sm:text-sm">
+            <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-slate-400 block text-xs mb-1 font-medium">คณะ</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                <i data-lucide="book-open" class="w-4 h-4 text-orange-500"></i>
+                คณะศึกษาศาสตร์
+              </span>
+            </div>
+            <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-slate-400 block text-xs mb-1 font-medium">สาขาวิชาเอก</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                <i data-lucide="laptop" class="w-4 h-4 text-sky-500"></i>
+                คอมพิวเตอร์ศึกษา
+              </span>
+            </div>
+            <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-slate-400 block text-xs mb-1 font-medium">ระดับ / ชั้นปี</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                <i data-lucide="award" class="w-4 h-4 text-emerald-500"></i>
+                ชั้นปีที่ 1 (รหัส 69)
+              </span>
+            </div>
+            <div class="bg-white/80 p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <span class="text-slate-400 block text-xs mb-1 font-medium">สถาบัน</span>
+              <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                <i data-lucide="landmark" class="w-4 h-4 text-amber-500"></i>
+                มหาวิทยาลัยขอนแก่น
+              </span>
+            </div>
+          </div>
+
+          <!-- DYNAMIC CONTENT: UNPAID STATE (PAYMENT & SLIP UPLOAD) -->
+          <div id="unpaidSection" class="pt-4 space-y-6">
+            
+            <!-- QR Payment Guide & Bank Info -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 bg-gradient-to-br from-amber-50/80 via-white to-orange-50/60 p-6 sm:p-8 rounded-3xl border border-amber-200 shadow-sm">
+              
+              <!-- QR Code Mock / Display -->
+              <div class="md:col-span-5 flex flex-col items-center justify-center p-5 bg-white rounded-2xl border border-slate-200 shadow-md text-center">
+                <span class="text-xs font-black text-slate-600 mb-3 uppercase tracking-wider flex items-center gap-1.5">
+                  <i data-lucide="qr-code" class="w-4 h-4 text-orange-600"></i>
+                  สแกนชำระเงินผ่าน PromptPay
+                </span>
+                
+                <div class="relative p-3 bg-white rounded-2xl border-2 border-slate-200 shadow-inner group">
+                  <!-- PromptPay QR Code Canvas / Visual -->
+                  <div class="w-48 h-48 bg-slate-900 rounded-xl flex flex-col items-center justify-between text-white p-2.5 relative overflow-hidden">
+                    <div class="w-full h-full bg-white p-2 flex flex-col items-center justify-between rounded-lg">
+                      <div class="flex justify-between w-full">
+                        <div class="w-9 h-9 bg-slate-900 rounded p-1"><div class="w-full h-full bg-white p-1"><div class="w-full h-full bg-slate-900"></div></div></div>
+                        <div class="w-9 h-9 bg-slate-900 rounded p-1"><div class="w-full h-full bg-white p-1"><div class="w-full h-full bg-slate-900"></div></div></div>
+                      </div>
+                      <div class="text-center my-auto">
+                        <div class="px-2.5 py-0.5 bg-blue-900 text-white rounded-md text-[10px] font-black">พร้อมเพย์</div>
+                        <span class="text-slate-950 font-black text-xl block mt-0.5 font-mono">฿190.00</span>
+                        <span class="text-[9px] font-semibold text-slate-500">บัญชีกลางสาขาคอมฯ</span>
+                      </div>
+                      <div class="flex justify-between w-full">
+                        <div class="w-9 h-9 bg-slate-900 rounded p-1"><div class="w-full h-full bg-white p-1"><div class="w-full h-full bg-slate-900"></div></div></div>
+                        <div class="w-9 h-9 flex items-center justify-center text-orange-600 font-black text-xs">KKU</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-3 text-xs text-slate-600">
+                  ยอดโอนตรงตามจำนวน: <strong class="text-orange-600 text-base font-black">190 บาท</strong>
+                </div>
+              </div>
+
+              <!-- Bank & Transfer Details -->
+              <div class="md:col-span-7 flex flex-col justify-between space-y-4">
+                <div>
+                  <h4 class="text-base font-black text-slate-900 flex items-center gap-2 mb-3">
+                    <i data-lucide="info" class="w-5 h-5 text-orange-500"></i>
+                    รายละเอียดการโอนชำระเงิน
+                  </h4>
+                  <ul class="space-y-2.5 text-xs sm:text-sm text-slate-700">
+                    <li class="flex items-start gap-2.5">
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                      <span><strong>รายการ:</strong> ค่าทำป้ายสาขาวิชาเอกคอมพิวเตอร์ศึกษา</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                      <span><strong>จำนวนเงิน:</strong> <span class="font-black text-slate-900">฿190.00 บาท / คน</span></span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                      <span><strong>ธนาคาร:</strong> ธนาคารกรุงไทย (Krungthai Bank)</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                      <span><strong>เลขที่บัญชี:</strong> <span class="font-mono font-black text-slate-950 bg-amber-100/80 px-2 py-0.5 rounded-lg select-all border border-amber-200">987-6-54321-0</span></span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="p-3.5 bg-amber-100/90 border border-amber-300 rounded-2xl text-xs text-amber-950 flex items-center gap-2.5 shadow-sm">
+                  <i data-lucide="shield-alert" class="w-5 h-5 text-amber-600 flex-shrink-0"></i>
+                  <span>เมื่อโอนเงินเสร็จแล้ว กรุณาแนบรูปภาพสลิปด้านล่างเพื่อบันทึกประวัติเข้าระบบ</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload Slip Area (Modern Card) -->
+            <div class="space-y-4">
+              <label class="block text-sm font-black text-slate-900 flex items-center gap-2">
+                <i data-lucide="receipt" class="w-5 h-5 text-orange-600"></i>
+                แนบสลิปหลักฐานการโอนเงิน
+              </label>
+
+              <!-- Drag & Drop Zone -->
+              <div 
+                id="slipDropZone"
+                onclick="document.getElementById('slipFileInput').click()"
+                ondragover="handleDragOver(event)"
+                ondragleave="handleDragLeave(event)"
+                ondrop="handleDrop(event)"
+                class="border-2 border-dashed border-slate-300 hover:border-orange-500 bg-white/60 hover:bg-orange-50/40 rounded-3xl p-8 sm:p-10 text-center cursor-pointer transition-all duration-300 group shadow-sm"
+              >
+                <input type="file" id="slipFileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                
+                <div class="space-y-3">
+                  <div class="w-18 h-18 mx-auto rounded-3xl bg-white border border-slate-200 text-slate-400 group-hover:text-orange-600 group-hover:border-orange-300 group-hover:scale-110 flex items-center justify-center transition-all shadow-md group-hover:shadow-glow-orange">
+                    <i data-lucide="upload-cloud" class="w-9 h-9"></i>
+                  </div>
+                  <div>
+                    <span class="text-base font-black text-slate-800 block group-hover:text-orange-700">คลิกเพื่อเลือกไฟล์สลิป หรือลากไฟล์รูปภาพมาวางที่นี่</span>
+                    <span class="text-xs text-slate-400 mt-1 block">รองรับไฟล์รูปภาพ PNG, JPG, JPEG ทุกขนาด</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Medium Size Slip Preview (Before Submit) -->
+              <div id="slipPreviewContainer" class="hidden bg-white p-6 rounded-3xl border border-slate-200 shadow-md space-y-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="image" class="w-4 h-4 text-orange-600"></i>
+                    <span class="text-xs font-bold text-slate-700">ตัวอย่างภาพสลิปที่เลือก (คลิกเพื่อดูภาพใหญ่)</span>
+                  </div>
+                  <button type="button" onclick="cancelSelectedSlip()" class="text-xs text-rose-500 hover:text-rose-700 font-bold flex items-center gap-1">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    ลบ / เปลี่ยนรูป
+                  </button>
+                </div>
+
+                <!-- Medium Preview Box with Zoom Indicator -->
+                <div class="relative group max-w-sm mx-auto overflow-hidden rounded-2xl border border-slate-200 shadow-md bg-slate-900/5 cursor-pointer" onclick="openFullscreenModal(tempSlipDataUrl)">
+                  <img id="mediumSlipImg" src="" alt="ภาพสลิปตัวอย่าง" class="w-full h-72 object-contain transition-transform duration-300 group-hover:scale-105">
+                  <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity duration-200">
+                    <i data-lucide="zoom-in" class="w-8 h-8 mb-1"></i>
+                    <span class="text-xs font-bold bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm">คลิกเพื่อดูรูปภาพขนาดเต็ม</span>
+                  </div>
+                </div>
+
+                <!-- Action Button to Trigger Confirmation Modal -->
+                <div class="pt-2 flex justify-end">
+                  <button 
+                    type="button" 
+                    onclick="openConfirmModal()"
+                    class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-600 hover:from-orange-700 hover:to-amber-700 text-white font-extrabold text-sm sm:text-base rounded-2xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 flex items-center justify-center gap-2 transition-all transform active:scale-98"
+                  >
+                    <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                    <span>ตรวจสอบข้อมูลและยืนยันการอัปโหลด</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- DYNAMIC CONTENT: PAID STATE (RECEIPT & EVIDENCE) -->
+          <div id="paidSection" class="hidden pt-4 space-y-6">
+            
+            <div class="bg-gradient-to-br from-emerald-50 via-teal-50/40 to-emerald-50 rounded-3xl p-6 sm:p-8 border border-emerald-200 text-center space-y-3 shadow-sm">
+              <div class="w-16 h-16 mx-auto rounded-3xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                <i data-lucide="badge-check" class="w-9 h-9"></i>
+              </div>
+              <h4 class="text-2xl font-black text-emerald-950">ชำระเงินค่าป้ายสาขาเรียบร้อยแล้ว</h4>
+              <p class="text-xs sm:text-sm text-emerald-700 max-w-md mx-auto">
+                ระบบได้บันทึกข้อมูลและยอดเงิน ฿190 เข้าสู่ฐานข้อมูลเรียบร้อยแล้ว
+              </p>
+            </div>
+
+            <!-- Receipt & Proof Details Box -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 space-y-5 shadow-sm">
+              <h5 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                <i data-lucide="file-text" class="w-4 h-4 text-orange-600"></i>
+                รายละเอียดหลักฐานการชำระเงิน
+              </h5>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
+                <div class="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                  <div class="flex justify-between border-b border-slate-200/80 pb-2">
+                    <span class="text-slate-400">สถานะการชำระ:</span>
+                    <span class="font-black text-emerald-600 flex items-center gap-1">
+                      <i data-lucide="check" class="w-4 h-4"></i> สำเร็จ (Paid)
+                    </span>
+                  </div>
+                  <div class="flex justify-between border-b border-slate-200/80 pb-2">
+                    <span class="text-slate-400">ยอดเงิน:</span>
+                    <span class="font-black text-slate-900 text-base">฿190.00 บาท</span>
+                  </div>
+                  <div class="flex justify-between border-b border-slate-200/80 pb-2">
+                    <span class="text-slate-400">วัน-เวลาที่บันทึก:</span>
+                    <span id="paidTimestampText" class="font-mono font-bold text-slate-700">-</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-400">รหัสอ้างอิง:</span>
+                    <span id="paidRefCode" class="font-mono font-semibold text-slate-500">-</span>
+                  </div>
+                </div>
+
+                <!-- Proof Slip Action & Embedded Preview Box -->
+                <div class="flex flex-col p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                  <span class="text-xs font-bold text-slate-700 block text-center">ภาพสลิปหลักฐาน:</span>
+                  <div id="paidSectionIframeWrapper" class="w-full h-72 sm:h-80 rounded-xl bg-white border border-slate-200 overflow-hidden shadow-inner flex items-center justify-center">
+                    <span class="text-xs text-slate-400 font-medium">กำลังโหลดสลิปจาก Google Drive...</span>
+                  </div>
+                  <div class="text-center">
+                    <a id="paidSectionDriveLink" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-black rounded-xl transition inline-flex items-center gap-1.5 shadow-md shadow-orange-600/25">
+                      <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                      <span>เปิดดูรูปเต็มบน Google Drive</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reset / Change option -->
+              <div class="pt-2 flex justify-end">
+                <button type="button" onclick="promptResetPayment()" class="text-xs text-slate-400 hover:text-rose-600 transition font-medium flex items-center gap-1">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span>ต้องการยกเลิกและส่งหลักฐานใหม่?</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SECTION 2: TAB STATUS CHECK (WHO HAS PAID / UNPAID) -->
+    <div id="tabContentStatus" class="hidden space-y-6">
+      <div class="premium-glass rounded-3xl p-6 sm:p-10 shadow-card-premium space-y-6">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+              <i data-lucide="clipboard-list" class="w-7 h-7 text-orange-600"></i>
+              ตรวจสอบสถานะรายชื่อนักศึกษา
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">
+              รายชื่อนักศึกษาชั้นปีที่ 1 ทั้งหมด 60 คน สามารถกรองสถานะ และกดดูหลักฐานสลิปจริงได้ทันที
+            </p>
+          </div>
+
+          <!-- Status Filter Tabs -->
+          <div class="flex items-center gap-1 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200 text-xs font-bold shadow-inner">
+            <button onclick="filterStatusList('all')" id="filterBtnAll" class="px-4 py-2 rounded-xl bg-white text-slate-900 shadow-sm transition font-black">
+              ทั้งหมด (<span id="countAllFilter">60</span>)
+            </button>
+            <button onclick="filterStatusList('paid')" id="filterBtnPaid" class="px-4 py-2 rounded-xl text-slate-600 hover:text-emerald-700 transition">
+              จ่ายแล้ว (<span id="countPaidFilter">0</span>)
+            </button>
+            <button onclick="filterStatusList('unpaid')" id="filterBtnUnpaid" class="px-4 py-2 rounded-xl text-slate-600 hover:text-rose-700 transition">
+              ยังไม่จ่าย (<span id="countUnpaidFilter">60</span>)
+            </button>
+          </div>
+        </div>
+
+        <!-- Search Table Filter -->
+        <div class="relative">
+          <div class="absolute left-4 top-3.5 text-slate-400">
+            <i data-lucide="search" class="w-4 h-4"></i>
+          </div>
+          <input 
+            type="text" 
+            id="tableSearchInput"
+            placeholder="ค้นหาในตารางด้วย ชื่อ, นามสกุล, ชื่อเล่น, รหัสนักศึกษา หรือ อีเมล..."
+            oninput="handleTableSearch(this.value)"
+            class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 shadow-sm outline-none transition"
+          >
+        </div>
+
+        <!-- Student List Table (Responsive Modern Styling) -->
+        <div class="overflow-x-auto rounded-2xl border border-slate-200/90 shadow-sm">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-100/90 text-slate-700 font-extrabold border-b border-slate-200">
+              <tr>
+                <th class="p-4 text-center w-12">ลำดับ</th>
+                <th class="p-4">รหัสนักศึกษา</th>
+                <th class="p-4">ชื่อ - นามสกุล</th>
+                <th class="p-4">ชื่อเล่น</th>
+                <th class="p-4 hidden md:table-cell">อีเมลนักศึกษา</th>
+                <th class="p-4 text-center">สถานะ</th>
+                <th class="p-4 text-center w-32">ดำเนินการ</th>
+              </tr>
+            </thead>
+            <tbody id="studentStatusTableBody" class="divide-y divide-slate-100 bg-white">
+              <!-- Rendered via Javascript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty Results Message -->
+        <div id="tableEmptyMessage" class="hidden text-center py-12 space-y-2">
+          <i data-lucide="search-x" class="w-10 h-10 text-slate-300 mx-auto"></i>
+          <p class="text-sm font-bold text-slate-600">ไม่พบข้อมูลที่ตรงกับคำค้นหา</p>
+          <p class="text-xs text-slate-400">ลองตรวจสอบตัวสะกดหรือค้นหาด้วยคำอื่น</p>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="mt-auto border-t border-slate-200 bg-white/80 backdrop-blur-md py-6 text-center text-xs text-slate-500">
+    <div class="max-w-6xl mx-auto px-4 space-y-2 flex flex-col items-center">
+      <div class="flex items-center gap-2 font-bold text-slate-700">
+        <img src="logo.png" alt="Logo" class="w-5 h-5 object-contain">
+        <span>สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</span>
+      </div>
+      <p class="text-slate-400">
+        ระบบบันทึกและตรวจสอบค่าทำป้ายสาขาวิชาเอก คนละ ฿190 • กำหนดชำระภายใน 5 กันยายน 2569 เวลา 13:59 น.
+      </p>
+      <div class="pt-2">
+        <a href="admin.html" class="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-orange-600 transition font-bold px-2.5 py-1 rounded-lg hover:bg-orange-50">
+          <i data-lucide="shield-lock" class="w-3.5 h-3.5"></i>
+          <span>เข้าสู่ระบบหลังบ้าน (Host Admin)</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. MODAL: CONFIRM UPLOAD & VERIFY DATA -->
+  <div id="modalConfirmUpload" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 transform transition-all">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center shadow-sm">
+            <i data-lucide="check-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-slate-900">ตรวจสอบความถูกต้อง</h3>
+            <p class="text-xs text-slate-400">โปรดยืนยันข้อมูลก่อนบันทึกเข้าระบบจริง</p>
+          </div>
+        </div>
+        <button onclick="closeConfirmModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Verification Summary Table -->
+      <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs sm:text-sm">
+        <div class="flex justify-between">
+          <span class="text-slate-500">ชื่อ-นามสกุล:</span>
+          <span id="modalConfirmName" class="font-black text-slate-900">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">รหัสนักศึกษา:</span>
+          <span id="modalConfirmId" class="font-mono font-extrabold text-orange-700">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">สาขา / ชั้นปี:</span>
+          <span class="text-slate-700">คอมพิวเตอร์ศึกษา ปี 1</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">ยอดชำระ:</span>
+          <span class="font-black text-emerald-600 text-base">฿190.00 บาท</span>
+        </div>
+      </div>
+
+      <!-- Attached Slip Preview in Modal -->
+      <div class="space-y-2">
+        <span class="text-xs font-bold text-slate-700">หลักฐานสลิปที่จะบันทึก:</span>
+        <div class="w-full h-48 rounded-2xl border border-slate-200 overflow-hidden bg-slate-900/5 cursor-pointer relative group" onclick="openFullscreenModal(tempSlipDataUrl)">
+          <img id="modalConfirmSlipImg" src="" alt="ภาพสลิป" class="w-full h-full object-contain">
+          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity">
+            <i data-lucide="zoom-in" class="w-5 h-5 mr-1"></i> คลิกเพื่อดูรูปเต็ม
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button 
+          type="button" 
+          onclick="closeConfirmModal()"
+          class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs sm:text-sm font-bold transition"
+        >
+          ยกเลิก / แก้ไข
+        </button>
+        <button 
+          type="button" 
+          id="btnFinalSubmit"
+          onclick="executeSlipSubmission()"
+          class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs sm:text-sm font-black shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition transform active:scale-95"
+        >
+          <i data-lucide="upload" class="w-4 h-4"></i>
+          <span id="btnSubmitText">บันทึกข้อมูลจริง</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 2. MODAL: FULLSCREEN SLIP VIEWER -->
+  <div id="modalFullscreenSlip" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center">
+      
+      <button 
+        type="button" 
+        onclick="closeFullscreenModal()"
+        class="absolute -top-12 right-0 sm:right-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2.5 rounded-full backdrop-blur-md transition flex items-center gap-1 text-xs font-bold"
+      >
+        <i data-lucide="x" class="w-5 h-5"></i>
+        <span class="hidden sm:inline">ปิดรูปภาพ (ESC)</span>
+      </button>
+
+      <div class="w-full flex items-center justify-center p-2">
+        <img id="fullscreenImg" src="" alt="ภาพสลิปเต็มจอ" class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl border border-white/20 bg-white/5">
+      </div>
+      
+      <p class="text-white/60 text-xs mt-3 flex items-center gap-1">
+        <i data-lucide="info" class="w-3.5 h-3.5"></i> กดปุ่มปิด หรือคลิกพื้นที่ภายนอกเพื่อกลับสู่หน้าเดิม
+      </p>
+    </div>
+  </div>
+
+  <!-- 3. MODAL: STUDENT QUICK VIEW DETAIL MODAL -->
+  <div id="modalStudentDetail" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 transform transition-all">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+          <i data-lucide="user-check" class="w-5 h-5 text-orange-600"></i>
+          ข้อมูลและหลักฐานการชำระเงิน
+        </h3>
+        <button onclick="closeStudentDetailModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="studentDetailModalContent">
+        <!-- Rendered via JS -->
+      </div>
+
+    </div>
+  </div>
+
+
+
+  <!-- Load Student Database -->
+  <script src="students_data.js"></script>
+
+  <!-- Application Logic -->
+  <script>
+    // --- APP CONFIG & STATE ---
+    const TARGET_PAYMENT_PER_PERSON = 190;
+    const STORAGE_KEY = 'COMED_KKU69_PAYMENT_DATA_V1';
+    const CLOUD_URL_KEY = 'COMED_KKU69_CLOUD_WEBAPP_URL';
+    
+    // Default Google Apps Script Web App URL
+    let googleAppsScriptUrl = localStorage.getItem(CLOUD_URL_KEY) || "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
+
+    // Deadline: 5 September 2026 at 13:59 (Bangkok Time UTC+7)
+    const DEADLINE_DATE = new Date('2026-09-05T13:59:00+07:00').getTime();
+
+    let studentDatabase = [];
+    let paymentRecords = {}; // { studentId: { paid: true, timestamp: "...", slipUrl: "...", refCode: "..." } }
+    let currentSelectedStudent = null;
+    let tempSlipDataUrl = null;
+    let currentStudentPaidSlip = null;
+    let currentFilter = 'all';
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initApp();
+    });
+
+    async function initApp() {
+      // 1. Load initial dataset
+      if (typeof window.studentDatabaseRaw !== 'undefined') {
+        studentDatabase = window.studentDatabaseRaw;
+      } else if (Array.isArray(window.STUDENTS_DATA)) {
+        studentDatabase = window.STUDENTS_DATA;
+      } else {
+        studentDatabase = getFallbackStudents();
+      }
+
+      // 2. Fetch payments from Cloud / Local Server / LocalStorage
+      await loadPaymentRecords();
+
+      // 3. Setup UI & Listeners
+      setupSearchInputListener();
+      setupCountdownTimer();
+      refreshProgressStats();
+      renderStatusTable();
+
+      // Init Lucide icons
+      lucide.createIcons();
+    }
+
+    // --- REAL API & CLOUD SYNC ---
+    async function loadPaymentRecords() {
+      // Priority 1: Google Apps Script Web App (if configured)
+      if (googleAppsScriptUrl) {
+        try {
+          const res = await fetch(googleAppsScriptUrl);
+          if (res.ok) {
+            paymentRecords = await res.json();
+            saveLocalBackup();
+            return;
+          }
+        } catch (e) {
+          console.warn("Cloud Google Apps Script fetch failed, trying local server", e);
+        }
+      }
+
+      // Priority 2: Local Python/Node Backend Server
+      try {
+        const res = await fetch('/api/payments');
+        if (res.ok) {
+          paymentRecords = await res.json();
+          saveLocalBackup();
+          return;
+        }
+      } catch (e) {
+        console.warn("Local Backend API unavailable, falling back to localStorage", e);
+      }
+
+      // Priority 3: LocalStorage
+      loadFromLocal();
+    }
+
+    function loadFromLocal() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        paymentRecords = stored ? JSON.parse(stored) : {};
+      } catch (e) {
+        paymentRecords = {};
+      }
+    }
+
+    function saveLocalBackup() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
+      } catch (e) {}
+    }
+
+    // --- COUNTDOWN TIMER ---
+    function setupCountdownTimer() {
+      function updateTimer() {
+        const now = new Date().getTime();
+        const distance = DEADLINE_DATE - now;
+
+        const cdDays = document.getElementById('cdDays');
+        const cdHours = document.getElementById('cdHours');
+        const cdMins = document.getElementById('cdMins');
+        const cdSecs = document.getElementById('cdSecs');
+        const badge = document.getElementById('countdownStatusBadge');
+
+        if (distance < 0) {
+          cdDays.textContent = '00';
+          cdHours.textContent = '00';
+          cdMins.textContent = '00';
+          cdSecs.textContent = '00';
+          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> สิ้นสุดเวลารับชำระแล้ว';
+          badge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1';
+          return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        cdDays.textContent = String(days).padStart(2, '0');
+        cdHours.textContent = String(hours).padStart(2, '0');
+        cdMins.textContent = String(minutes).padStart(2, '0');
+        cdSecs.textContent = String(seconds).padStart(2, '0');
+      }
+
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    }
+
+    // --- STATS & PROGRESS CALCULATION ---
+    function refreshProgressStats() {
+      const totalCount = studentDatabase.length;
+      let paidCount = 0;
+
+      studentDatabase.forEach(st => {
+        if (paymentRecords[st.id] && paymentRecords[st.id].paid) {
+          paidCount++;
+        }
+      });
+
+      const totalTargetMoney = totalCount * TARGET_PAYMENT_PER_PERSON;
+      const currentMoney = paidCount * TARGET_PAYMENT_PER_PERSON;
+
+      const peoplePercent = totalCount > 0 ? Math.round((paidCount / totalCount) * 100) : 0;
+      const moneyPercent = totalTargetMoney > 0 ? Math.round((currentMoney / totalTargetMoney) * 100) : 0;
+
+      // Update Money UI
+      document.getElementById('totalMoneyPaid').textContent = `฿${currentMoney.toLocaleString()}`;
+      document.getElementById('targetMoney').textContent = `/ ฿${totalTargetMoney.toLocaleString()} (เป้าหมาย)`;
+      document.getElementById('moneyPercentBadge').textContent = `${moneyPercent}%`;
+      document.getElementById('moneyProgressBar').style.width = `${moneyPercent}%`;
+
+      // Update People UI
+      document.getElementById('totalPeoplePaid').textContent = `${paidCount}`;
+      document.getElementById('targetPeople').textContent = `/ ${totalCount} คนทั้งหมด`;
+      document.getElementById('peoplePercentBadge').textContent = `${peoplePercent}%`;
+      document.getElementById('peopleProgressBar').style.width = `${peoplePercent}%`;
+
+      // Filter Counts
+      document.getElementById('countAllFilter').textContent = totalCount;
+      document.getElementById('countPaidFilter').textContent = paidCount;
+      document.getElementById('countUnpaidFilter').textContent = (totalCount - paidCount);
+    }
+
+    // --- AUTO-FORMATTING & SMART SEARCH ---
+    function setupSearchInputListener() {
+      const input = document.getElementById('smartSearchInput');
+      const clearBtn = document.getElementById('btnClearSearch');
+      const dropdown = document.getElementById('autocompleteDropdown');
+
+      // Click outside to close dropdown
+      document.addEventListener('click', (e) => {
+        if (!document.getElementById('searchContainer').contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      });
+
+      input.addEventListener('input', (e) => {
+        let value = input.value;
+        clearBtn.classList.toggle('hidden', value.length === 0);
+
+        // Auto formatting 693050XXX-X
+        const rawDigits = value.replace(/\D/g, '');
+        if (/^\d+$/.test(value.replace(/-/g, '')) && rawDigits.length >= 2) {
+          if (rawDigits.length <= 9) {
+            input.value = rawDigits;
+          } else {
+            input.value = rawDigits.slice(0, 9) + '-' + rawDigits.slice(9, 10);
+          }
+          value = input.value;
+        }
+
+        performSearch(value.trim());
+      });
+
+      input.addEventListener('focus', () => {
+        if (input.value.trim().length > 0) {
+          performSearch(input.value.trim());
+        }
+      });
+    }
+
+    function clearSearchInput() {
+      const input = document.getElementById('smartSearchInput');
+      input.value = '';
+      document.getElementById('btnClearSearch').classList.add('hidden');
+      document.getElementById('autocompleteDropdown').classList.add('hidden');
+      document.getElementById('matchCountHint').classList.add('hidden');
+      input.focus();
+    }
+
+    async function pasteFromClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          const input = document.getElementById('smartSearchInput');
+          const rawDigits = text.trim().replace(/\D/g, '');
+          if (rawDigits.length === 10 && rawDigits.startsWith('69')) {
+            input.value = rawDigits.slice(0, 9) + '-' + rawDigits.slice(9, 10);
+          } else {
+            input.value = text.trim();
+          }
+          input.dispatchEvent(new Event('input'));
+        }
+      } catch (err) {
+        alert("กรุณากดวาง (Ctrl+V หรือ Cmd+V) ในช่องค้นหา");
+      }
+    }
+
+    function performSearch(query) {
+      const dropdown = document.getElementById('autocompleteDropdown');
+      const hint = document.getElementById('matchCountHint');
+
+      if (!query) {
+        dropdown.classList.add('hidden');
+        hint.classList.add('hidden');
+        return;
+      }
+
+      const q = query.toLowerCase().replace(/-/g, '');
+      const matches = studentDatabase.filter(st => {
+        const idClean = st.id.toLowerCase().replace(/-/g, '');
+        const nameClean = st.name.toLowerCase();
+        const nickClean = st.nickname.toLowerCase();
+        const emailClean = st.email.toLowerCase();
+        
+        return idClean.includes(q) || 
+               nameClean.includes(q) || 
+               nickClean.includes(q) || 
+               emailClean.includes(q);
+      });
+
+      const exactMatch = studentDatabase.find(st => 
+        st.id === query || 
+        st.id.replace(/-/g, '') === query.replace(/-/g, '') ||
+        st.email.toLowerCase() === query.toLowerCase()
+      );
+
+      if (matches.length > 0) {
+        hint.textContent = `พบ ${matches.length} รายการ`;
+        hint.classList.remove('hidden');
+        renderAutocompleteList(matches);
+        dropdown.classList.remove('hidden');
+      } else {
+        hint.textContent = `ไม่พบข้อมูลที่ตรงกัน`;
+        hint.classList.remove('hidden');
+        dropdown.innerHTML = `
+          <div class="p-4 text-center text-slate-400 text-xs font-semibold">
+            ไม่พบรายชื่อที่ตรงกับ "${query}"
+          </div>
+        `;
+        dropdown.classList.remove('hidden');
+      }
+
+      if (exactMatch && (query === exactMatch.id || query === exactMatch.email)) {
+        selectStudent(exactMatch);
+        dropdown.classList.add('hidden');
+      }
+    }
+
+    function renderAutocompleteList(list) {
+      const dropdown = document.getElementById('autocompleteDropdown');
+      dropdown.innerHTML = list.map(st => {
+        const isPaid = paymentRecords[st.id] && paymentRecords[st.id].paid;
+        return `
+          <div onclick="handleAutocompleteSelect('${st.id}')" class="p-3.5 hover:bg-orange-50/80 cursor-pointer flex items-center justify-between transition group">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-2xl bg-slate-100 group-hover:bg-orange-100 text-slate-700 group-hover:text-orange-700 flex items-center justify-center font-black text-xs shadow-sm">
+                ${st.nickname.slice(0, 1)}
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-black text-slate-900 text-sm">${st.name}</span>
+                  <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">น้อง${st.nickname}</span>
+                </div>
+                <div class="text-xs text-slate-400 font-mono mt-0.5 flex items-center gap-2">
+                  <span>${st.id}</span>
+                  <span>•</span>
+                  <span>${st.email}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              ${isPaid 
+                ? '<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> จ่ายแล้ว</span>'
+                : '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>'
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function handleAutocompleteSelect(studentId) {
+      const st = studentDatabase.find(s => s.id === studentId);
+      if (st) {
+        document.getElementById('smartSearchInput').value = st.id;
+        document.getElementById('autocompleteDropdown').classList.add('hidden');
+        selectStudent(st);
+      }
+    }
+
+    // --- STUDENT PROFILE DISPLAY ---
+    function selectStudent(st) {
+      currentSelectedStudent = st;
+      tempSlipDataUrl = null;
+      document.getElementById('slipPreviewContainer').classList.add('hidden');
+
+      // Populate Card
+      document.getElementById('profileAvatarText').textContent = st.nickname.slice(0, 1) || st.name.slice(0, 1);
+      document.getElementById('profileFullName').textContent = st.name;
+      document.getElementById('profileNickname').textContent = `ชื่อเล่น: น้อง${st.nickname}`;
+      document.getElementById('profileStudentId').textContent = st.id;
+      document.getElementById('profileEmail').textContent = st.email;
+
+      const record = paymentRecords[st.id];
+      const isPaid = record && record.paid;
+
+      const statusBadgeContainer = document.getElementById('profileStatusBadgeContainer');
+      const unpaidSection = document.getElementById('unpaidSection');
+      const paidSection = document.getElementById('paidSection');
+
+      if (isPaid) {
+        statusBadgeContainer.innerHTML = `
+          <div class="px-4 py-2 rounded-2xl bg-emerald-100 text-emerald-900 border border-emerald-300 font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+            <span>ชำระเงินเรียบร้อยแล้ว</span>
+          </div>
+        `;
+        document.getElementById('paidTimestampText').textContent = record.timestamp || '-';
+        document.getElementById('paidRefCode').textContent = record.refCode || 'TXN-COMED-' + st.id.replace(/\D/g,'');
+        
+        currentStudentPaidSlip = record.slipUrl || '';
+        const driveLinkEl = document.getElementById('paidSectionDriveLink');
+        const wrapperEl = document.getElementById('paidSectionIframeWrapper');
+        
+        let drivePreviewUrl = currentStudentPaidSlip;
+        if (currentStudentPaidSlip.includes('drive.google.com')) {
+          const idMatch = currentStudentPaidSlip.match(/[-\w]{25,}/);
+          if (idMatch) {
+            drivePreviewUrl = `https://drive.google.com/file/d/${idMatch[0]}/preview`;
+          }
+        }
+
+        if (driveLinkEl) {
+          driveLinkEl.href = currentStudentPaidSlip || '#';
+        }
+        if (wrapperEl) {
+          if (drivePreviewUrl) {
+            wrapperEl.innerHTML = `<iframe src="${drivePreviewUrl}" class="w-full h-full border-0 rounded-xl" allow="autoplay" loading="lazy"></iframe>`;
+          } else {
+            wrapperEl.innerHTML = `<span class="text-xs text-slate-400 font-medium">ไม่มีภาพสลิป</span>`;
+          }
+        }
+
+        unpaidSection.classList.add('hidden');
+        paidSection.classList.remove('hidden');
+      } else {
+        statusBadgeContainer.innerHTML = `
+          <div class="px-4 py-2 rounded-2xl bg-rose-100 text-rose-900 border border-rose-300 font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600"></i>
+            <span>ยังไม่ได้ชำระเงิน (฿190)</span>
+          </div>
+        `;
+        unpaidSection.classList.remove('hidden');
+        paidSection.classList.add('hidden');
+      }
+
+      // Show Card with GSAP Animation
+      const card = document.getElementById('studentProfileCard');
+      card.classList.remove('hidden');
+      gsap.fromTo(card, { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" });
+
+      lucide.createIcons();
+    }
+
+    // --- FILE UPLOAD & PREVIEW HANDLERS ---
+    function handleDragOver(e) {
+      e.preventDefault();
+      document.getElementById('slipDropZone').classList.add('border-orange-500', 'bg-orange-50/60');
+    }
+
+    function handleDragLeave(e) {
+      e.preventDefault();
+      document.getElementById('slipDropZone').classList.remove('border-orange-500', 'bg-orange-50/60');
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      handleDragLeave(e);
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        processUploadedFile(e.dataTransfer.files[0]);
+      }
+    }
+
+    function handleFileSelect(e) {
+      if (e.target.files && e.target.files[0]) {
+        processUploadedFile(e.target.files[0]);
+      }
+    }
+
+    function processUploadedFile(file) {
+      if (!file.type.startsWith('image/')) {
+        alert("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น (JPG, PNG)");
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        tempSlipDataUrl = event.target.result;
+        
+        const mediumImg = document.getElementById('mediumSlipImg');
+        mediumImg.src = tempSlipDataUrl;
+        
+        const previewContainer = document.getElementById('slipPreviewContainer');
+        previewContainer.classList.remove('hidden');
+        
+        gsap.fromTo(previewContainer, { opacity: 0, scale: 0.98 }, { opacity: 1, scale: 1, duration: 0.3 });
+        lucide.createIcons();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function cancelSelectedSlip() {
+      tempSlipDataUrl = null;
+      document.getElementById('slipFileInput').value = '';
+      document.getElementById('slipPreviewContainer').classList.add('hidden');
+    }
+
+    // --- CONFIRMATION MODAL & SUBMISSION (CLOUD + BACKEND) ---
+    function openConfirmModal() {
+      if (!currentSelectedStudent) {
+        alert("กรุณาเลือกนักศึกษาก่อน");
+        return;
+      }
+      if (!tempSlipDataUrl) {
+        alert("กรุณาเลือกหรือแนบรูปภาพสลิปก่อน");
+        return;
+      }
+
+      document.getElementById('modalConfirmName').textContent = `${currentSelectedStudent.name} (${currentSelectedStudent.nickname})`;
+      document.getElementById('modalConfirmId').textContent = currentSelectedStudent.id;
+      document.getElementById('modalConfirmSlipImg').src = tempSlipDataUrl;
+
+      const modal = document.getElementById('modalConfirmUpload');
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('modalConfirmUpload').classList.add('hidden');
+    }
+
+    async function executeSlipSubmission() {
+      if (!currentSelectedStudent || !tempSlipDataUrl) return;
+
+      const btnSubmit = document.getElementById('btnFinalSubmit');
+      const btnText = document.getElementById('btnSubmitText');
+      btnSubmit.disabled = true;
+      btnText.textContent = 'กำลังบันทึกและซิงค์ Cloud...';
+
+      const studentId = currentSelectedStudent.id;
+      const timestamp = new Date().toLocaleString('th-TH');
+      const refCode = "TXN-COMED-" + Math.floor(100000 + Math.random() * 900000);
+
+      const payload = {
+        studentId: studentId,
+        name: currentSelectedStudent.name,
+        nickname: currentSelectedStudent.nickname,
+        email: currentSelectedStudent.email,
+        slipBase64: tempSlipDataUrl,
+        timestamp: timestamp,
+        refCode: refCode
+      };
+
+      let savedSuccessfully = false;
+
+      // 1. Send to Google Apps Script (if configured)
+      if (googleAppsScriptUrl) {
+        try {
+          const cloudRes = await fetch(googleAppsScriptUrl, {
+            method: 'POST',
+            mode: 'no-cors', // Apps Script standard CORS handling
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          savedSuccessfully = true;
+        } catch (e) {
+          console.warn("Cloud Sync warning", e);
+        }
+      }
+
+      // 2. Send to Local Python Server
+      try {
+        const res = await fetch('/api/pay', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          paymentRecords[studentId] = {
+            paid: true,
+            timestamp: result.timestamp,
+            slipUrl: result.slipUrl,
+            refCode: result.refCode,
+            amount: 190
+          };
+          savedSuccessfully = true;
+        }
+      } catch (e) {
+        console.warn("Local server offline", e);
+      }
+
+      // 3. Fallback to LocalStorage memory
+      if (!paymentRecords[studentId]) {
+        paymentRecords[studentId] = {
+          paid: true,
+          timestamp: timestamp,
+          slipUrl: tempSlipDataUrl,
+          refCode: refCode,
+          amount: 190
+        };
+      }
+
+      saveLocalBackup();
+      btnSubmit.disabled = false;
+      btnText.textContent = 'บันทึกข้อมูลจริง';
+      closeConfirmModal();
+
+      // Confetti Celebration
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 100,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+      }
+
+      // Refresh Stats & View
+      refreshProgressStats();
+      selectStudent(currentSelectedStudent);
+      renderStatusTable();
+    }
+
+    async function promptResetPayment() {
+      if (!currentSelectedStudent) return;
+      if (confirm(`คุณต้องการยกเลิกสถานะการชำระเงินของ "${currentSelectedStudent.name}" เพื่อส่งสลิปใหม่หรือไม่?`)) {
+        try {
+          await fetch('/api/reset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentId: currentSelectedStudent.id })
+          });
+        } catch (e) {}
+
+        delete paymentRecords[currentSelectedStudent.id];
+        saveLocalBackup();
+        refreshProgressStats();
+        selectStudent(currentSelectedStudent);
+        renderStatusTable();
+      }
+    }
+
+    // --- FULLSCREEN SLIP VIEWER ---
+    function openFullscreenModal(imageUrl) {
+      if (!imageUrl) return;
+      document.getElementById('fullscreenImg').src = imageUrl;
+      document.getElementById('modalFullscreenSlip').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeFullscreenModal() {
+      document.getElementById('modalFullscreenSlip').classList.add('hidden');
+    }
+
+    // --- CLOUD SYNC CONFIG MODAL ---
+    function openCloudModal() {
+      document.getElementById('cloudWebappUrlInput').value = googleAppsScriptUrl;
+      document.getElementById('modalCloudSync').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCloudModal() {
+      document.getElementById('modalCloudSync').classList.add('hidden');
+    }
+
+    function saveCloudUrl() {
+      const url = document.getElementById('cloudWebappUrlInput').value.trim();
+      googleAppsScriptUrl = url;
+      localStorage.setItem(CLOUD_URL_KEY, url);
+      closeCloudModal();
+      alert("บันทึกการเชื่อมต่อ Google Cloud เรียบร้อยแล้ว ระบบจะซิงค์ข้อมูลกับ Google Sheets และ Google Drive อัตโนมัติ!");
+      loadPaymentRecords();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeFullscreenModal();
+        closeConfirmModal();
+        closeStudentDetailModal();
+        closeCloudModal();
+      }
+    });
+
+    // --- STATUS TABLE (TAB 2) ---
+    function renderStatusTable() {
+      const tbody = document.getElementById('studentStatusTableBody');
+      const searchVal = (document.getElementById('tableSearchInput')?.value || '').toLowerCase().trim();
+
+      let list = studentDatabase.filter(st => {
+        const isPaid = paymentRecords[st.id] && paymentRecords[st.id].paid;
+        if (currentFilter === 'paid' && !isPaid) return false;
+        if (currentFilter === 'unpaid' && isPaid) return false;
+
+        if (searchVal) {
+          const matchString = `${st.id} ${st.name} ${st.nickname} ${st.email}`.toLowerCase();
+          return matchString.includes(searchVal);
+        }
+        return true;
+      });
+
+      const emptyMsg = document.getElementById('tableEmptyMessage');
+      if (list.length === 0) {
+        tbody.innerHTML = '';
+        emptyMsg.classList.remove('hidden');
+        return;
+      }
+      emptyMsg.classList.add('hidden');
+
+      tbody.innerHTML = list.map((st, index) => {
+        const isPaid = paymentRecords[st.id] && paymentRecords[st.id].paid;
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors">
+            <td class="p-4 text-center text-slate-400 font-mono text-xs">${index + 1}</td>
+            <td class="p-4 font-mono font-bold text-slate-800">${st.id}</td>
+            <td class="p-4 font-bold text-slate-900">${st.name}</td>
+            <td class="p-4">
+              <span class="px-2.5 py-1 rounded-lg bg-orange-50 text-orange-800 text-xs font-black border border-orange-200/80 shadow-xs">
+                น้อง${st.nickname}
+              </span>
+            </td>
+            <td class="p-4 hidden md:table-cell text-slate-500 font-mono text-xs">${st.email}</td>
+            <td class="p-4 text-center">
+              ${isPaid 
+                ? '<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-700 bg-emerald-100/90 px-3 py-1 rounded-full border border-emerald-300 shadow-xs"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> จ่ายแล้ว</span>'
+                : '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-700 bg-rose-100/90 px-3 py-1 rounded-full border border-rose-300 shadow-xs"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>'
+              }
+            </td>
+            <td class="p-4 text-center">
+              ${isPaid 
+                ? `<button onclick="openStudentDetail('${st.id}')" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 mx-auto shadow-xs">
+                    <i data-lucide="eye" class="w-3.5 h-3.5 text-slate-500"></i> ดูหลักฐาน
+                   </button>`
+                : `<button onclick="redirectToPayment('${st.id}')" class="px-3.5 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-black rounded-xl transition flex items-center gap-1.5 mx-auto border border-orange-200 shadow-xs">
+                    <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> ไปหน้าจ่าย
+                   </button>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function handleTableSearch(val) {
+      renderStatusTable();
+    }
+
+    function filterStatusList(filter) {
+      currentFilter = filter;
+      
+      const btnAll = document.getElementById('filterBtnAll');
+      const btnPaid = document.getElementById('filterBtnPaid');
+      const btnUnpaid = document.getElementById('filterBtnUnpaid');
+
+      [btnAll, btnPaid, btnUnpaid].forEach(b => {
+        b.className = 'px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition font-bold';
+      });
+
+      if (filter === 'all') {
+        btnAll.className = 'px-4 py-2 rounded-xl bg-white text-slate-900 shadow-sm font-black transition';
+      } else if (filter === 'paid') {
+        btnPaid.className = 'px-4 py-2 rounded-xl bg-emerald-600 text-white shadow-sm font-black transition';
+      } else if (filter === 'unpaid') {
+        btnUnpaid.className = 'px-4 py-2 rounded-xl bg-rose-600 text-white shadow-sm font-black transition';
+      }
+
+      renderStatusTable();
+    }
+
+    function redirectToPayment(studentId) {
+      const st = studentDatabase.find(s => s.id === studentId);
+      if (!st) return;
+      
+      switchMainTab('payment');
+      document.getElementById('smartSearchInput').value = st.id;
+      selectStudent(st);
+      
+      window.scrollTo({
+        top: document.getElementById('studentProfileCard').offsetTop - 80,
+        behavior: 'smooth'
+      });
+    }
+
+    function formatDriveImageUrl(url) {
+      if (!url) return '';
+      if (url.includes('drive.google.com')) {
+        const idMatch = url.match(/[-\w]{25,}/);
+        if (idMatch) {
+          return `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w1200`;
+        }
+      }
+      return url;
+    }
+
+    function openStudentDetail(studentId) {
+      const st = studentDatabase.find(s => s.id === studentId);
+      const record = paymentRecords[studentId];
+      if (!st) return;
+
+      const isPaid = record && record.paid;
+      const rawSlipUrl = record?.slipUrl || '';
+      const previewImgUrl = formatDriveImageUrl(rawSlipUrl);
+
+      const content = document.getElementById('studentDetailModalContent');
+      content.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-black text-xl shadow-md shadow-orange-500/20">
+              ${st.nickname.slice(0, 1)}
+            </div>
+            <div>
+              <h4 class="font-black text-slate-900 text-lg">${st.name} (น้อง${st.nickname})</h4>
+              <p class="text-xs text-slate-500 font-mono">${st.id} • ${st.email}</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs sm:text-sm">
+            <div class="flex justify-between">
+              <span class="text-slate-500">สถานะ:</span>
+              <span class="font-black ${isPaid ? 'text-emerald-600' : 'text-rose-600'}">
+                ${isPaid ? 'ชำระเงินแล้ว (฿190)' : 'ยังไม่ได้ชำระเงิน'}
+              </span>
+            </div>
+            ${isPaid ? `
+              <div class="flex justify-between">
+                <span class="text-slate-500">วันที่-เวลาที่บันทึก:</span>
+                <span class="font-mono font-bold text-slate-700">${record.timestamp || '-'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">รหัสอ้างอิง:</span>
+                <span class="font-mono text-slate-500">${record.refCode || '-'}</span>
+              </div>
+            ` : ''}
+          </div>
+
+          ${(isPaid && rawSlipUrl) ? `
+            <div class="space-y-3">
+              <span class="text-xs font-bold text-slate-700 block">ภาพสลิปหลักฐาน:</span>
+              <div class="w-full h-80 sm:h-96 rounded-2xl border border-slate-200 overflow-hidden shadow-inner bg-slate-100">
+                <iframe 
+                  src="${rawSlipUrl.includes('drive.google.com') ? rawSlipUrl.replace(/\/view.*|\/open\?id=/, '/file/d/').replace('/file/d/', 'https://drive.google.com/file/d/').split('&')[0].replace('?usp=sharing','') + '/preview' : rawSlipUrl}" 
+                  class="w-full h-full border-0" 
+                  loading="lazy"
+                ></iframe>
+              </div>
+              <div class="text-center pt-1">
+                <a href="${rawSlipUrl}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-orange-600 hover:text-orange-700 inline-flex items-center gap-1">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> เปิดดูไฟล์ภาพต้นฉบับบน Google Drive
+                </a>
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="flex justify-end pt-2">
+            <button onclick="closeStudentDetailModal()" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+              ปิดหน้าต่าง
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modalStudentDetail').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeStudentDetailModal() {
+      document.getElementById('modalStudentDetail').classList.add('hidden');
+    }
+
+    // --- TAB SWITCHER ---
+    function switchMainTab(tab) {
+      const tabPayment = document.getElementById('tabContentPayment');
+      const tabStatus = document.getElementById('tabContentStatus');
+      const navPayment = document.getElementById('navTabPayment');
+      const navStatus = document.getElementById('navTabStatus');
+
+      if (tab === 'payment') {
+        tabPayment.classList.remove('hidden');
+        tabStatus.classList.add('hidden');
+
+        navPayment.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm';
+        navStatus.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900';
+      } else {
+        tabPayment.classList.add('hidden');
+        tabStatus.classList.remove('hidden');
+
+        navStatus.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm';
+        navPayment.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900';
+        
+        renderStatusTable();
+      }
+      lucide.createIcons();
+    }
+
+    function getFallbackStudents() {
+      return [
+        {"id": "693050120-5", "name": "กชกร แสนอินทร์", "nickname": "มิวสิค", "email": "kodchakon.sa@kkumail.com"},
+        {"id": "693050121-3", "name": "กนกพร คำพิทูล", "nickname": "โดนัท", "email": "kanokporn.kump@kkumail.com"},
+        {"id": "693050122-1", "name": "กรกต บรรเจิดวัฒนกุล", "nickname": "โนว่า", "email": "korakod.b@kkumail.com"},
+        {"id": "693050123-9", "name": "กัญชณิกา นันททิพักษ์", "nickname": "โบนัส", "email": "kanchaniga.n@kkumail.com"},
+        {"id": "693050124-7", "name": "กิตติชัย สิงเนิน", "nickname": "น้ำเต้า", "email": "Kittichai.si@kkumail.com"},
+        {"id": "693050125-5", "name": "ขลุ่ยไทย เคนมี", "nickname": "ขลุ่ย", "email": "kruithai.k@kkumail.com"},
+        {"id": "693050126-3", "name": "จิรทีปต์ ชัยศรี", "nickname": "บีน", "email": "jirathip.c@kkumail.com"},
+        {"id": "693050127-1", "name": "ชัยพงค์ วรรณทวี", "nickname": "มาร์ค", "email": "chaiyaphong.w@kkumail.com"},
+        {"id": "693050128-9", "name": "ธัญชนก สุตะโคตร", "nickname": "เค้ก", "email": "thanchanok.sut@kkumail.com"},
+        {"id": "693050129-7", "name": "ธันยนันท์ สุวัฒนะ", "nickname": "วาน", "email": "thanyanan.su@kkumail.com"},
+        {"id": "693050130-2", "name": "ธีรดนย์ ศรีโพธิ์ชัย", "nickname": "ยูโร", "email": "theeradon.sr@kkumail.com"},
+        {"id": "693050131-0", "name": "บุญญรัตน์ ชะนะพาล", "nickname": "อันอัน", "email": "bunyarat.c@kkumail.com"},
+        {"id": "693050132-8", "name": "ปภาดา เพิ่มพูล", "nickname": "แตงโม", "email": "papada.ph@kkumail.com"},
+        {"id": "693050133-6", "name": "ปุณเมศ บุญสง", "nickname": "คิว", "email": "punnamet.b@kkumail.com"},
+        {"id": "693050134-4", "name": "พรหมพิริยะ หอมจันทร์", "nickname": "โอปอน", "email": "phromphiriya.h@kkumail.com"},
+        {"id": "693050135-2", "name": "พิชชาพร เดชกุล", "nickname": "แพนนี่", "email": "phitchaphon.d@kkumail.com"},
+        {"id": "693050136-0", "name": "พีระพัฒน์ เกียมา", "nickname": "ต้นกล้า", "email": "Phiraphat.ki@kkumail.com"},
+        {"id": "693050137-8", "name": "ภาณุวิชญ์ ขัตติสอน", "nickname": "ไกด์", "email": "panuvich.k@kkumail.com"},
+        {"id": "693050138-6", "name": "ภูธเนศ วงษ์ชาดี", "nickname": "ภู", "email": "phuthanet.wo@kkumail.com"},
+        {"id": "693050139-4", "name": "วชรพล อินธิกาย", "nickname": "เนคไท", "email": "Wacharaphol.i@kkumail.com"},
+        {"id": "693050140-9", "name": "วชิรวิทย์ ทรัพย์เพิ่ม", "nickname": "นิว", "email": "Wachirawit.sap@kkumail.com"},
+        {"id": "693050141-7", "name": "วชิรวิทย์ บุญขันธ์", "nickname": "คิว", "email": "wachirawit.boonk@kkumail.com"},
+        {"id": "693050142-5", "name": "วัชรากร บุญโสม", "nickname": "ออย", "email": "watcharakon.bu@kkumail.com"},
+        {"id": "693050143-3", "name": "ศุกลวัฒน์ พาพลงาม", "nickname": "เปรม", "email": "sukollawat.p@kkumail.com"},
+        {"id": "693050144-1", "name": "อธิชา พิมพ์ทอง", "nickname": "ไอคิว", "email": "athicha.pi@kkumail.com"},
+        {"id": "693050145-9", "name": "เขมนิจ บุตรชน", "nickname": "เขม", "email": "kemmanit.b@kkumail.com"},
+        {"id": "693050146-7", "name": "เพ็ญพิชชา โกมลวรรค", "nickname": "นานา", "email": "panphitcha.k@kkumail.com"},
+        {"id": "693050157-5", "name": "แก่นพนม เฉลิมวงศ์วิวัฒน", "nickname": "ข้าวเหนียว", "email": "kaenpanom.c@kkumail.com"},
+        {"id": "693050148-3", "name": "โสภิตรา หุนสุวงค์", "nickname": "เค้ก", "email": "Sopitra.h@kkumail.com"},
+        {"id": "693050383-3", "name": "ฉัตรรดา กะไรยะ", "nickname": "ฟ่าง", "email": "chatrada.k@kkumail.com"},
+        {"id": "693050384-1", "name": "ชลากร กุลสอนนาน", "nickname": "ต้น", "email": "chalakorn.k@kkumail.com"},
+        {"id": "693050385-9", "name": "ฐิติกานต์ บุญสอน", "nickname": "มะปราง", "email": "thitikan.boo@kkumail.com"},
+        {"id": "693050386-7", "name": "ณัฏฐชัย โพธิ์ทับไทย", "nickname": "โอ้", "email": "nattachai.p@kkumail.com"},
+        {"id": "693050387-5", "name": "ณิชคุณ ชำนาญ", "nickname": "นาโน", "email": "Nichakhun.c@kkumail.com"},
+        {"id": "693050388-3", "name": "ธนาธิป ภูนาเหนือ", "nickname": "ซี", "email": "thanathip.p@kkumail.com"},
+        {"id": "693050389-1", "name": "ธิติวุฒิ อารีเอื้อ", "nickname": "ภูผา", "email": "Thitiwut.a@kkumail.com"},
+        {"id": "693050390-6", "name": "ธีระพล บัวรัตน์", "nickname": "แม็กมิน", "email": "Thiraphon.b@kkumail.com"},
+        {"id": "693050391-4", "name": "ประกฤษฎิ์ เหยียดชัยภูมิ", "nickname": "ต้นกล้า", "email": "prakrit.y@kkumail.com"},
+        {"id": "693050393-0", "name": "พิชามญธุ์ สามสี", "nickname": "หมูหวาน", "email": "pichamon.sam@kkumail.com"},
+        {"id": "693050394-8", "name": "ภูวกร มูลเหลา", "nickname": "เฟส", "email": "phuwakorn.m@kkumail.com"},
+        {"id": "693050395-6", "name": "รัชชานนท์ แสงสว่าง", "nickname": "ภูมิ", "email": "ratchanon.saen@kkumail.com"},
+        {"id": "693050396-4", "name": "วรัญญา อามาตย์", "nickname": "อุ้ม", "email": "waranya.ar@kkumail.com"},
+        {"id": "693050397-2", "name": "วริศรา งามประเสริฐ", "nickname": "นุ่น", "email": "waritsara.ng@kkumail.com"},
+        {"id": "693050398-0", "name": "วิมลสิริ วงศ์คำชาว", "nickname": "แพรวา", "email": "wimonsiri.w@kkumail.com"},
+        {"id": "693050399-8", "name": "วีรภัทร เพชรอ้อม", "nickname": "ตะวัน", "email": "wiraphat.phe@kkumail.com"},
+        {"id": "693050400-9", "name": "สิรวิชญ์ บุญหล้า", "nickname": "อั้ม", "email": "sirawit.b@kkumail.com"},
+        {"id": "693050401-7", "name": "เบญญาภา มีสวัสดิ์", "nickname": "บัวชมพู", "email": "benyapa.mee@kkumail.com"},
+        {"id": "693050534-8", "name": "กัลยรัตน์ ไชยเดช", "nickname": "อเล็ก", "email": "kanyarat.chaid@kkumail.com"},
+        {"id": "693050535-6", "name": "กิตติพัฒน์ เพียรยิ่ง", "nickname": "ปอนด์", "email": "kttiphat.pi@kkumail.com"},
+        {"id": "693050537-2", "name": "ทิติภา มาสุข", "nickname": "ดีดี้", "email": "thitipha.m@kkumail.com"},
+        {"id": "693050538-0", "name": "ภริดา เด่นไชยรัตน์", "nickname": "ต้นอ้อ", "email": "pharida.d@kkumail.com"},
+        {"id": "693050539-8", "name": "ภูมรินทร์ บุญมี", "nickname": "ภูมิ", "email": "poommarin.b@kkumail.com"},
+        {"id": "693050540-3", "name": "รณชัย สายเนตร์", "nickname": "น็อต", "email": "ronnachai.sa@kkumail.com"},
+        {"id": "693050541-1", "name": "อัษฎากร ศรีสังข์", "nickname": "บาส", "email": "adsadakorn.s@kkumail.com"},
+        {"id": "693050562-3", "name": "ชิษณุพงศ์ แสงสีงาม", "nickname": "ไผ่", "email": "chitsanupong.sae@kkumail.com"},
+        {"id": "693050563-1", "name": "ธาราทิพย์ การร้อย", "nickname": "บีม", "email": "tharathip.ka@kkumail.com"},
+        {"id": "693050564-9", "name": "ปุณยพัฒน์ สินโพธิ์", "nickname": "โบนัส", "email": "punyaphat.s@kkumail.com"},
+        {"id": "693050565-7", "name": "พิยดา สารทอง", "nickname": "โซอี้", "email": "phiyada.san@kkumail.com"},
+        {"id": "693050566-5", "name": "สุธีกานต์ บัตเลอร์", "nickname": "เจสซี่", "email": "suthikan.b@kkumail.com"},
+        {"id": "693050567-3", "name": "อาภัสรา นากลาง", "nickname": "เป้ย", "email": "apassara.n@kkumail.com"}
+      ];
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | ระบบจัดการค่าป้ายสาขาวิชาคอมพิวเตอร์ศึกษา</title>
+  <meta name="description" content="ระบบจัดการหลังบ้านและตรวจสอบสลิปการชำระเงินสาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น">
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              dark: '#0f172a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- SheetJS for Excel Export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased bg-slate-900 text-slate-100 selection:bg-orange-500 selection:text-white">
+
+  <!-- ================= 1. LOGIN SCREEN (IF NOT AUTHENTICATED) ================= -->
+  <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
+    <div class="max-w-md w-full bg-slate-900/90 backdrop-blur-2xl border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6 text-center">
+      <div class="w-18 h-18 mx-auto rounded-3xl bg-white p-2 border border-slate-700 shadow-lg flex items-center justify-center">
+        <img src="logo.png" alt="โลโก้" class="w-12 h-12 object-contain">
+      </div>
+      <div>
+        <span class="text-xs font-black tracking-widest text-orange-500 uppercase">Admin Portal</span>
+        <h2 class="text-2xl font-black text-white mt-1">เข้าสู่ระบบผู้ดูแลระบบ</h2>
+        <p class="text-xs text-slate-400 mt-1">ระบบจัดการและตรวจสอบการชำระเงินค่าป้ายสาขา 69</p>
+      </div>
+
+      <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-left">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">รหัสผ่านแอดมิน (Admin PIN / Password)</label>
+          <div class="relative">
+            <input 
+              type="password" 
+              id="adminPasswordInput"
+              placeholder="กรอกรหัสผ่าน (ค่าเริ่มต้น: admin69)" 
+              class="w-full pl-11 pr-4 py-3 bg-slate-800/90 border border-slate-700 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition"
+              required
+            >
+            <i data-lucide="lock" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5"></i>
+          </div>
+        </div>
+
+        <div id="loginErrorMsg" class="hidden text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-2">
+          <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400"></i>
+          <span>รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</span>
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/25 transition transform active:scale-98 flex items-center justify-center gap-2"
+        >
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>เข้าสู่ระบบ Dashboard</span>
+        </button>
+      </form>
+
+      <div class="pt-2">
+        <a href="index.html" class="text-xs text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>กลับสู่หน้าเว็บไซต์หลัก</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 2. MAIN ADMIN DASHBOARD ================= -->
+  <div id="adminDashboard" class="hidden flex-grow flex flex-col">
+    
+    <!-- Top Header -->
+    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800 shadow-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-white p-1 border border-slate-700 shadow-sm flex items-center justify-center">
+            <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-black text-orange-400 uppercase tracking-wider">COMED KKU 69</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-500/20 text-orange-300 border border-orange-500/30">Host Admin</span>
+            </div>
+            <h1 class="text-base sm:text-lg font-black text-white">ระบบจัดการหลังบ้าน (Control Panel)</h1>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a href="index.html" target="_blank" class="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+            <span>ดูหน้าเว็บ</span>
+          </a>
+          <button onclick="exportToExcel()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/60 transition shadow-sm">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-400"></i>
+            <span>Export Excel</span>
+          </button>
+          <button onclick="handleAdminLogout()" class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition" title="ออกจากระบบ">
+            <i data-lucide="log-out" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 flex-grow">
+      
+      <!-- Stats Overview 4-Grid Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- 1. Total Received Money -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-lg">
+          <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+            <span class="font-bold">ยอดเงินที่ได้รับแล้ว</span>
+            <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+              <i data-lucide="wallet" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-3xl font-black text-white font-mono" id="statMoneyReceived">฿0</div>
+          <div class="text-xs text-slate-500 mt-1 flex justify-between">
+            <span>เป้าหมาย ฿11,400</span>
+            <span id="statMoneyPercent" class="text-amber-400 font-bold">0%</span>
+          </div>
+        </div>
+
+        <!-- 2. Paid Count -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-lg">
+          <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+            <span class="font-bold">ชำระเงินแล้ว</span>
+            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <i data-lucide="user-check" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-3xl font-black text-emerald-400 font-mono" id="statPaidCount">0 <span class="text-xs font-normal text-slate-400">คน</span></div>
+          <div class="text-xs text-slate-500 mt-1 flex justify-between">
+            <span>จากทั้งหมด 60 คน</span>
+            <span id="statPaidPercent" class="text-emerald-400 font-bold">0%</span>
+          </div>
+        </div>
+
+        <!-- 3. Unpaid Count -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-lg">
+          <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+            <span class="font-bold">ยังไม่ชำระเงิน</span>
+            <div class="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
+              <i data-lucide="user-x" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-3xl font-black text-rose-400 font-mono" id="statUnpaidCount">60 <span class="text-xs font-normal text-slate-400">คน</span></div>
+          <div class="text-xs text-slate-500 mt-1 flex justify-between">
+            <span>ยอดค้างรับ</span>
+            <span id="statUnpaidMoney" class="text-rose-400 font-bold">฿11,400</span>
+          </div>
+        </div>
+
+        <!-- 4. Cloud Sync Status -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-lg flex flex-col justify-between">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span class="font-bold">การเชื่อมต่อ Cloud</span>
+            <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
+              <i data-lucide="cloud" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 text-sm font-bold text-white">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Google Sheets & Drive</span>
+            </div>
+            <span class="text-[11px] text-slate-400 block mt-1">ซิงค์อัตโนมัติ 2-Way</span>
+          </div>
+          <button onclick="refreshDataFromCloud()" class="w-full py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1 transition">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> ซิงค์ข้อมูลล่าสุด
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Main Management Table Card -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+        
+        <!-- Controls: Filters, Search & Bulk Actions -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h2 class="text-xl font-black text-white flex items-center gap-2">
+              <i data-lucide="users" class="w-5 h-5 text-orange-500"></i>
+              รายชื่อนักศึกษาทั้งหมด 60 คน
+            </h2>
+          </div>
+
+          <!-- Status Filter Tabs -->
+          <div class="flex items-center gap-1 p-1 bg-slate-950 rounded-2xl border border-slate-800 text-xs font-bold">
+            <button onclick="setFilter('all')" id="fBtnAll" class="px-4 py-2 rounded-xl bg-slate-800 text-white shadow-sm transition">
+              ทั้งหมด (60)
+            </button>
+            <button onclick="setFilter('paid')" id="fBtnPaid" class="px-4 py-2 rounded-xl text-slate-400 hover:text-emerald-400 transition">
+              จ่ายแล้ว (<span id="countFPaid">0</span>)
+            </button>
+            <button onclick="setFilter('unpaid')" id="fBtnUnpaid" class="px-4 py-2 rounded-xl text-slate-400 hover:text-rose-400 transition">
+              ยังไม่จ่าย (<span id="countFUnpaid">60</span>)
+            </button>
+            <button onclick="setFilter('trash')" id="fBtnTrash" class="px-4 py-2 rounded-xl text-slate-400 hover:text-amber-400 transition flex items-center gap-1">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5 text-amber-500"></i>
+              <span>ถังขยะ (<span id="countFTrash">0</span>)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <i data-lucide="search" class="w-5 h-5 text-slate-500 absolute left-4 top-3.5"></i>
+          <input 
+            type="text" 
+            id="adminSearchInput"
+            placeholder="ค้นหาด้วย รหัสนักศึกษา, ชื่อ, นามสกุล, ชื่อเล่น หรือ อีเมล..." 
+            oninput="renderAdminTable()"
+            class="w-full pl-12 pr-4 py-3 bg-slate-950/90 border border-slate-800 rounded-2xl text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition"
+          >
+        </div>
+
+        <!-- Table Responsive Container -->
+        <div class="overflow-x-auto rounded-2xl border border-slate-800">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-950 text-slate-400 font-extrabold border-b border-slate-800">
+              <tr>
+                <th class="p-4 text-center w-12">ลำดับ</th>
+                <th class="p-4">รหัสนักศึกษา</th>
+                <th class="p-4">ชื่อ - นามสกุล</th>
+                <th class="p-4">ชื่อเล่น</th>
+                <th class="p-4 hidden md:table-cell">อีเมล</th>
+                <th class="p-4 text-center">สถานะ</th>
+                <th class="p-4 text-center">หลักฐานสลิป</th>
+                <th class="p-4 text-center w-36">การจัดการ (Admin)</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody" class="divide-y divide-slate-800/60 bg-slate-900/50">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- ================= 3. MODAL: SLIP INSPECTOR & STATUS CHANGER ================= -->
+  <div id="modalSlipInspector" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i data-lucide="receipt" class="w-5 h-5 text-orange-500"></i>
+          ตรวจสอบหลักฐานสลิป
+        </h3>
+        <button onclick="closeInspectorModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="inspectorContent">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Student Database -->
+  <script src="students_data.js"></script>
+
+  <!-- Admin Dashboard Logic -->
+  <script>
+    const ADMIN_PASSWORD_HASH = "admin69"; // รหัสผ่านเข้าสู่ระบบหลังบ้าน
+    const STORAGE_KEY = 'COMED_KKU69_PAYMENT_DATA_V1';
+    const CLOUD_URL_KEY = 'COMED_KKU69_CLOUD_WEBAPP_URL';
+    const ADMIN_SESSION_KEY = 'COMED_KKU69_ADMIN_LOGGED_IN';
+
+    // รายชื่อนักศึกษาทั้ง 60 คน (Embedded Safe Fallback)
+    const DEFAULT_STUDENTS = [
+      {"id": "693050120-5", "name": "กชกร แสนอินทร์", "nickname": "มิวสิค", "email": "kodchakon.sa@kkumail.com"},
+      {"id": "693050121-3", "name": "กนกพร คำพิทูล", "nickname": "โดนัท", "email": "kanokporn.kump@kkumail.com"},
+      {"id": "693050122-1", "name": "กรกต บรรเจิดวัฒนกุล", "nickname": "โนว่า", "email": "korakod.b@kkumail.com"},
+      {"id": "693050123-9", "name": "กัญชณิกา นันททิพักษ์", "nickname": "โบนัส", "email": "kanchaniga.n@kkumail.com"},
+      {"id": "693050124-7", "name": "กิตติชัย สิงเนิน", "nickname": "น้ำเต้า", "email": "Kittichai.si@kkumail.com"},
+      {"id": "693050125-5", "name": "ขลุ่ยไทย เคนมี", "nickname": "ขลุ่ย", "email": "kruithai.k@kkumail.com"},
+      {"id": "693050126-3", "name": "จิรทีปต์ ชัยศรี", "nickname": "บีน", "email": "jirathip.c@kkumail.com"},
+      {"id": "693050127-1", "name": "ชัยพงค์ วรรณทวี", "nickname": "มาร์ค", "email": "chaiyaphong.w@kkumail.com"},
+      {"id": "693050128-9", "name": "ธัญชนก สุตะโคตร", "nickname": "เค้ก", "email": "thanchanok.sut@kkumail.com"},
+      {"id": "693050129-7", "name": "ธันยนันท์ สุวัฒนะ", "nickname": "วาน", "email": "thanyanan.su@kkumail.com"},
+      {"id": "693050130-2", "name": "ธีรดนย์ ศรีโพธิ์ชัย", "nickname": "ยูโร", "email": "theeradon.sr@kkumail.com"},
+      {"id": "693050131-0", "name": "บุญญรัตน์ ชะนะพาล", "nickname": "อันอัน", "email": "bunyarat.c@kkumail.com"},
+      {"id": "693050132-8", "name": "ปภาดา เพิ่มพูล", "nickname": "แตงโม", "email": "papada.ph@kkumail.com"},
+      {"id": "693050133-6", "name": "ปุณเมศ บุญสง", "nickname": "คิว", "email": "punnamet.b@kkumail.com"},
+      {"id": "693050134-4", "name": "พรหมพิริยะ หอมจันทร์", "nickname": "โอปอน", "email": "phromphiriya.h@kkumail.com"},
+      {"id": "693050135-2", "name": "พิชชาพร เดชกุล", "nickname": "แพนนี่", "email": "phitchaphon.d@kkumail.com"},
+      {"id": "693050136-0", "name": "พีระพัฒน์ เกียมา", "nickname": "ต้นกล้า", "email": "Phiraphat.ki@kkumail.com"},
+      {"id": "693050137-8", "name": "ภาณุวิชญ์ ขัตติสอน", "nickname": "ไกด์", "email": "panuvich.k@kkumail.com"},
+      {"id": "693050138-6", "name": "ภูธเนศ วงษ์ชาดี", "nickname": "ภู", "email": "phuthanet.wo@kkumail.com"},
+      {"id": "693050139-4", "name": "วชรพล อินธิกาย", "nickname": "เนคไท", "email": "Wacharaphol.i@kkumail.com"},
+      {"id": "693050140-9", "name": "วชิรวิทย์ ทรัพย์เพิ่ม", "nickname": "นิว", "email": "Wachirawit.sap@kkumail.com"},
+      {"id": "693050141-7", "name": "วชิรวิทย์ บุญขันธ์", "nickname": "คิว", "email": "wachirawit.boonk@kkumail.com"},
+      {"id": "693050142-5", "name": "วัชรากร บุญโสม", "nickname": "ออย", "email": "watcharakon.bu@kkumail.com"},
+      {"id": "693050143-3", "name": "ศุกลวัฒน์ พาพลงาม", "nickname": "เปรม", "email": "sukollawat.p@kkumail.com"},
+      {"id": "693050144-1", "name": "อธิชา พิมพ์ทอง", "nickname": "ไอคิว", "email": "athicha.pi@kkumail.com"},
+      {"id": "693050145-9", "name": "เขมนิจ บุตรชน", "nickname": "เขม", "email": "kemmanit.b@kkumail.com"},
+      {"id": "693050146-7", "name": "เพ็ญพิชชา โกมลวรรค", "nickname": "นานา", "email": "panphitcha.k@kkumail.com"},
+      {"id": "693050157-5", "name": "แก่นพนม เฉลิมวงศ์วิวัฒน", "nickname": "ข้าวเหนียว", "email": "kaenpanom.c@kkumail.com"},
+      {"id": "693050148-3", "name": "โสภิตรา หุนสุวงค์", "nickname": "เค้ก", "email": "Sopitra.h@kkumail.com"},
+      {"id": "693050383-3", "name": "ฉัตรรดา กะไรยะ", "nickname": "ฟ่าง", "email": "chatrada.k@kkumail.com"},
+      {"id": "693050384-1", "name": "ชลากร กุลสอนนาน", "nickname": "ต้น", "email": "chalakorn.k@kkumail.com"},
+      {"id": "693050385-9", "name": "ฐิติกานต์ บุญสอน", "nickname": "มะปราง", "email": "thitikan.boo@kkumail.com"},
+      {"id": "693050386-7", "name": "ณัฏฐชัย โพธิ์ทับไทย", "nickname": "โอ้", "email": "nattachai.p@kkumail.com"},
+      {"id": "693050387-5", "name": "ณิชคุณ ชำนาญ", "nickname": "นาโน", "email": "Nichakhun.c@kkumail.com"},
+      {"id": "693050388-3", "name": "ธนาธิป ภูนาเหนือ", "nickname": "ซี", "email": "thanathip.p@kkumail.com"},
+      {"id": "693050389-1", "name": "ธิติวุฒิ อารีเอื้อ", "nickname": "ภูผา", "email": "Thitiwut.a@kkumail.com"},
+      {"id": "693050390-6", "name": "ธีระพล บัวรัตน์", "nickname": "แม็กมิน", "email": "Thiraphon.b@kkumail.com"},
+      {"id": "693050391-4", "name": "ประกฤษฎิ์ เหยียดชัยภูมิ", "nickname": "ต้นกล้า", "email": "prakrit.y@kkumail.com"},
+      {"id": "693050393-0", "name": "พิชามญธุ์ สามสี", "nickname": "หมูหวาน", "email": "pichamon.sam@kkumail.com"},
+      {"id": "693050394-8", "name": "ภูวกร มูลเหลา", "nickname": "เฟส", "email": "phuwakorn.m@kkumail.com"},
+      {"id": "693050395-6", "name": "รัชชานนท์ แสงสว่าง", "nickname": "ภูมิ", "email": "ratchanon.saen@kkumail.com"},
+      {"id": "693050396-4", "name": "วรัญญา อามาตย์", "nickname": "อุ้ม", "email": "waranya.ar@kkumail.com"},
+      {"id": "693050397-2", "name": "วริศรา งามประเสริฐ", "nickname": "นุ่น", "email": "waritsara.ng@kkumail.com"},
+      {"id": "693050398-0", "name": "วิมลสิริ วงศ์คำชาว", "nickname": "แพรวา", "email": "wimonsiri.w@kkumail.com"},
+      {"id": "693050399-8", "name": "วีรภัทร เพชรอ้อม", "nickname": "ตะวัน", "email": "wiraphat.phe@kkumail.com"},
+      {"id": "693050400-9", "name": "สิรวิชญ์ บุญหล้า", "nickname": "อั้ม", "email": "sirawit.b@kkumail.com"},
+      {"id": "693050401-7", "name": "เบญญาภา มีสวัสดิ์", "nickname": "บัวชมพู", "email": "benyapa.mee@kkumail.com"},
+      {"id": "693050534-8", "name": "กัลยรัตน์ ไชยเดช", "nickname": "อเล็ก", "email": "kanyarat.chaid@kkumail.com"},
+      {"id": "693050535-6", "name": "กิตติพัฒน์ เพียรยิ่ง", "nickname": "ปอนด์", "email": "kttiphat.pi@kkumail.com"},
+      {"id": "693050537-2", "name": "ทิติภา มาสุข", "nickname": "ดีดี้", "email": "thitipha.m@kkumail.com"},
+      {"id": "693050538-0", "name": "ภริดา เด่นไชยรัตน์", "nickname": "ต้นอ้อ", "email": "pharida.d@kkumail.com"},
+      {"id": "693050539-8", "name": "ภูมรินทร์ บุญมี", "nickname": "ภูมิ", "email": "poommarin.b@kkumail.com"},
+      {"id": "693050540-3", "name": "รณชัย สายเนตร์", "nickname": "น็อต", "email": "ronnachai.sa@kkumail.com"},
+      {"id": "693050541-1", "name": "อัษฎากร ศรีสังข์", "nickname": "บาส", "email": "adsadakorn.s@kkumail.com"},
+      {"id": "693050562-3", "name": "ชิษณุพงศ์ แสงสีงาม", "nickname": "ไผ่", "email": "chitsanupong.sae@kkumail.com"},
+      {"id": "693050563-1", "name": "ธาราทิพย์ การร้อย", "nickname": "บีม", "email": "tharathip.ka@kkumail.com"},
+      {"id": "693050564-9", "name": "ปุณยพัฒน์ สินโพธิ์", "nickname": "โบนัส", "email": "punyaphat.s@kkumail.com"},
+      {"id": "693050565-7", "name": "พิยดา สารทอง", "nickname": "โซอี้", "email": "phiyada.san@kkumail.com"},
+      {"id": "693050566-5", "name": "สุธีกานต์ บัตเลอร์", "nickname": "เจสซี่", "email": "suthikan.b@kkumail.com"},
+      {"id": "693050567-3", "name": "อาภัสรา นากลาง", "nickname": "เป้ย", "email": "apassara.n@kkumail.com"}
+    ];
+
+    let googleAppsScriptUrl = "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
+    let studentDatabase = DEFAULT_STUDENTS;
+    let paymentRecords = {};
+    let currentFilter = 'all';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Check if logged in
+      if (sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true') {
+        showDashboard();
+      } else {
+        showLoginScreen();
+      }
+      lucide.createIcons();
+    });
+
+    function showLoginScreen() {
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('adminDashboard').classList.add('hidden');
+    }
+
+    async function showDashboard() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('adminDashboard').classList.remove('hidden');
+
+      studentDatabase = DEFAULT_STUDENTS;
+      renderStats();
+      renderAdminTable();
+
+      await loadAllPayments();
+      renderStats();
+      renderAdminTable();
+      lucide.createIcons();
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const pwd = document.getElementById('adminPasswordInput').value;
+      if (pwd === ADMIN_PASSWORD_HASH) {
+        sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
+        showDashboard();
+      } else {
+        document.getElementById('loginErrorMsg').classList.remove('hidden');
+      }
+    }
+
+    function handleAdminLogout() {
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+      location.reload();
+    }
+
+    let trashRecords = {};
+
+    async function loadAllPayments() {
+      if (googleAppsScriptUrl) {
+        try {
+          const res = await fetch(googleAppsScriptUrl);
+          if (res.ok) {
+            const raw = await res.json();
+            if (raw._trash) {
+              trashRecords = raw._trash;
+              delete raw._trash;
+            }
+            paymentRecords = raw;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
+            localStorage.setItem('COMED_KKU69_TRASH_RECORDS', JSON.stringify(trashRecords));
+            return;
+          }
+        } catch (err) {}
+      }
+
+      try {
+        const res = await fetch('/api/payments');
+        if (res.ok) {
+          paymentRecords = await res.json();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
+          return;
+        }
+      } catch (err) {}
+
+      const local = localStorage.getItem(STORAGE_KEY);
+      paymentRecords = local ? JSON.parse(local) : {};
+      const localTrash = localStorage.getItem('COMED_KKU69_TRASH_RECORDS');
+      trashRecords = localTrash ? JSON.parse(localTrash) : {};
+    }
+
+    function renderStats() {
+      const total = studentDatabase.length;
+      let paidCount = 0;
+
+      studentDatabase.forEach(st => {
+        if (paymentRecords[st.id] && paymentRecords[st.id].paid) {
+          paidCount++;
+        }
+      });
+
+      const unpaidCount = total - paidCount;
+      const moneyReceived = paidCount * 190;
+      const unpaidMoney = unpaidCount * 190;
+      const moneyPercent = Math.round((moneyReceived / (total * 190)) * 100);
+      const paidPercent = Math.round((paidCount / total) * 100);
+
+      document.getElementById('statMoneyReceived').textContent = `฿${moneyReceived.toLocaleString()}`;
+      document.getElementById('statMoneyPercent').textContent = `${moneyPercent}%`;
+      
+      document.getElementById('statPaidCount').innerHTML = `${paidCount} <span class="text-xs font-normal text-slate-400">คน</span>`;
+      document.getElementById('statPaidPercent').textContent = `${paidPercent}%`;
+
+      document.getElementById('statUnpaidCount').innerHTML = `${unpaidCount} <span class="text-xs font-normal text-slate-400">คน</span>`;
+      document.getElementById('statUnpaidMoney').textContent = `฿${unpaidMoney.toLocaleString()}`;
+
+      document.getElementById('countFPaid').textContent = paidCount;
+      document.getElementById('countFUnpaid').textContent = unpaidCount;
+      document.getElementById('countFTrash').textContent = Object.keys(trashRecords).length;
+    }
+
+    function renderAdminTable() {
+      const tbody = document.getElementById('adminTableBody');
+      const searchVal = (document.getElementById('adminSearchInput')?.value || '').toLowerCase().trim();
+
+      // VIEW TRASH TAB
+      if (currentFilter === 'trash') {
+        const trashKeys = Object.keys(trashRecords);
+        if (trashKeys.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="text-center py-12 text-slate-500 text-xs font-bold">ไม่มีข้อมูลในถังขยะ</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = trashKeys.map((id, idx) => {
+          const item = trashRecords[id];
+          return `
+            <tr class="hover:bg-amber-950/20 transition bg-amber-950/10">
+              <td class="p-4 text-center text-slate-500 font-mono text-xs">${idx + 1}</td>
+              <td class="p-4 font-mono font-bold text-amber-300">${item.studentId}</td>
+              <td class="p-4 font-bold text-slate-200">${item.name || '-'}</td>
+              <td class="p-4"><span class="px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-400 font-bold text-xs border border-amber-500/20">น้อง${item.nickname || '-'}</span></td>
+              <td class="p-4 hidden md:table-cell text-slate-400 font-mono text-xs">${item.email || '-'}</td>
+              <td class="p-4 text-center"><span class="inline-flex items-center gap-1 text-[11px] font-black text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> อยู่ในถังขยะ</span></td>
+              <td class="p-4 text-center">
+                ${item.slipUrl 
+                  ? `<button onclick="inspectSlipDirect('${item.studentId}', '${item.name}', '${item.nickname}', '${item.slipUrl}', '${item.timestamp}', '${item.refCode}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto border border-slate-700">
+                      <i data-lucide="image" class="w-3.5 h-3.5"></i> ดูสลิป
+                     </button>`
+                  : '<span class="text-xs text-slate-600">-</span>'
+                }
+              </td>
+              <td class="p-4 text-center">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button onclick="adminRestoreFromTrash('${item.studentId}')" class="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition" title="กู้คืน">
+                    กู้คืน
+                  </button>
+                  <button onclick="adminDeletePermanently('${item.studentId}')" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition" title="ลบถาวร">
+                    ลบถาวร
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        lucide.createIcons();
+        return;
+      }
+
+      // VIEW NORMAL TABS (ALL, PAID, UNPAID)
+      let list = studentDatabase.filter(st => {
+        const isPaid = paymentRecords[st.id] && paymentRecords[st.id].paid;
+        if (currentFilter === 'paid' && !isPaid) return false;
+        if (currentFilter === 'unpaid' && isPaid) return false;
+
+        if (searchVal) {
+          const matchStr = `${st.id} ${st.name} ${st.nickname} ${st.email}`.toLowerCase();
+          return matchStr.includes(searchVal);
+        }
+        return true;
+      });
+
+      tbody.innerHTML = list.map((st, idx) => {
+        const record = paymentRecords[st.id];
+        const isPaid = record && record.paid;
+        const slipUrl = record?.slipUrl || '';
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="p-4 text-center text-slate-500 font-mono text-xs">${idx + 1}</td>
+            <td class="p-4 font-mono font-bold text-white">${st.id}</td>
+            <td class="p-4 font-bold text-slate-200">${st.name}</td>
+            <td class="p-4">
+              <span class="px-2 py-0.5 rounded-lg bg-orange-500/10 text-orange-400 font-bold text-xs border border-orange-500/20">
+                น้อง${st.nickname}
+              </span>
+            </td>
+            <td class="p-4 hidden md:table-cell text-slate-400 font-mono text-xs">${st.email}</td>
+            <td class="p-4 text-center">
+              ${isPaid 
+                ? '<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20"><i data-lucide="check" class="w-3.5 h-3.5"></i> จ่ายแล้ว (฿190)</span>'
+                : '<span class="inline-flex items-center gap-1 text-[11px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20"><i data-lucide="x" class="w-3.5 h-3.5"></i> ยังไม่จ่าย</span>'
+              }
+            </td>
+            <td class="p-4 text-center">
+              ${isPaid && slipUrl 
+                ? `<button onclick="inspectSlip('${st.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto border border-slate-700">
+                    <i data-lucide="image" class="w-3.5 h-3.5"></i> ดูสลิป
+                   </button>`
+                : '<span class="text-xs text-slate-600">-</span>'
+              }
+            </td>
+            <td class="p-4 text-center">
+              ${isPaid 
+                ? `<button onclick="adminMoveToTrash('${st.id}')" class="px-3 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto">
+                    <i data-lucide="trash-2" class="w-3 h-3"></i> ย้ายไปถังขยะ
+                   </button>`
+                : `<button onclick="adminTogglePayment('${st.id}', true)" class="px-3 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition">
+                    ทำเครื่องหมายว่าจ่ายแล้ว
+                   </button>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.getElementById('fBtnAll').className = filter === 'all' ? 'px-4 py-2 rounded-xl bg-slate-800 text-white shadow-sm transition' : 'px-4 py-2 rounded-xl text-slate-400 hover:text-slate-200 transition';
+      document.getElementById('fBtnPaid').className = filter === 'paid' ? 'px-4 py-2 rounded-xl bg-emerald-600 text-white shadow-sm transition' : 'px-4 py-2 rounded-xl text-slate-400 hover:text-emerald-400 transition';
+      document.getElementById('fBtnUnpaid').className = filter === 'unpaid' ? 'px-4 py-2 rounded-xl bg-rose-600 text-white shadow-sm transition' : 'px-4 py-2 rounded-xl text-slate-400 hover:text-rose-400 transition';
+      document.getElementById('fBtnTrash').className = filter === 'trash' ? 'px-4 py-2 rounded-xl bg-amber-600 text-white shadow-sm transition flex items-center gap-1 font-bold' : 'px-4 py-2 rounded-xl text-slate-400 hover:text-amber-400 transition flex items-center gap-1';
+      renderAdminTable();
+    }
+
+    // 1. Move to Trash (ย้ายไปยังถังขยะ + ย้ายไฟล์ Drive ไปโฟลเดอร์ถังขยะ)
+    async function adminMoveToTrash(studentId) {
+      const st = studentDatabase.find(s => s.id === studentId);
+      const name = st ? st.name : studentId;
+
+      if (confirm(`คุณต้องการยกเลิกสถานะของ "${name}" และย้ายไปยังถังขยะใช่หรือไม่?\n\n• แถวในชีตจะย้ายไปแท็บ "Trash_ถังขยะ"\n• ไฟล์สลิปใน Drive จะย้ายไปโฟลเดอร์ "Trash_Slips_ถังขยะ"`)) {
+        const record = paymentRecords[studentId] || {};
+        const slipUrl = record.slipUrl || '';
+
+        trashRecords[studentId] = {
+          studentId: studentId,
+          name: st?.name || '',
+          nickname: st?.nickname || '',
+          email: st?.email || '',
+          slipUrl: slipUrl,
+          timestamp: new Date().toLocaleString('th-TH'),
+          refCode: record.refCode || ''
+        };
+        delete paymentRecords[studentId];
+
+        if (googleAppsScriptUrl) {
+          try {
+            fetch(googleAppsScriptUrl, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: "move_to_trash",
+                studentId: studentId,
+                name: st?.name || '',
+                nickname: st?.nickname || '',
+                email: st?.email || '',
+                slipUrl: slipUrl
+              })
+            });
+          } catch(e){}
+        }
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
+        localStorage.setItem('COMED_KKU69_TRASH_RECORDS', JSON.stringify(trashRecords));
+        renderStats();
+        renderAdminTable();
+      }
+    }
+
+    // 2. Restore from Trash (กู้คืนกลับมาสถานะเดิม)
+    async function adminRestoreFromTrash(studentId) {
+      const item = trashRecords[studentId];
+      if (!item) return;
+
+      if (confirm(`ต้องการกู้คืนข้อมูลของ "${item.name}" กลับสู่รายการชำระเงินปกติใช่หรือไม่?`)) {
+        paymentRecords[studentId] = {
+          paid: true,
+          timestamp: item.timestamp || new Date().toLocaleString('th-TH'),
+          slipUrl: item.slipUrl || '',
+          refCode: item.refCode || '',
+          amount: 190
+        };
+        delete trashRecords[studentId];
+
+        if (googleAppsScriptUrl) {
+          try {
+            fetch(googleAppsScriptUrl, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: "restore",
+                studentId: studentId
+              })
+            });
+          } catch(e){}
+        }
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
+        localStorage.setItem('COMED_KKU69_TRASH_RECORDS', JSON.stringify(trashRecords));
+        renderStats();
+        renderAdminTable();
+      }
+    }
+
+    // 3. Delete Permanently (ลบถาวร ทั้งชีตและไฟล์ใน Drive)
+    async function adminDeletePermanently(studentId) {
+      const item = trashRecords[studentId];
+      if (!item) return;
+
+      if (confirm(`⚠️ คำเตือน: คุณต้องการลบข้อมูลของ "${item.name}" อย่างถาวรใช่หรือไม่?\n\n• แถวข้อมูลในชีตถังขยะจะถูกลบ\n• ไฟล์สลิปใน Google Drive จะถูกลบทันที`)) {
+        delete trashRecords[studentId];
+
+        if (googleAppsScriptUrl) {
+          try {
+            fetch(googleAppsScriptUrl, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: "delete_permanently",
+                studentId: studentId
+              })
+            });
+          } catch(e){}
+        }
+
+        localStorage.setItem('COMED_KKU69_TRASH_RECORDS', JSON.stringify(trashRecords));
+        renderStats();
+        renderAdminTable();
+      }
+    }
+
+    async function adminTogglePayment(studentId, setPaid) {
+      const st = studentDatabase.find(s => s.id === studentId);
+      if (!st) return;
+
+      if (confirm(`ต้องการทำเครื่องหมายว่า "${st.name}" ชำระเงินแล้ว ฿190 หรือไม่?`)) {
+        paymentRecords[studentId] = {
+          paid: true,
+          timestamp: new Date().toLocaleString('th-TH'),
+          slipUrl: '',
+          refCode: 'ADMIN-MANUAL-' + Date.now(),
+          amount: 190
+        };
+        if (googleAppsScriptUrl) {
+          try {
+            fetch(googleAppsScriptUrl, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                studentId: studentId,
+                name: st.name,
+                nickname: st.nickname,
+                email: st.email,
+                source: "Admin Manual"
+              })
+            });
+          } catch(e){}
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
+        renderStats();
+        renderAdminTable();
+      }
+    }
+
+    function inspectSlipDirect(studentId, name, nickname, slipUrl, timestamp, refCode) {
+      let drivePreviewUrl = slipUrl;
+      let driveViewUrl = slipUrl;
+      if (slipUrl.includes('drive.google.com')) {
+        const idMatch = slipUrl.match(/[-\w]{25,}/);
+        if (idMatch) {
+          drivePreviewUrl = `https://drive.google.com/file/d/${idMatch[0]}/preview`;
+          driveViewUrl = `https://drive.google.com/file/d/${idMatch[0]}/view?usp=sharing`;
+        }
+      }
+
+      const content = document.getElementById('inspectorContent');
+      content.innerHTML = `
+        <div class="space-y-4">
+          <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2 text-xs">
+            <div class="flex justify-between"><span class="text-slate-500">ชื่อ-นามสกุล:</span><span class="font-bold text-white">${name} (น้อง${nickname})</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">รหัสนักศึกษา:</span><span class="font-mono text-orange-400 font-bold">${studentId}</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">วัน-เวลา:</span><span class="text-slate-300 font-mono">${timestamp || '-'}</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">รหัสอ้างอิง:</span><span class="text-slate-400 font-mono">${refCode || '-'}</span></div>
+          </div>
+          <div class="w-full h-96 rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden shadow-inner flex flex-col relative">
+            <iframe src="${drivePreviewUrl}" class="w-full h-full border-0 rounded-2xl" allow="autoplay" loading="lazy"></iframe>
+          </div>
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <a href="${driveViewUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-md shadow-sky-600/25">
+              <i data-lucide="external-link" class="w-4 h-4"></i><span>เปิดดูรูปเต็มบน Google Drive</span>
+            </a>
+            <button onclick="closeInspectorModal()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition">ปิดหน้าต่าง</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('modalSlipInspector').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    // Helper: แปลงลิงก์ Google Drive ให้อยู่ในรูปแบบเปิดดูรูปและดาวน์โหลดได้ 100%
+    function formatDriveImageUrl(url) {
+      if (!url) return '';
+      let fileId = '';
+      
+      // กรณีเป็นลิงก์ Google Drive รูปแบบต่างๆ
+      if (url.includes('drive.google.com')) {
+        const idMatch = url.match(/[-\w]{25,}/);
+        if (idMatch) {
+          fileId = idMatch[0];
+          // ลิงก์ตรงสำหรับ Preview รูปภาพ
+          return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1200`;
+        }
+      }
+      return url;
+    }
+
+    function getDriveDirectViewUrl(url) {
+      if (!url) return '#';
+      if (url.includes('drive.google.com')) {
+        const idMatch = url.match(/[-\w]{25,}/);
+        if (idMatch) {
+          return `https://drive.google.com/file/d/${idMatch[0]}/view?usp=sharing`;
+        }
+      }
+      return url;
+    }
+
+    function inspectSlip(studentId) {
+      const st = studentDatabase.find(s => s.id === studentId);
+      const record = paymentRecords[studentId];
+      if (!st || !record) return;
+
+      const rawSlipUrl = record.slipUrl || '';
+      let drivePreviewUrl = rawSlipUrl;
+      let driveViewUrl = rawSlipUrl;
+      
+      if (rawSlipUrl.includes('drive.google.com')) {
+        const idMatch = rawSlipUrl.match(/[-\w]{25,}/);
+        if (idMatch) {
+          const fileId = idMatch[0];
+          drivePreviewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+          driveViewUrl = `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
+        }
+      }
+
+      const content = document.getElementById('inspectorContent');
+      content.innerHTML = `
+        <div class="space-y-4">
+          <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2 text-xs">
+            <div class="flex justify-between">
+              <span class="text-slate-500">ชื่อ-นามสกุล:</span>
+              <span class="font-bold text-white">${st.name} (น้อง${st.nickname})</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">รหัสนักศึกษา:</span>
+              <span class="font-mono text-orange-400 font-bold">${st.id}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">วัน-เวลาที่ส่ง:</span>
+              <span class="text-slate-300 font-mono">${record.timestamp || '-'}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">รหัสอ้างอิง:</span>
+              <span class="text-slate-400 font-mono">${record.refCode || '-'}</span>
+            </div>
+          </div>
+
+          <!-- Embedded Google Drive Interactive Viewer (Direct Image Display) -->
+          <div class="w-full h-96 rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden shadow-inner flex flex-col relative">
+            <iframe 
+              src="${drivePreviewUrl}" 
+              class="w-full h-full border-0 rounded-2xl" 
+              allow="autoplay"
+              loading="lazy"
+            ></iframe>
+          </div>
+
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <a href="${driveViewUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-md shadow-sky-600/25">
+              <i data-lucide="external-link" class="w-4 h-4"></i>
+              <span>เปิดดูรูปเต็มบน Google Drive</span>
+            </a>
+            <button onclick="closeInspectorModal()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition">
+              ปิดหน้าต่าง
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modalSlipInspector').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeInspectorModal() {
+      document.getElementById('modalSlipInspector').classList.add('hidden');
+    }
+
+    async function refreshDataFromCloud() {
+      await loadAllPayments();
+      renderStats();
+      renderAdminTable();
+      alert("ซิงค์ข้อมูลล่าสุดจาก Google Cloud สำเร็จเรียบร้อยแล้ว!");
+    }
+
+    function exportToExcel() {
+      const data = studentDatabase.map((st, idx) => {
+        const record = paymentRecords[st.id];
+        const isPaid = record && record.paid;
+        return {
+          "ลำดับ": idx + 1,
+          "รหัสนักศึกษา": st.id,
+          "ชื่อ - นามสกุล": st.name,
+          "ชื่อเล่น": st.nickname,
+          "อีเมล": st.email,
+          "สถานะ": isPaid ? "ชำระเงินแล้ว" : "ยังไม่ชำระเงิน",
+          "ยอดเงิน (บาท)": isPaid ? 190 : 0,
+          "วัน-เวลาที่ชำระ": record?.timestamp || "-",
+          "รหัสอ้างอิง": record?.refCode || "-",
+          "ลิงก์สลิป": record?.slipUrl || "-"
+        };
+      });
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "ComEd69_Payments");
+      XLSX.writeFile(wb, `ComEd69_Payment_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+  </script>
+</body>
+</html>
