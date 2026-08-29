@@ -1540,7 +1540,9 @@
 
     async function refreshDataFromCloud() {
       const icon = document.getElementById('adminRefreshIcon');
-      if (icon) icon.classList.add('animate-spin');
+      if (icon) {
+        gsap.to(icon, { rotation: "+=360", duration: 0.6, ease: "power2.inOut" });
+      }
 
       // Showing animated loading toast popup
       const loadingToast = showLoadingToast("🔄 กำลังดึงและซิงค์ข้อมูลล่าสุดจาก Google Cloud...");
@@ -1550,10 +1552,9 @@
       renderAdminTable();
 
       setTimeout(() => {
-        if (icon) icon.classList.remove('animate-spin');
         if (loadingToast) loadingToast.remove();
         showToastNotification("✨ ซิงค์ข้อมูลล่าสุดจาก Google Cloud สำเร็จเรียบร้อยแล้ว!");
-      }, 700);
+      }, 500);
     }
 
     function showLoadingToast(msg) {

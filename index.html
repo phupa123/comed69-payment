@@ -1138,13 +1138,14 @@
         console.warn("Local Backend API unavailable, falling back to localStorage", e);
       }
 
-      // Priority 3: LocalStorage
-      loadFromLocal();
-    }
-
     async function manualRefreshData() {
+      const btn = document.getElementById('btnQuickRefresh');
       const icon = document.getElementById('refreshIcon');
-      if (icon) icon.classList.add('animate-spin');
+      
+      // หมุนไอคอนอย่างนุ่มนวลด้วย GSAP
+      if (icon) {
+        gsap.to(icon, { rotation: "+=360", duration: 0.6, ease: "power2.inOut" });
+      }
 
       await loadPaymentRecords();
       refreshProgressStats();
@@ -1154,9 +1155,21 @@
         selectStudent(currentSelectedStudent);
       }
 
+      // แสดง Popup แจ้งเตือนว่ารีเฟรชข้อมูลล่าสุดสำเร็จแล้ว
+      showFrontendToast("✨ รีเฟรชและอัปเดตข้อมูลล่าสุดสำเร็จแล้ว!");
+    }
+
+    function showFrontendToast(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-6 right-6 z-50 bg-slate-900/95 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-2xl shadow-2xl border border-orange-500/40 flex items-center gap-2.5 backdrop-blur-xl';
+      toast.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i><span>${msg}</span>`;
+      document.body.appendChild(toast);
+      lucide.createIcons();
+
+      gsap.fromTo(toast, { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.5)" });
       setTimeout(() => {
-        if (icon) icon.classList.remove('animate-spin');
-      }, 600);
+        gsap.to(toast, { opacity: 0, y: 20, scale: 0.9, duration: 0.3, onComplete: () => toast.remove() });
+      }, 2500);
     }
 
     function saveLocalBackup() {
