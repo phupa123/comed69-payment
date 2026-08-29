@@ -1997,6 +1997,19 @@
       document.getElementById('modalConfirmId').textContent = currentSelectedStudent.id;
       document.getElementById('modalConfirmSlipImg').src = tempSlipDataUrl;
 
+      // Reset Modal UI state
+      const actionArea = document.getElementById('slipActionButtonsArea');
+      const progressState = document.getElementById('slipUploadingProgressState');
+      const bar = document.getElementById('uploadAnimatedBar');
+      const title = document.getElementById('uploadStatusTitle');
+      const subtitle = document.getElementById('uploadStatusSubtitle');
+
+      if (actionArea) actionArea.classList.remove('hidden');
+      if (progressState) progressState.classList.add('hidden');
+      if (bar) bar.style.width = '0%';
+      if (title) title.textContent = 'กำลังส่งข้อมูลและอัปโหลดรูปสลิป...';
+      if (subtitle) subtitle.textContent = 'กรุณารอสักครู่ ระบบกำลังประมวลผลขึ้นสู่ Google Cloud';
+
       const modal = document.getElementById('modalConfirmUpload');
       modal.classList.remove('hidden');
       lucide.createIcons();
@@ -2004,6 +2017,19 @@
 
     function closeConfirmModal() {
       document.getElementById('modalConfirmUpload').classList.add('hidden');
+
+      // Reset modal controls for next submission
+      const actionArea = document.getElementById('slipActionButtonsArea');
+      const progressState = document.getElementById('slipUploadingProgressState');
+      const bar = document.getElementById('uploadAnimatedBar');
+      const title = document.getElementById('uploadStatusTitle');
+      const subtitle = document.getElementById('uploadStatusSubtitle');
+
+      if (actionArea) actionArea.classList.remove('hidden');
+      if (progressState) progressState.classList.add('hidden');
+      if (bar) bar.style.width = '0%';
+      if (title) title.textContent = 'กำลังส่งข้อมูลและอัปโหลดรูปสลิป...';
+      if (subtitle) subtitle.textContent = 'กรุณารอสักครู่ ระบบกำลังประมวลผลขึ้นสู่ Google Cloud';
     }
 
     async function executeSlipSubmission() {
