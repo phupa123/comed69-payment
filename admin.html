@@ -106,6 +106,15 @@
       { email: 'nattachai.p@kkumail.com', name: 'ณัฏฐชัย โพธิ์ทับไทย (โอ้)', password: 'OhNatta#69ComEd', role: 'Admin' }
     ];
 
+    function fillAdminCreds(email, pwd) {
+      var emailEl = document.getElementById('adminEmailInput');
+      var pwdEl = document.getElementById('adminPasswordInput');
+      if (emailEl) emailEl.value = email;
+      if (pwdEl) pwdEl.value = pwd;
+      var errBox = document.getElementById('loginErrorMsg');
+      if (errBox) errBox.classList.add('hidden');
+    }
+
     function togglePasswordVisibility(inputId, iconWrapperId) {
       var input = document.getElementById(inputId);
       if (!input) return;
@@ -195,41 +204,82 @@
     }
   </script>
 
-  <!-- ================= 1. LOGIN SCREEN (SECURE EMAIL + PASSWORD AUTH) ================= -->
+  <!-- ================= 1. ULTRA-PREMIUM MODERN LOGIN SCREEN ================= -->
   <div id="loginScreen"
-    class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
+    class="fixed inset-0 z-40 flex items-center justify-center p-4 sm:p-6 bg-slate-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(249,115,22,0.15),rgba(255,255,255,0))]">
+    
+    <!-- Ambient Background Glow Elements -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-10 right-10 w-72 h-72 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
     <div
-      class="max-w-md w-full bg-slate-900/90 backdrop-blur-2xl border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6 text-center">
-      <div
-        class="w-18 h-18 mx-auto rounded-3xl bg-white p-2 border border-slate-700 shadow-lg flex items-center justify-center">
-        <img src="logo.png" alt="โลโก้" class="w-12 h-12 object-contain">
-      </div>
-      <div>
-        <span class="text-xs font-black tracking-widest text-orange-500 uppercase">Secure Host Admin</span>
-        <h2 class="text-2xl font-black text-white mt-1">เข้าสู่ระบบผู้ดูแลระบบ</h2>
-        <p class="text-xs text-slate-400 mt-1">เฉพาะอีเมลและรหัสผ่านของผู้ดูแลระบบที่ได้รับอนุญาตเท่านั้น</p>
+      class="relative max-w-md w-full bg-slate-900/80 backdrop-blur-2xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/80 space-y-6 text-center">
+      
+      <!-- Brand Header -->
+      <div class="space-y-3">
+        <div class="relative w-20 h-20 mx-auto">
+          <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 blur-lg opacity-40 animate-pulse"></div>
+          <div class="relative w-full h-full rounded-3xl bg-slate-900 border border-slate-700/80 p-2.5 flex items-center justify-center shadow-xl">
+            <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
+          </div>
+        </div>
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-black tracking-widest uppercase mb-1">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span>HOST ADMIN PORTAL</span>
+          </div>
+          <h2 class="text-2xl font-black text-white tracking-tight">เข้าสู่ระบบผู้ดูแล</h2>
+          <p class="text-xs text-slate-400 mt-1">สาขาคอมพิวเตอร์ศึกษา มข. (รหัส 69)</p>
+        </div>
       </div>
 
+      <!-- Quick Admin Account Selector -->
+      <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-3 text-left space-y-2">
+        <div class="flex items-center justify-between text-[11px] font-bold text-slate-400">
+          <span>⚡ เลือกบัญชีแอดมินด่วน:</span>
+          <span class="text-[10px] text-orange-400 font-normal">(คลิกเพื่อกรอกอัตโนมัติ)</span>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5">
+          <button type="button" onclick="fillAdminCreds('thitiwut.a@kkumail.com', 'Phupa#69ComEd')"
+            class="p-2 rounded-xl bg-slate-900 hover:bg-orange-950/40 border border-slate-800 hover:border-orange-500/50 text-center transition group cursor-pointer">
+            <div class="text-[11px] font-extrabold text-white group-hover:text-orange-400">ภูผา</div>
+            <div class="text-[9px] text-orange-400/80 font-mono">Super Admin</div>
+          </button>
+          <button type="button" onclick="fillAdminCreds('pichamon.sam@kkumail.com', 'MooWan#69ComEd')"
+            class="p-2 rounded-xl bg-slate-900 hover:bg-orange-950/40 border border-slate-800 hover:border-orange-500/50 text-center transition group cursor-pointer">
+            <div class="text-[11px] font-extrabold text-white group-hover:text-orange-400">หมูหวาน</div>
+            <div class="text-[9px] text-slate-400 font-mono">Admin</div>
+          </button>
+          <button type="button" onclick="fillAdminCreds('nattachai.p@kkumail.com', 'OhNatta#69ComEd')"
+            class="p-2 rounded-xl bg-slate-900 hover:bg-orange-950/40 border border-slate-800 hover:border-orange-500/50 text-center transition group cursor-pointer">
+            <div class="text-[11px] font-extrabold text-white group-hover:text-orange-400">โอ้</div>
+            <div class="text-[9px] text-slate-400 font-mono">Admin</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Login Form -->
       <form id="adminLoginForm" onsubmit="event.preventDefault(); handleAdminLogin(event);" class="space-y-4 text-left">
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1.5">อีเมลแอดมิน (KKU Mail)</label>
           <div class="relative">
             <input type="email" id="adminEmailInput" placeholder="เช่น thitiwut.a@kkumail.com"
-              class="w-full pl-11 pr-4 py-3 bg-slate-800/90 border border-slate-700 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition"
+              class="w-full pl-11 pr-4 py-3 bg-slate-950/80 border border-slate-700/80 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition font-sans"
               required>
-            <i data-lucide="mail" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5"></i>
+            <i data-lucide="mail" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none"></i>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5">รหัสผ่านแอดมิน (Password)</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">รหัสผ่าน (Password)</label>
           <div class="relative flex items-center">
             <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่านของคุณ"
-              class="w-full pl-11 pr-14 py-3 bg-slate-800/90 border border-slate-700 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition"
+              class="w-full pl-11 pr-14 py-3 bg-slate-950/80 border border-slate-700/80 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition font-sans"
               required>
             <i data-lucide="lock" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none"></i>
             <button type="button" id="pwdToggleBtn" onclick="togglePasswordVisibility('adminPasswordInput', 'pwdToggleIconWrap')"
-              class="absolute right-0 top-0 bottom-0 px-4 text-slate-400 hover:text-white transition cursor-pointer flex items-center justify-center rounded-r-2xl z-10">
+              class="absolute right-0 top-0 bottom-0 px-4 text-slate-400 hover:text-white transition cursor-pointer flex items-center justify-center rounded-r-2xl z-10"
+              title="แสดง/ซ่อนรหัสผ่าน">
               <span id="pwdToggleIconWrap" class="pointer-events-none flex items-center justify-center">
                 <i data-lucide="eye" class="w-5 h-5"></i>
               </span>
@@ -238,21 +288,21 @@
         </div>
 
         <div id="loginErrorMsg"
-          class="hidden text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-2">
+          class="hidden text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 p-3 rounded-2xl flex items-center gap-2">
           <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 flex-shrink-0"></i>
           <span id="loginErrorText">อีเมลหรือรหัสผ่านไม่ถูกต้อง</span>
         </div>
 
         <button type="button" id="btnLoginSubmit" onclick="handleAdminLogin(event)"
-          class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/25 transition transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer">
+          class="w-full py-3.5 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-orange-500/25 transition transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer">
           <i data-lucide="log-in" class="w-4 h-4"></i>
           <span>เข้าสู่ระบบ Dashboard</span>
         </button>
       </form>
 
-      <div class="pt-2">
+      <div class="pt-1">
         <a href="index.html"
-          class="text-xs text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1">
+          class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-orange-400 transition font-bold py-1">
           <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
           <span>กลับสู่หน้าเว็บไซต์หลัก</span>
         </a>
