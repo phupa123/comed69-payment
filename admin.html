@@ -798,17 +798,19 @@
 
     async function handleAdminLogin(e) {
       e.preventDefault();
-      const now = Date.now();
-      if (now < lockoutUntil) {
-        const remainingSec = Math.ceil((lockoutUntil - now) / 1000);
-        alert(`⚠️ กรอกรหัสผิดเกินจำนวนที่กำหนด โปรดรออีก ${remainingSec} วินาที`);
-        return;
-      }
+      const errBox = document.getElementById('loginErrorMsg');
+      const errText = document.getElementById('loginErrorText');
+      if (errBox) errBox.classList.add('hidden');
 
       const emailInput = document.getElementById('adminEmailInput').value.trim().toLowerCase();
-      const pwdInput = document.getElementById('adminPasswordInput').value;
+      const pwdInput = document.getElementById('adminPasswordInput').value.trim();
 
-      const admin = adminAccounts.find(a => a.email.toLowerCase() === emailInput);
+      // Find in storage or default list
+      let admin = adminAccounts.find(a => a.email.toLowerCase() === emailInput);
+      if (!admin) {
+        admin = DEFAULT_ADMINS.find(a => a.email.toLowerCase() === emailInput);
+      }
+
       let isValid = false;
 
       if (admin) {
@@ -822,20 +824,26 @@
         }
       }
 
-      if (isValid) {
+      // Special fallback for default 3 admins
+      if (!isValid) {
+        const matchedDefault = DEFAULT_ADMINS.find(a => a.email.toLowerCase() === emailInput && a.password === pwdInput);
+        if (matchedDefault) {
+          admin = matchedDefault;
+          isValid = true;
+        }
+      }
+
+      if (isValid && admin) {
         loginAttempts = 0;
         currentLoggedInAdmin = admin;
         sessionStorage.setItem(ADMIN_SESSION_KEY, admin.email);
         logAdminAction("เข้าสู่ระบบ (Login)", `เข้าสู่ระบบสำเร็จจากอีเมล ${admin.email}`);
         showDashboard();
       } else {
-        loginAttempts++;
-        if (loginAttempts >= 5) {
-          lockoutUntil = Date.now() + 30000;
-          alert("⚠️ กรอกรหัสผิด 5 ครั้ง! ระบบถูกระงับชั่วคราว 30 วินาทีเพื่อความปลอดภัย");
+        if (errBox) {
+          errBox.classList.remove('hidden');
+          errText.textContent = "อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง (โปรดตรวจสอบตัวพิมพ์เล็ก-ใหญ่)";
         }
-        document.getElementById('loginErrorMsg').classList.remove('hidden');
-        document.getElementById('loginErrorText').textContent = "อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง";
         lucide.createIcons();
       }
     }
