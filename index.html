@@ -489,7 +489,7 @@
 
       <!-- Search & Autocomplete Card -->
       <div
-        class="search-card-animate mobile-card premium-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-card-premium relative overflow-hidden">
+        class="search-card-animate mobile-card premium-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-card-premium relative">
 
         <!-- Subtle background deco -->
         <div class="absolute right-0 top-0 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -540,7 +540,7 @@
 
             <!-- Autocomplete Dropdown List -->
             <div id="autocompleteDropdown"
-              class="hidden absolute left-0 right-0 top-full mt-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-dropdown border border-slate-200 z-50 max-h-72 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
+              class="hidden absolute left-0 right-0 top-full mt-2 bg-white/98 backdrop-blur-2xl rounded-2xl shadow-2xl border-2 border-orange-200/80 z-[100] max-h-80 sm:max-h-96 overflow-y-auto custom-scrollbar divide-y divide-slate-100 overscroll-contain">
               <!-- Rendered dynamically -->
             </div>
           </div>
@@ -1793,7 +1793,8 @@
         dropdown.classList.remove('hidden');
       }
 
-      if (exactMatch && (query === exactMatch.id || query === exactMatch.email)) {
+      // Auto-select ONLY when full 11-char student ID (e.g. 693050120-5) or full email is typed
+      if (exactMatch && (query === exactMatch.id || (query.length === 11 && query.replace(/-/g, '') === exactMatch.id.replace(/-/g, '')) || query.toLowerCase() === exactMatch.email.toLowerCase())) {
         selectStudent(exactMatch);
         dropdown.classList.add('hidden');
       }
