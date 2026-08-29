@@ -98,6 +98,47 @@
 <body
   class="min-h-screen flex flex-col antialiased bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white overflow-x-hidden">
 
+  <!-- Critical functions defined early so onclick attributes can find them immediately -->
+  <script>
+    function togglePasswordVisibility(inputId, iconWrapperId) {
+      var input = document.getElementById(inputId);
+      if (!input) return;
+      input.type = (input.type === 'password') ? 'text' : 'password';
+      var wrap = document.getElementById(iconWrapperId);
+      if (wrap) {
+        if (input.type === 'text') {
+          wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>';
+        } else {
+          wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+        }
+      }
+    }
+
+    function handleAdminLogin(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      var emailInput = (document.getElementById('adminEmailInput') || {}).value || '';
+      var pwdInput = (document.getElementById('adminPasswordInput') || {}).value || '';
+      emailInput = emailInput.trim().toLowerCase();
+      pwdInput = pwdInput.trim();
+
+      var errBox = document.getElementById('loginErrorMsg');
+      var errText = document.getElementById('loginErrorText');
+      if (errBox) errBox.classList.add('hidden');
+
+      if (!emailInput || !pwdInput) {
+        if (errBox) { errBox.classList.remove('hidden'); if (errText) errText.textContent = 'กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน'; }
+        return;
+      }
+
+      // Wait for main script to be ready
+      if (typeof _handleAdminLoginCore === 'function') {
+        _handleAdminLoginCore(emailInput, pwdInput);
+      } else {
+        if (errBox) { errBox.classList.remove('hidden'); if (errText) errText.textContent = 'กรุณารอระบบโหลดสักครู่แล้วลองใหม่'; }
+      }
+    }
+  </script>
+
   <!-- ================= 1. LOGIN SCREEN (SECURE EMAIL + PASSWORD AUTH) ================= -->
   <div id="loginScreen"
     class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
@@ -791,23 +832,10 @@
       }
     }
 
-    async function handleAdminLogin(e) {
-      if (e && e.preventDefault) e.preventDefault();
-      
+    async function _handleAdminLoginCore(emailInput, pwdInput) {
       const errBox = document.getElementById('loginErrorMsg');
       const errText = document.getElementById('loginErrorText');
       if (errBox) errBox.classList.add('hidden');
-
-      const emailInput = (document.getElementById('adminEmailInput')?.value || '').trim().toLowerCase();
-      const pwdInput = (document.getElementById('adminPasswordInput')?.value || '').trim();
-
-      if (!emailInput || !pwdInput) {
-        if (errBox) {
-          errBox.classList.remove('hidden');
-          errText.textContent = "กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน";
-        }
-        return;
-      }
 
       // Master check against DEFAULT_ADMINS or stored adminAccounts
       let matchedAdmin = null;
@@ -854,9 +882,6 @@
         if (errBox) {
           errBox.classList.remove('hidden');
           errText.textContent = "อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง";
-        }
-        if (typeof lucide !== 'undefined') {
-          lucide.createIcons();
         }
       }
     }
