@@ -171,26 +171,37 @@
     
     <!-- Top Header -->
     <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800 shadow-md">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        <div class="flex items-center gap-3.5">
-          <div class="w-12 h-12 rounded-2xl bg-white p-1 border border-slate-700 shadow-sm flex items-center justify-center">
-            <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-black text-orange-400 uppercase tracking-wider">COMED KKU 69</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-500/20 text-orange-300 border border-orange-500/30">Host Admin</span>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 sm:py-0 sm:h-20 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white p-1 border border-slate-700 shadow-sm flex items-center justify-center flex-shrink-0">
+              <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
             </div>
-            <h1 class="text-base sm:text-lg font-black text-white">ระบบจัดการหลังบ้าน (Control Panel)</h1>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] font-black text-orange-400 uppercase tracking-wider">COMED KKU 69</span>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-orange-500/20 text-orange-300 border border-orange-500/30">Host Admin</span>
+              </div>
+              <h1 class="text-sm sm:text-lg font-black text-white">ระบบจัดการหลังบ้าน</h1>
+            </div>
+          </div>
+
+          <div class="sm:hidden flex items-center gap-1.5">
+            <button onclick="refreshDataFromCloud()" class="p-2 rounded-xl bg-sky-950/80 text-sky-400 border border-sky-700/60" title="รีเฟรชข้อมูล">
+              <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+            </button>
+            <button onclick="handleAdminLogout()" class="p-2 rounded-xl text-rose-400 bg-rose-500/10 border border-rose-500/20" title="ออกจากระบบ">
+              <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2.5">
           <button onclick="refreshDataFromCloud()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-sky-400 bg-sky-950/80 hover:bg-sky-900 border border-sky-700/60 transition shadow-sm group">
             <i data-lucide="rotate-cw" id="adminRefreshIcon" class="w-4 h-4 transition-transform group-hover:rotate-180 duration-500"></i>
             <span>รีเฟรชข้อมูล</span>
           </button>
-          <a href="index.html" target="_blank" class="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
+          <a href="index.html" target="_blank" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
             <i data-lucide="external-link" class="w-4 h-4"></i>
             <span>ดูหน้าเว็บ</span>
           </a>
