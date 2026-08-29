@@ -42,6 +42,8 @@
     }
   </script>
 
+  <!-- Google Identity Services (Sign in with Google) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- GSAP for Ultra-Smooth Animations -->
@@ -113,6 +115,17 @@
           </div>
           <h2 class="text-2xl font-black text-white tracking-tight">เข้าสู่ระบบผู้ดูแล</h2>
           <p class="text-xs text-slate-400 mt-1">สาขาคอมพิวเตอร์ศึกษา มข. (รหัส 69)</p>
+        </div>
+      </div>
+
+      <!-- Quick Google Admin Sign-in Button -->
+      <div class="space-y-3 pt-1">
+        <div id="googleAdminButtonWrapper" class="flex justify-center min-h-[44px]"></div>
+        
+        <div class="relative flex py-1 items-center">
+          <div class="flex-grow border-t border-slate-800"></div>
+          <span class="flex-shrink mx-3 text-slate-500 text-[11px] font-semibold">หรือเข้าสู่ระบบด้วยรหัสผ่าน</span>
+          <div class="flex-grow border-t border-slate-800"></div>
         </div>
       </div>
 
@@ -684,6 +697,70 @@
     let trashRecords = {};
     let currentFilter = 'all';
 
+    const GOOGLE_CLIENT_ID = "799199144896-9tft22kns4jjv40lk19oul9dp1mprmb4.apps.googleusercontent.com";
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch(e) {
+        return null;
+      }
+    }
+
+    async function handleGoogleAdminCredential(response) {
+      const data = parseJwt(response.credential);
+      const errBox = document.getElementById('loginErrorMsg');
+      const errText = document.getElementById('loginErrorText');
+
+      if (!data || !data.email) {
+        if (errBox && errText) {
+          errText.textContent = "ไม่สามารถอ่านข้อมูลบัญชี Google ได้";
+          errBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      const email = data.email.toLowerCase().trim();
+      const admin = adminAccounts.find(a => a.email.toLowerCase() === email);
+
+      if (admin) {
+        // Authorized Admin Login
+        currentLoggedInAdmin = admin;
+        sessionStorage.setItem(ADMIN_SESSION_KEY, admin.email);
+        await logAdminAction("Google Login Success", `ผู้ดูแล ${admin.name} เข้าสู่ระบบด้วย Google Account (${email})`);
+        showDashboard();
+      } else {
+        // Not an authorized admin
+        if (errBox && errText) {
+          errText.textContent = `บัญชี "${email}" ไม่มีสิทธิ์ผู้ดูแลระบบ (Admin) ในระบบนี้`;
+          errBox.classList.remove('hidden');
+        }
+      }
+    }
+
+    function initGoogleAdminButton() {
+      try {
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleAdminCredential,
+            auto_select: false
+          });
+          google.accounts.id.renderButton(
+            document.getElementById('googleAdminButtonWrapper'),
+            { theme: "filled_blue", size: "large", width: 280, text: "signin_with", shape: "pill" }
+          );
+        }
+      } catch(e) {
+        console.warn("Google Admin One-Tap Error", e);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       const loggedEmail = sessionStorage.getItem(ADMIN_SESSION_KEY);
       if (loggedEmail) {
@@ -691,6 +768,7 @@
         showDashboard();
       } else {
         showLoginScreen();
+        initGoogleAdminButton();
       }
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
