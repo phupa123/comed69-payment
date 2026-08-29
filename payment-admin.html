@@ -779,6 +779,20 @@
       }
     }
 
+    // Ensure Google Identity SDK is fully initialized
+    function ensureGoogleInitialized() {
+      if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleAdminCredential,
+          auto_select: false,
+          cancel_on_tap_outside: false
+        });
+        return true;
+      }
+      return false;
+    }
+
     function switchLoginMode(mode) {
       const tabGoogle = document.getElementById('tabModeGoogle');
       const tabPassword = document.getElementById('tabModePassword');
@@ -804,32 +818,50 @@
 
     function triggerGoogleOneTapPrompt() {
       try {
-        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-          google.accounts.id.prompt();
+        if (ensureGoogleInitialized()) {
+          google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              console.log("One-tap dismissed/suppressed, rendering standard button.");
+            }
+          });
         }
       } catch(e) {
         console.warn("One-Tap Trigger Error", e);
       }
     }
 
+    // Explicit OAuth Login Popup (Triggered when clicking the primary button)
+    function triggerGooglePopupAuth() {
+      try {
+        if (ensureGoogleInitialized()) {
+          // Trigger Google One Tap / Account picker popup
+          google.accounts.id.prompt();
+        } else {
+          alert("กำลังเชื่อมต่อ Google Service กรุณารอสักครู่...");
+        }
+      } catch(e) {
+        console.warn("Google Auth Trigger", e);
+      }
+    }
+
     function initGoogleAdminButton() {
       try {
-        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-          google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
-            callback: handleGoogleAdminCredential,
-            auto_select: false,
-            cancel_on_tap_outside: false
-          });
-          google.accounts.id.renderButton(
-            document.getElementById('googleAdminButtonWrapper'),
-            { theme: "filled_blue", size: "large", width: 280, text: "signin_with", shape: "pill" }
-          );
+        if (ensureGoogleInitialized()) {
+          const wrapper = document.getElementById('googleAdminButtonWrapper');
+          if (wrapper) {
+            google.accounts.id.renderButton(
+              wrapper,
+              { theme: "filled_blue", size: "large", width: 280, text: "signin_with", shape: "pill" }
+            );
+          }
           
           // Auto prompt Google One-Tap account selector at top-right
           setTimeout(() => {
             google.accounts.id.prompt();
-          }, 400);
+          }, 500);
+        } else {
+          // If script still loading, retry in 300ms
+          setTimeout(initGoogleAdminButton, 300);
         }
       } catch(e) {
         console.warn("Google Admin One-Tap Error", e);
