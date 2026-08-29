@@ -2822,14 +2822,18 @@
       }
     }
 
-    // Call after initial fetch
-    const originalRenderSubmissions = renderSubmissions;
-    renderSubmissions = function(submissions) {
-      if (typeof originalRenderSubmissions === 'function') {
-        originalRenderSubmissions(submissions);
-      }
+    // Run user auth & payment sync on page load and table render
+    document.addEventListener('DOMContentLoaded', () => {
       checkPaymentUserSession();
-    };
+    });
+
+    if (typeof renderStatusTable === 'function') {
+      const originalRenderStatusTable = renderStatusTable;
+      renderStatusTable = function() {
+        originalRenderStatusTable();
+        checkPaymentUserSession();
+      };
+    }
   </script>
 </body>
 
