@@ -195,9 +195,10 @@ function doPost(e) {
         issueSheet = ss.insertSheet("Issues_ปัญหาผู้ใช้");
         issueSheet.appendRow(["รหัสปัญหา", "รหัสนักศึกษา", "ชื่อ-นามสกุล", "ช่องทางติดต่อ", "หัวข้อปัญหา", "รายละเอียด", "ลิงก์หลักฐาน", "สถานะ", "เวลาที่แจ้ง"]);
         issueSheet.setFrozenRows(1);
+        issueSheet.getRange(1, 1, 1, 9).setBackground("#ea580c").setFontColor("#ffffff").setFontWeight("bold");
       }
 
-      const issueId = "ISSUE-" + Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyyMMdd-HHmmss");
+      const issueId = data.issueId || ("ISSUE-" + Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyyMMdd-HHmmss"));
       const timeStr = Utilities.formatDate(new Date(), "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss");
 
       issueSheet.appendRow([
@@ -212,6 +213,7 @@ function doPost(e) {
         timeStr
       ]);
 
+      SpreadsheetApp.flush();
       return ContentService.createTextOutput(JSON.stringify({ success: true, issueId: issueId })).setMimeType(ContentService.MimeType.JSON);
     }
 
