@@ -805,6 +805,8 @@
             document.getElementById('googleButtonWrapper'),
             { theme: "outline", size: "large", width: 280, text: "signin_with", shape: "pill" }
           );
+          // Trigger Google Account Floating Popup (Top Right)
+          google.accounts.id.prompt();
         }
       } catch (e) {
         console.warn("Google One-Tap Init", e);
@@ -971,10 +973,31 @@
       renderRoster(filtered);
     }
 
-    // Initial render
+    // Initial render & Google One-Tap Setup
     document.addEventListener('DOMContentLoaded', () => {
       checkUserSession();
       renderRoster(window.STUDENTS_DATA || []);
+
+      // Auto-trigger Google One-Tap Top-Right Prompt if user is not logged in
+      const session = localStorage.getItem('COMED_USER_SESSION');
+      if (!session) {
+        setTimeout(() => {
+          try {
+            if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+              google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleGoogleCredentialResponse,
+                auto_select: false,
+                cancel_on_tap_outside: false
+              });
+              // Prompt Top-Right Floating Google Account Selector
+              google.accounts.id.prompt();
+            }
+          } catch(e) {
+            console.warn("One-Tap Auto Prompt error", e);
+          }
+        }, 800);
+      }
     });
   </script>
 </body>
