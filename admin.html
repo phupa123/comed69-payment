@@ -100,41 +100,97 @@
 
   <!-- Critical functions defined early so onclick attributes can find them immediately -->
   <script>
+    var DEFAULT_ADMINS = [
+      { email: 'thitiwut.a@kkumail.com', name: 'ธิติวุฒิ อารีเอื้อ (ภูผา)', password: 'Phupa#69ComEd', role: 'Super Admin' },
+      { email: 'pichamon.sam@kkumail.com', name: 'พิชามญธุ์ สามสี (หมูหวาน)', password: 'MooWan#69ComEd', role: 'Admin' },
+      { email: 'nattachai.p@kkumail.com', name: 'ณัฏฐชัย โพธิ์ทับไทย (โอ้)', password: 'OhNatta#69ComEd', role: 'Admin' }
+    ];
+
     function togglePasswordVisibility(inputId, iconWrapperId) {
       var input = document.getElementById(inputId);
       if (!input) return;
-      input.type = (input.type === 'password') ? 'text' : 'password';
+      
+      var isPwd = (input.type === 'password');
+      input.type = isPwd ? 'text' : 'password';
+
       var wrap = document.getElementById(iconWrapperId);
       if (wrap) {
-        if (input.type === 'text') {
-          wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>';
+        if (isPwd) {
+          wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>';
         } else {
-          wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+          wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
         }
       }
     }
 
-    function handleAdminLogin(e) {
+    async function handleAdminLogin(e) {
       if (e && e.preventDefault) e.preventDefault();
-      var emailInput = (document.getElementById('adminEmailInput') || {}).value || '';
-      var pwdInput = (document.getElementById('adminPasswordInput') || {}).value || '';
-      emailInput = emailInput.trim().toLowerCase();
-      pwdInput = pwdInput.trim();
+      var emailEl = document.getElementById('adminEmailInput');
+      var pwdEl = document.getElementById('adminPasswordInput');
+      var emailInput = (emailEl ? emailEl.value : '').trim().toLowerCase();
+      var pwdInput = (pwdEl ? pwdEl.value : '').trim();
 
       var errBox = document.getElementById('loginErrorMsg');
       var errText = document.getElementById('loginErrorText');
       if (errBox) errBox.classList.add('hidden');
 
       if (!emailInput || !pwdInput) {
-        if (errBox) { errBox.classList.remove('hidden'); if (errText) errText.textContent = 'กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน'; }
+        if (errBox) { 
+          errBox.classList.remove('hidden'); 
+          if (errText) errText.textContent = 'กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน'; 
+        }
         return;
       }
 
-      // Wait for main script to be ready
-      if (typeof _handleAdminLoginCore === 'function') {
-        _handleAdminLoginCore(emailInput, pwdInput);
+      // Check against DEFAULT_ADMINS or stored admin accounts
+      var matchedAdmin = null;
+      for (var i = 0; i < DEFAULT_ADMINS.length; i++) {
+        if (DEFAULT_ADMINS[i].email.toLowerCase() === emailInput && DEFAULT_ADMINS[i].password === pwdInput) {
+          matchedAdmin = DEFAULT_ADMINS[i];
+          break;
+        }
+      }
+
+      if (!matchedAdmin) {
+        try {
+          var stored = localStorage.getItem('COMED_KKU69_ADMIN_ACCOUNTS_V2');
+          if (stored) {
+            var list = JSON.parse(stored);
+            for (var j = 0; j < list.length; j++) {
+              if (list[j].email.toLowerCase() === emailInput && list[j].password === pwdInput) {
+                matchedAdmin = list[j];
+                break;
+              }
+            }
+          }
+        } catch(err) {}
+      }
+
+      if (matchedAdmin) {
+        try {
+          sessionStorage.setItem('COMED_KKU69_ADMIN_LOGGED_USER', matchedAdmin.email);
+        } catch(err) {}
+        
+        // Hide login, show dashboard instantly
+        var login = document.getElementById('loginScreen');
+        var dash = document.getElementById('adminDashboard');
+        if (login) {
+          login.style.display = 'none';
+          login.classList.add('hidden');
+        }
+        if (dash) {
+          dash.style.display = 'flex';
+          dash.classList.remove('hidden');
+        }
+
+        if (typeof showDashboard === 'function') {
+          showDashboard();
+        }
       } else {
-        if (errBox) { errBox.classList.remove('hidden'); if (errText) errText.textContent = 'กรุณารอระบบโหลดสักครู่แล้วลองใหม่'; }
+        if (errBox) {
+          errBox.classList.remove('hidden');
+          if (errText) errText.textContent = 'อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง';
+        }
       }
     }
   </script>
@@ -169,12 +225,12 @@
           <label class="block text-xs font-bold text-slate-300 mb-1.5">รหัสผ่านแอดมิน (Password)</label>
           <div class="relative flex items-center">
             <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่านของคุณ"
-              class="w-full pl-11 pr-12 py-3 bg-slate-800/90 border border-slate-700 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition"
+              class="w-full pl-11 pr-14 py-3 bg-slate-800/90 border border-slate-700 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition"
               required>
             <i data-lucide="lock" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none"></i>
             <button type="button" id="pwdToggleBtn" onclick="togglePasswordVisibility('adminPasswordInput', 'pwdToggleIconWrap')"
-              class="absolute right-2.5 p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-700/50 transition cursor-pointer z-10">
-              <span id="pwdToggleIconWrap">
+              class="absolute right-0 top-0 bottom-0 px-4 text-slate-400 hover:text-white transition cursor-pointer flex items-center justify-center rounded-r-2xl z-10">
+              <span id="pwdToggleIconWrap" class="pointer-events-none flex items-center justify-center">
                 <i data-lucide="eye" class="w-5 h-5"></i>
               </span>
             </button>
