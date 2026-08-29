@@ -83,153 +83,22 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
-    @keyframes progress {
-      0% { width: 0%; }
-      100% { width: 100%; }
-    }
-    @keyframes fadeOutSplash {
-      0% { opacity: 1; visibility: visible; }
-      99% { opacity: 0; visibility: visible; }
-      100% { opacity: 0; visibility: hidden; display: none; }
-    }
   </style>
 </head>
 
 <body
   class="min-h-screen flex flex-col antialiased bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white overflow-x-hidden">
 
-  <!-- Critical functions defined early so onclick attributes can find them immediately -->
-  <script>
-    var DEFAULT_ADMINS = [
-      { email: 'thitiwut.a@kkumail.com', name: 'ธิติวุฒิ อารีเอื้อ (ภูผา)', password: 'Phupa#69ComEd', role: 'Super Admin' },
-      { email: 'pichamon.sam@kkumail.com', name: 'พิชามญธุ์ สามสี (หมูหวาน)', password: 'MooWan#69ComEd', role: 'Admin' },
-      { email: 'nattachai.p@kkumail.com', name: 'ณัฏฐชัย โพธิ์ทับไทย (โอ้)', password: 'OhNatta#69ComEd', role: 'Admin' }
-    ];
-
-    function fillAdminCreds(email, pwd) {
-      var emailEl = document.getElementById('adminEmailInput');
-      var pwdEl = document.getElementById('adminPasswordInput');
-      if (emailEl) emailEl.value = email;
-      if (pwdEl) pwdEl.value = pwd;
-      var errBox = document.getElementById('loginErrorMsg');
-      if (errBox) errBox.classList.add('hidden');
-    }
-
-    function togglePasswordVisibility(inputId, iconWrapperId) {
-      var input = document.getElementById(inputId);
-      if (!input) return;
-      
-      var isPwd = (input.type === 'password');
-      input.type = isPwd ? 'text' : 'password';
-
-      var wrap = document.getElementById(iconWrapperId);
-      if (wrap) {
-        if (isPwd) {
-          wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>';
-        } else {
-          wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
-        }
-      }
-    }
-
-    async function handleAdminLogin(e) {
-      if (e && e.preventDefault) e.preventDefault();
-      var emailEl = document.getElementById('adminEmailInput');
-      var pwdEl = document.getElementById('adminPasswordInput');
-      var emailInput = (emailEl ? emailEl.value : '').trim().toLowerCase();
-      var pwdInput = (pwdEl ? pwdEl.value : '').trim();
-
-      var errBox = document.getElementById('loginErrorMsg');
-      var errText = document.getElementById('loginErrorText');
-      if (errBox) errBox.classList.add('hidden');
-
-      if (!emailInput || !pwdInput) {
-        if (errBox) { 
-          errBox.classList.remove('hidden'); 
-          if (errText) errText.textContent = 'กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน'; 
-        }
-        return;
-      }
-
-      // Check against DEFAULT_ADMINS or stored admin accounts
-      var matchedAdmin = null;
-      for (var i = 0; i < DEFAULT_ADMINS.length; i++) {
-        if (DEFAULT_ADMINS[i].email.toLowerCase() === emailInput && DEFAULT_ADMINS[i].password === pwdInput) {
-          matchedAdmin = DEFAULT_ADMINS[i];
-          break;
-        }
-      }
-
-      if (!matchedAdmin) {
-        try {
-          var stored = localStorage.getItem('COMED_KKU69_ADMIN_ACCOUNTS_V2');
-          if (stored) {
-            var list = JSON.parse(stored);
-            for (var j = 0; j < list.length; j++) {
-              if (list[j].email.toLowerCase() === emailInput && list[j].password === pwdInput) {
-                matchedAdmin = list[j];
-                break;
-              }
-            }
-          }
-        } catch(err) {}
-      }
-
-      if (matchedAdmin) {
-        try {
-          sessionStorage.setItem('COMED_KKU69_ADMIN_LOGGED_USER', matchedAdmin.email);
-        } catch(err) {}
-        
-        // Hide login, show dashboard instantly
-        var login = document.getElementById('loginScreen');
-        var dash = document.getElementById('adminDashboard');
-        if (login) {
-          login.style.display = 'none';
-          login.classList.add('hidden');
-        }
-        if (dash) {
-          dash.style.display = 'flex';
-          dash.classList.remove('hidden');
-        }
-
-        if (typeof showDashboard === 'function') {
-          showDashboard();
-        } else if (typeof window.initAdminDashboard === 'function') {
-          window.initAdminDashboard();
-        }
-      } else {
-        if (errBox) {
-          errBox.classList.remove('hidden');
-          if (errText) errText.textContent = 'อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง';
-        }
-      }
-    }
-
-    // Global placeholder for refreshDataFromCloud before full script loads
-    function refreshDataFromCloud() {
-      if (typeof window._refreshDataFromCloudImpl === 'function') {
-        window._refreshDataFromCloudImpl();
-      } else if (typeof loadAllPayments === 'function') {
-        loadAllPayments().then(() => {
-          if (typeof renderStats === 'function') renderStats();
-          if (typeof renderAdminTable === 'function') renderAdminTable();
-        });
-      }
-    }
-  </script>
-
   <!-- ================= 1. ULTRA-PREMIUM MODERN LOGIN SCREEN ================= -->
   <div id="loginScreen"
     class="fixed inset-0 z-40 flex items-center justify-center p-4 sm:p-6 bg-slate-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(249,115,22,0.15),rgba(255,255,255,0))]">
     
-    <!-- Ambient Background Glow Elements -->
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute bottom-10 right-10 w-72 h-72 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
     <div
       class="relative max-w-md w-full bg-slate-900/80 backdrop-blur-2xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/80 space-y-6 text-center">
       
-      <!-- Brand Header -->
       <div class="space-y-3">
         <div class="relative w-20 h-20 mx-auto">
           <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 blur-lg opacity-40 animate-pulse"></div>
@@ -829,26 +698,19 @@
     ];
 
     let googleAppsScriptUrl = "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
-    let studentDatabase = (typeof window.STUDENTS_DATA !== 'undefined' && window.STUDENTS_DATA.length > 0) ? window.STUDENTS_DATA : DEFAULT_STUDENTS;
+    let studentDatabase = DEFAULT_STUDENTS;
     let paymentRecords = {};
     let trashRecords = {};
     let currentFilter = 'all';
 
-    window.initAdminDashboard = showDashboard;
-
     document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const loggedEmail = sessionStorage.getItem(ADMIN_SESSION_KEY);
-        if (loggedEmail) {
-          currentLoggedInAdmin = adminAccounts.find(a => a.email.toLowerCase() === loggedEmail.toLowerCase()) || { email: loggedEmail, name: "Admin" };
-          showDashboard();
-        } else {
-          showLoginScreen();
-        }
-      } catch (e) {
+      const loggedEmail = sessionStorage.getItem(ADMIN_SESSION_KEY);
+      if (loggedEmail) {
+        currentLoggedInAdmin = adminAccounts.find(a => a.email.toLowerCase() === loggedEmail.toLowerCase()) || { email: loggedEmail, name: "Admin" };
+        showDashboard();
+      } else {
         showLoginScreen();
       }
-
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
       }
@@ -866,22 +728,28 @@
       }, 20000);
     });
 
-    function togglePasswordVisibility(inputId, btnOrIconId) {
+    function fillAdminCreds(email, pwd) {
+      const emailEl = document.getElementById('adminEmailInput');
+      const pwdEl = document.getElementById('adminPasswordInput');
+      if (emailEl) emailEl.value = email;
+      if (pwdEl) pwdEl.value = pwd;
+      const errBox = document.getElementById('loginErrorMsg');
+      if (errBox) errBox.classList.add('hidden');
+    }
+
+    function togglePasswordVisibility(inputId, iconWrapperId) {
       const input = document.getElementById(inputId);
       if (!input) return;
+      
+      const isPwd = (input.type === 'password');
+      input.type = isPwd ? 'text' : 'password';
 
-      if (input.type === 'password') {
-        input.type = 'text';
-      } else {
-        input.type = 'password';
-      }
-
-      const iconEl = document.getElementById(btnOrIconId);
-      if (iconEl) {
-        if (input.type === 'text') {
-          iconEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>`;
+      const wrap = document.getElementById(iconWrapperId);
+      if (wrap) {
+        if (isPwd) {
+          wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>';
         } else {
-          iconEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+          wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
         }
       }
     }
@@ -889,47 +757,39 @@
     function showLoginScreen() {
       const login = document.getElementById('loginScreen');
       const dash = document.getElementById('adminDashboard');
-      if (login) login.style.display = 'flex';
-      if (dash) dash.style.display = 'none';
+      if (login) login.classList.remove('hidden');
+      if (dash) dash.classList.add('hidden');
     }
 
     async function showDashboard() {
       const login = document.getElementById('loginScreen');
       const dash = document.getElementById('adminDashboard');
-      
-      if (login) {
-        login.style.display = 'none';
-        login.classList.add('hidden');
-      }
-      if (dash) {
-        dash.style.display = 'flex';
-        dash.classList.remove('hidden');
-      }
+      if (login) login.classList.add('hidden');
+      if (dash) dash.classList.remove('hidden');
 
       studentDatabase = (typeof window.STUDENTS_DATA !== 'undefined' && window.STUDENTS_DATA.length > 0) ? window.STUDENTS_DATA : DEFAULT_STUDENTS;
       
-      // Load cached payments immediately
-      try {
-        const local = localStorage.getItem(STORAGE_KEY);
-        if (local) paymentRecords = JSON.parse(local);
-        const localTrash = localStorage.getItem('COMED_KKU69_TRASH_RECORDS');
-        if (localTrash) trashRecords = JSON.parse(localTrash);
-      } catch(e) {}
+      const local = localStorage.getItem(STORAGE_KEY);
+      if (local) {
+        try { paymentRecords = JSON.parse(local); } catch(e) {}
+      }
+      const localTrash = localStorage.getItem('COMED_KKU69_TRASH_RECORDS');
+      if (localTrash) {
+        try { trashRecords = JSON.parse(localTrash); } catch(e) {}
+      }
 
       renderStats();
       renderAdminTable();
 
       try {
         if (typeof gsap !== 'undefined') {
-          gsap.fromTo("header", { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power3.out" });
-          gsap.fromTo(".admin-stat-card", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, stagger: 0.05, ease: "power3.out" });
+          gsap.fromTo("header", { y: -25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" });
+          gsap.fromTo(".admin-stat-card", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power3.out" });
+          gsap.fromTo("#adminTableContainer", { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, delay: 0.2, ease: "power3.out" });
         }
-      } catch (e) {}
-
-      try {
-        await loadAllPayments(true);
       } catch(e) {}
-      
+
+      await loadAllPayments();
       renderStats();
       renderAdminTable();
       if (typeof lucide !== 'undefined') {
@@ -942,9 +802,7 @@
       const timestamp = new Date().toLocaleString('th-TH');
       const newLog = { timestamp, adminEmail: email, action, detail };
       adminLogs.unshift(newLog);
-      try {
-        localStorage.setItem(ADMIN_LOGS_KEY, JSON.stringify(adminLogs.slice(0, 200)));
-      } catch(e) {}
+      localStorage.setItem(ADMIN_LOGS_KEY, JSON.stringify(adminLogs.slice(0, 200)));
 
       if (googleAppsScriptUrl) {
         try {
@@ -963,57 +821,55 @@
       }
     }
 
-    async function _handleAdminLoginCore(emailInput, pwdInput) {
+    async function handleAdminLogin(e) {
+      e.preventDefault();
       const errBox = document.getElementById('loginErrorMsg');
       const errText = document.getElementById('loginErrorText');
       if (errBox) errBox.classList.add('hidden');
 
-      // Master check against DEFAULT_ADMINS or stored adminAccounts
-      let matchedAdmin = null;
+      const emailInput = document.getElementById('adminEmailInput').value.trim().toLowerCase();
+      const pwdInput = document.getElementById('adminPasswordInput').value.trim();
 
-      // 1. Direct check with DEFAULT_ADMINS
-      for (const adm of DEFAULT_ADMINS) {
-        if (adm.email.toLowerCase() === emailInput && adm.password === pwdInput) {
-          matchedAdmin = adm;
-          break;
-        }
+      // Find in storage or default list
+      let admin = adminAccounts.find(a => a.email.toLowerCase() === emailInput);
+      if (!admin) {
+        admin = DEFAULT_ADMINS.find(a => a.email.toLowerCase() === emailInput);
       }
 
-      // 2. Check with stored adminAccounts (if customized)
-      if (!matchedAdmin && Array.isArray(adminAccounts)) {
-        for (const adm of adminAccounts) {
-          if (adm.email.toLowerCase() === emailInput && adm.password === pwdInput) {
-            matchedAdmin = adm;
-            break;
+      let isValid = false;
+
+      if (admin) {
+        if (admin.password && admin.password === pwdInput) {
+          isValid = true;
+        } else if (admin.hash) {
+          const inputHash = await sha256(emailInput + ':' + pwdInput);
+          if (inputHash === admin.hash) {
+            isValid = true;
           }
         }
       }
 
-      // 3. Fallback hash check
-      if (!matchedAdmin) {
-        for (const adm of [...DEFAULT_ADMINS, ...(adminAccounts || [])]) {
-          if (adm.email.toLowerCase() === emailInput && adm.hash) {
-            const inputHash = await sha256(emailInput + ':' + pwdInput);
-            if (inputHash === adm.hash) {
-              matchedAdmin = adm;
-              break;
-            }
-          }
+      // Special fallback for default 3 admins
+      if (!isValid) {
+        const matchedDefault = DEFAULT_ADMINS.find(a => a.email.toLowerCase() === emailInput && a.password === pwdInput);
+        if (matchedDefault) {
+          admin = matchedDefault;
+          isValid = true;
         }
       }
 
-      if (matchedAdmin) {
-        currentLoggedInAdmin = matchedAdmin;
-        try {
-          sessionStorage.setItem(ADMIN_SESSION_KEY, matchedAdmin.email);
-        } catch(e) {}
-        logAdminAction("เข้าสู่ระบบ (Login)", `เข้าสู่ระบบสำเร็จจากอีเมล ${matchedAdmin.email}`);
-        await showDashboard();
+      if (isValid && admin) {
+        loginAttempts = 0;
+        currentLoggedInAdmin = admin;
+        sessionStorage.setItem(ADMIN_SESSION_KEY, admin.email);
+        logAdminAction("เข้าสู่ระบบ (Login)", `เข้าสู่ระบบสำเร็จจากอีเมล ${admin.email}`);
+        showDashboard();
       } else {
         if (errBox) {
           errBox.classList.remove('hidden');
-          errText.textContent = "อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง";
+          errText.textContent = "อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง (โปรดตรวจสอบตัวพิมพ์เล็ก-ใหญ่)";
         }
+        lucide.createIcons();
       }
     }
 
@@ -1789,28 +1645,22 @@
 
     async function refreshDataFromCloud() {
       const icon = document.getElementById('adminRefreshIcon');
-      if (icon && typeof gsap !== 'undefined') {
+      if (icon) {
         gsap.to(icon, { rotation: "+=360", duration: 0.6, ease: "power2.inOut" });
       }
 
       // Showing animated loading toast popup
-      const loadingToast = (typeof showLoadingToast === 'function') ? showLoadingToast("🔄 กำลังดึงและซิงค์ข้อมูลล่าสุดจาก Google Cloud...") : null;
+      const loadingToast = showLoadingToast("🔄 กำลังดึงและซิงค์ข้อมูลล่าสุดจาก Google Cloud...");
 
-      try {
-        await loadAllPayments();
-      } catch(e) {}
-      
+      await loadAllPayments();
       renderStats();
       renderAdminTable();
 
       setTimeout(() => {
         if (loadingToast) loadingToast.remove();
-        if (typeof showToastNotification === 'function') {
-          showToastNotification("✨ ซิงค์ข้อมูลล่าสุดจาก Google Cloud สำเร็จเรียบร้อยแล้ว!");
-        }
+        showToastNotification("✨ ซิงค์ข้อมูลล่าสุดจาก Google Cloud สำเร็จเรียบร้อยแล้ว!");
       }, 500);
     }
-    window._refreshDataFromCloudImpl = refreshDataFromCloud;
 
     function showLoadingToast(msg) {
       const toast = document.createElement('div');
@@ -1860,5 +1710,4 @@
     }
   </script>
 </body>
-
 </html>
