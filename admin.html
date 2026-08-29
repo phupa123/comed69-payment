@@ -316,10 +316,23 @@
 
   <!-- Admin Dashboard Logic -->
   <script>
-    const ADMIN_PASSWORD_HASH = "admin69"; // รหัสผ่านเข้าสู่ระบบหลังบ้าน
+    // รหัสผ่านหลังบ้านเข้ารหัสด้วย SHA-256 Cryptographic Hash ป้องกันการแอบดู Source Code
+    const ADMIN_PASSWORD_HASH = "728b7f9b970d0c72956d7b5d745c3c2055833f5278866d6c2ed80db60b707283"; 
     const STORAGE_KEY = 'COMED_KKU69_PAYMENT_DATA_V1';
     const CLOUD_URL_KEY = 'COMED_KKU69_CLOUD_WEBAPP_URL';
-    const ADMIN_SESSION_KEY = 'COMED_KKU69_ADMIN_LOGGED_IN';
+    const ADMIN_SESSION_KEY = 'COMED_KKU69_ADMIN_SECURE_TOKEN';
+
+    // Helper: คำนวณ SHA-256 ใน Browser
+    async function sha256(message) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Rate Limiting (ป้องกัน Brute Force Login)
+    let loginAttempts = 0;
+    let lockoutUntil = 0;
 
     // รายชื่อนักศึกษาทั้ง 60 คน (Embedded Safe Fallback)
     const DEFAULT_STUDENTS = [
@@ -419,13 +432,28 @@
       lucide.createIcons();
     }
 
-    function handleAdminLogin(e) {
+    async function handleAdminLogin(e) {
       e.preventDefault();
-      const pwd = document.getElementById('adminPasswordInput').value;
-      if (pwd === ADMIN_PASSWORD_HASH) {
-        sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
+      const now = Date.now();
+      if (now < lockoutUntil) {
+        const remainingSec = Math.ceil((lockoutUntil - now) / 1000);
+        alert(`⚠️ กรอกรหัสผิดเกินจำนวนที่กำหนด โปรดรออีก ${remainingSec} วินาที`);
+        return;
+      }
+
+      const pwdInput = document.getElementById('adminPasswordInput').value;
+      const pwdHash = await sha256(pwdInput);
+
+      if (pwdHash === ADMIN_PASSWORD_HASH) {
+        loginAttempts = 0;
+        sessionStorage.setItem(ADMIN_SESSION_KEY, pwdHash);
         showDashboard();
       } else {
+        loginAttempts++;
+        if (loginAttempts >= 5) {
+          lockoutUntil = Date.now() + 30000; // Lock 30 วินาที
+          alert("⚠️ กรอกรหัสผิด 5 ครั้ง! ระบบถูกระงับชั่วคราว 30 วินาทีเพื่อความปลอดภัย");
+        }
         document.getElementById('loginErrorMsg').classList.remove('hidden');
       }
     }
