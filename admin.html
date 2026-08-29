@@ -204,6 +204,18 @@
         }
       }
     }
+
+    // Global placeholder for refreshDataFromCloud before full script loads
+    function refreshDataFromCloud() {
+      if (typeof window._refreshDataFromCloudImpl === 'function') {
+        window._refreshDataFromCloudImpl();
+      } else if (typeof loadAllPayments === 'function') {
+        loadAllPayments().then(() => {
+          if (typeof renderStats === 'function') renderStats();
+          if (typeof renderAdminTable === 'function') renderAdminTable();
+        });
+      }
+    }
   </script>
 
   <!-- ================= 1. ULTRA-PREMIUM MODERN LOGIN SCREEN ================= -->
@@ -1777,22 +1789,28 @@
 
     async function refreshDataFromCloud() {
       const icon = document.getElementById('adminRefreshIcon');
-      if (icon) {
+      if (icon && typeof gsap !== 'undefined') {
         gsap.to(icon, { rotation: "+=360", duration: 0.6, ease: "power2.inOut" });
       }
 
       // Showing animated loading toast popup
-      const loadingToast = showLoadingToast("🔄 กำลังดึงและซิงค์ข้อมูลล่าสุดจาก Google Cloud...");
+      const loadingToast = (typeof showLoadingToast === 'function') ? showLoadingToast("🔄 กำลังดึงและซิงค์ข้อมูลล่าสุดจาก Google Cloud...") : null;
 
-      await loadAllPayments();
+      try {
+        await loadAllPayments();
+      } catch(e) {}
+      
       renderStats();
       renderAdminTable();
 
       setTimeout(() => {
         if (loadingToast) loadingToast.remove();
-        showToastNotification("✨ ซิงค์ข้อมูลล่าสุดจาก Google Cloud สำเร็จเรียบร้อยแล้ว!");
+        if (typeof showToastNotification === 'function') {
+          showToastNotification("✨ ซิงค์ข้อมูลล่าสุดจาก Google Cloud สำเร็จเรียบร้อยแล้ว!");
+        }
       }, 500);
     }
+    window._refreshDataFromCloudImpl = refreshDataFromCloud;
 
     function showLoadingToast(msg) {
       const toast = document.createElement('div');
