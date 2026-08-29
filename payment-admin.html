@@ -118,24 +118,27 @@
         </div>
       </div>
 
-      <!-- Quick Google Admin Sign-in Button -->
-      <div class="space-y-3 pt-1">
+      <!-- Prominent Google Admin Sign-in Option (Featured Top) -->
+      <div class="space-y-3 pt-2">
         <div id="googleAdminButtonWrapper" class="flex justify-center min-h-[44px]"></div>
         
-        <div class="relative flex py-1 items-center">
+        <div class="relative flex py-2 items-center">
           <div class="flex-grow border-t border-slate-800"></div>
-          <span class="flex-shrink mx-3 text-slate-500 text-[11px] font-semibold">หรือเข้าสู่ระบบด้วยรหัสผ่าน</span>
+          <span class="flex-shrink mx-3 text-slate-500 text-xs font-bold">หรือ กรอกชื่อบัญชีและรหัสผ่าน</span>
           <div class="flex-grow border-t border-slate-800"></div>
         </div>
       </div>
 
-      <!-- Login Form -->
+      <!-- Login Form with Email & Password -->
       <form id="adminLoginForm" onsubmit="event.preventDefault(); handleAdminLogin(event);" class="space-y-4 text-left">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5">อีเมลแอดมิน (KKU Mail)</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
+            <span>อีเมลผู้ดูแลระบบ (KKU Mail)</span>
+            <span class="text-[10px] text-orange-400 font-normal">เฉพาะแอดมินที่ได้รับสิทธิ์</span>
+          </label>
           <div class="relative">
             <input type="email" id="adminEmailInput" placeholder="เช่น thitiwut.a@kkumail.com"
-              class="w-full pl-11 pr-4 py-3 bg-slate-950/80 border border-slate-700/80 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition font-sans"
+              class="w-full pl-11 pr-4 py-3.5 bg-slate-950/90 border border-slate-700/80 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition font-sans"
               required>
             <i data-lucide="mail" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none"></i>
           </div>
@@ -144,8 +147,8 @@
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1.5">รหัสผ่าน (Password)</label>
           <div class="relative flex items-center">
-            <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่านของคุณ"
-              class="w-full pl-11 pr-14 py-3 bg-slate-950/80 border border-slate-700/80 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition font-sans"
+            <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่านผู้ดูแลระบบ"
+              class="w-full pl-11 pr-14 py-3.5 bg-slate-950/90 border border-slate-700/80 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition font-sans"
               required>
             <i data-lucide="lock" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none"></i>
             <button type="button" id="pwdToggleBtn" onclick="togglePasswordVisibility('adminPasswordInput', 'pwdToggleIconWrap')"
@@ -159,7 +162,7 @@
         </div>
 
         <div id="loginErrorMsg"
-          class="hidden text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 p-3 rounded-2xl flex items-center gap-2">
+          class="hidden text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 p-3.5 rounded-2xl flex items-center gap-2">
           <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 flex-shrink-0"></i>
           <span id="loginErrorText">อีเมลหรือรหัสผ่านไม่ถูกต้อง</span>
         </div>
@@ -167,11 +170,11 @@
         <button type="button" id="btnLoginSubmit" onclick="handleAdminLogin(event)"
           class="w-full py-3.5 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-orange-500/25 transition transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer">
           <i data-lucide="log-in" class="w-4 h-4"></i>
-          <span>เข้าสู่ระบบ Dashboard</span>
+          <span>เข้าสู่ระบบ Dashboard ด้วยรหัสผ่าน</span>
         </button>
       </form>
 
-      <div class="pt-1">
+      <div class="pt-2">
         <a href="index.html"
           class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-orange-400 transition font-bold py-1">
           <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
