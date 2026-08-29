@@ -1,11 +1,66 @@
 /**
  * =========================================================================
  * GOOGLE APPS SCRIPT: Complete Auto-Sync Engine for COMED KKU 69
- * (Payments, Google Drive Images, Issues, Trash & Logs)
+ * (Payments, Google Drive Images, Issues, Trash, Logs & LINE Notification)
  * =========================================================================
  */
 
 const GOOGLE_DRIVE_FOLDER_ID = "1KaE-6GyKd0mafFBYTp-fAlAG4YAJWrFa6xxUov59JvktlP5fVBQDKzJEBlc1b2GWDcuNYxJI";
+
+// ================= LINE NOTIFICATION CONFIG =================
+const LINE_CHANNEL_ACCESS_TOKEN = "xW18yEAjS6kjxO6SdQQtyEbatDIlzE4YW0+OKBNspb1Nw9oDSP94vNknZ2cJd139Ldc1nkEMeOJ8oWKC0AoK/MqKmSTpSSGwqMYr00FsG1yhLOw1GhsnyN+mrBBnMrzwl9rg1eHlk82KqzRYFdAqGQdB04t89/1O/w1cDnyilFU=";
+const LINE_TARGET_USER_ID = "U39c507609d6f5e67d64c35a4a7708ea6";
+
+// ฟังก์ชันส่งการแจ้งเตือนสลิปเข้า LINE
+function sendLineSlipNotification(name, nickname, studentId, slipUrl, timestamp, refCode) {
+  if (!LINE_CHANNEL_ACCESS_TOKEN || !LINE_TARGET_USER_ID) return;
+  try {
+    const textMsg = `🔔 ได้รับสลิปชำระเงินใหม่!\n` +
+      `━━━━━━━━━━━━━━━\n` +
+      `👤 ชื่อ: ${name} (น้อง${nickname})\n` +
+      `🆔 รหัสนักศึกษา: ${studentId}\n` +
+      `💵 ยอดเงิน: ฿190.00 บาท\n` +
+      `🕒 วัน-เวลา: ${timestamp}\n` +
+      `🔖 รหัสอ้างอิง: ${refCode}\n` +
+      `━━━━━━━━━━━━━━━\n` +
+      (slipUrl && slipUrl.startsWith("http") ? `🖼️ ลิงก์สลิป: ${slipUrl}` : ``);
+
+    const messages = [
+      {
+        "type": "text",
+        "text": textMsg
+      }
+    ];
+
+    // ถ้าเป็นรูปสลิปจาก Google Drive แปลงลิงก์ส่งเป็นรูปภาพใน LINE
+    if (slipUrl && slipUrl.includes("drive.google.com")) {
+      const idMatch = slipUrl.match(/[-\w]{25,}/);
+      if (idMatch) {
+        const directImgUrl = "https://lh3.googleusercontent.com/d/" + idMatch[0];
+        messages.push({
+          "type": "image",
+          "originalContentUrl": directImgUrl,
+          "previewImageUrl": directImgUrl
+        });
+      }
+    }
+
+    UrlFetchApp.fetch("https://api.line.me/v2/bot/message/push", {
+      "method": "post",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + LINE_CHANNEL_ACCESS_TOKEN
+      },
+      "payload": JSON.stringify({
+        "to": LINE_TARGET_USER_ID,
+        "messages": messages
+      }),
+      "muteHttpExceptions": true
+    });
+  } catch (err) {
+    Logger.log("LINE Notification Error: " + err.toString());
+  }
+}
 
 // ฟังก์ชันหาหรือสร้างโฟลเดอร์ใน Google Drive
 function getOrCreateFolder(name) {
@@ -506,6 +561,21 @@ function doPost(e) {
     }
 
     SpreadsheetApp.flush();
+
+    // ส่งการแจ้งเตือนสลิปเข้า LINE ทันที
+    try {
+      sendLineSlipNotification(
+        data.name || "",
+        data.nickname || "",
+        data.studentId || "",
+        driveFileUrl || "",
+        timestamp,
+        refCode
+      );
+    } catch (lineErr) {
+      Logger.log("Line send error: " + lineErr.toString());
+    }
+
     return ContentService.createTextOutput(JSON.stringify({
       success: true,
       slipUrl: driveFileUrl,
