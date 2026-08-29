@@ -48,8 +48,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- GSAP for Ultra-Smooth Animations -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <!-- SheetJS for Excel Export -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- SheetJS with Full Cell Styling Support (xlsx-js-style for real .xlsx colors) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
   <style>
     body {
@@ -1993,7 +1993,7 @@
 
       // 1. Show loading toast
       const loadingToast = (typeof showLoadingToast === 'function') 
-        ? showLoadingToast("📊 กำลังประมวลผลข้อมูลและเตรียมไฟล์ Excel...") 
+        ? showLoadingToast("📊 กำลังประมวลผลข้อมูลและสร้างไฟล์ Excel แท้ (.xlsx)...") 
         : null;
 
       // 2. Fetch fresh real-time data from Cloud & LocalStorage
@@ -2018,7 +2018,7 @@
           email: st.email,
           isPaid: isPaid,
           statusText: isPaid ? "ชำระเงินแล้ว" : "ยังไม่ชำระเงิน",
-          statusVisual: isPaid ? "✅ ชำระเงินแล้ว" : "❌ ยังไม่ชำระเงิน",
+          statusVisual: isPaid ? "✔ ชำระเงินแล้ว" : "✖ ยังไม่ชำระเงิน",
           amount: isPaid ? (record.amount || 190) : 0,
           timestamp: record?.timestamp || "-",
           refCode: record?.refCode || "-",
@@ -2028,24 +2028,35 @@
 
       // 4. Apply Custom Filtering and Sorting
       if (sortOpt === 'paid_top') {
-        // คนที่จ่ายไว้บน
         dataset.sort((a, b) => (b.isPaid - a.isPaid));
       } else if (sortOpt === 'paid_bottom') {
-        // คนที่จ่ายไว้ล่าง
         dataset.sort((a, b) => (a.isPaid - b.isPaid));
       } else if (sortOpt === 'paid_only') {
-        // เอาเฉพาะคนจ่าย
         dataset = dataset.filter(d => d.isPaid);
       } else if (sortOpt === 'unpaid_only') {
-        // เอาเฉพาะคนยังไม่จ่าย
         dataset = dataset.filter(d => !d.isPaid);
-      } // default = keep original student order
+      }
 
-      // 5. Format Data for Export
+      // 5. Generate True Binary XLSX Workbook with Style (xlsx-js-style)
+      const wb = XLSX.utils.book_new();
+
+      const headers = [
+        "ลำดับ",
+        "รหัสนักศึกษา",
+        "ชื่อ - นามสกุล",
+        "ชื่อเล่น",
+        "อีเมล (KKU Mail)",
+        "สถานะการชำระเงิน",
+        "ยอดเงิน (บาท)",
+        "วัน-เวลาที่ชำระ",
+        "รหัสอ้างอิง",
+        "ลิงก์ภาพสลิป"
+      ];
+
       let paidCount = 0;
       let totalAmount = 0;
 
-      const excelData = dataset.map((item, index) => {
+      const rows = dataset.map((item, idx) => {
         if (item.isPaid) {
           paidCount++;
           totalAmount += item.amount;
@@ -2053,30 +2064,24 @@
 
         const statusDisplay = (colorStyle === 'highlight') ? item.statusVisual : item.statusText;
 
-        return {
-          "ลำดับ": index + 1,
-          "รหัสนักศึกษา": item.id,
-          "ชื่อ - นามสกุล": item.name,
-          "ชื่อเล่น": item.nickname,
-          "อีเมล (KKU Mail)": item.email,
-          "สถานะการชำระเงิน": statusDisplay,
-          "ยอดเงิน (บาท)": item.amount,
-          "วัน-เวลาที่ชำระ": item.timestamp,
-          "รหัสอ้างอิง": item.refCode,
-          "ลิงก์ภาพสลิป": item.slipUrl
-        };
+        return [
+          idx + 1,
+          item.id,
+          item.name,
+          item.nickname,
+          item.email,
+          statusDisplay,
+          item.amount,
+          item.timestamp,
+          item.refCode,
+          item.slipUrl
+        ];
       });
 
-      // 6. If Highlight style is selected, generate XML-based styled spreadsheet (Color Cell Formatting)
-      if (colorStyle === 'highlight') {
-        exportStyledExcelHtml(dataset, sortOpt, paidCount, totalAmount, loadingToast);
-        return;
-      }
+      const sheetData = [headers, ...rows];
+      const wsPayments = XLSX.utils.aoa_to_sheet(sheetData);
 
-      // 7. Standard SheetJS Export (Clean Plain Mode)
-      const wb = XLSX.utils.book_new();
-      const wsPayments = XLSX.utils.json_to_sheet(excelData);
-      
+      // Set Column Widths
       wsPayments['!cols'] = [
         { wch: 8 },  // ลำดับ
         { wch: 16 }, // รหัสนักศึกษา
@@ -2089,131 +2094,122 @@
         { wch: 20 }, // รหัสอ้างอิง
         { wch: 45 }  // ลิงก์สลิป
       ];
+
+      // Style Table Cells (Header Dark Navy + Row Colors for Highlights)
+      const range = XLSX.utils.decode_range(wsPayments['!ref']);
+
+      // 1. Style Header Row
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+        if (!wsPayments[cellRef]) continue;
+        wsPayments[cellRef].s = {
+          font: { name: "Prompt", sz: 11, bold: true, color: { rgb: "FFFFFF" } },
+          fill: { fgColor: { rgb: "0F172A" } },
+          alignment: { horizontal: "center", vertical: "center" },
+          border: {
+            top: { style: "thin", color: { rgb: "334155" } },
+            bottom: { style: "medium", color: { rgb: "334155" } },
+            left: { style: "thin", color: { rgb: "334155" } },
+            right: { style: "thin", color: { rgb: "334155" } }
+          }
+        };
+      }
+
+      // 2. Style Data Rows
+      for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+        const item = dataset[R - 1];
+        const isPaid = item?.isPaid;
+
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+          const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+          if (!wsPayments[cellRef]) continue;
+
+          // Default styling
+          const cellStyle = {
+            font: { name: "Prompt", sz: 10, color: { rgb: "0F172A" } },
+            border: {
+              top: { style: "thin", color: { rgb: "E2E8F0" } },
+              bottom: { style: "thin", color: { rgb: "E2E8F0" } },
+              left: { style: "thin", color: { rgb: "E2E8F0" } },
+              right: { style: "thin", color: { rgb: "E2E8F0" } }
+            },
+            alignment: { vertical: "center" }
+          };
+
+          // Alignment rules
+          if (C === 0 || C === 1 || C === 3 || C === 5 || C === 7 || C === 8) {
+            cellStyle.alignment.horizontal = "center";
+          } else if (C === 6) {
+            cellStyle.alignment.horizontal = "right";
+          }
+
+          // Student ID formatting
+          if (C === 1) {
+            cellStyle.font.bold = true;
+            wsPayments[cellRef].t = 's'; // Force string so dashes and zeros are preserved
+          }
+
+          // Highlight Mode Colors
+          if (colorStyle === 'highlight') {
+            if (C === 5) {
+              // Status Column: Green for Paid, Red for Unpaid
+              cellStyle.fill = { fgColor: { rgb: isPaid ? "DCFCE7" : "FEE2E2" } };
+              cellStyle.font = { name: "Prompt", sz: 10, bold: true, color: { rgb: isPaid ? "15803D" : "B91C1C" } };
+            } else if (C === 6 && isPaid) {
+              cellStyle.font.color = { rgb: "15803D" };
+              cellStyle.font.bold = true;
+            }
+          }
+
+          // Slip Link formatting
+          if (C === 9 && item?.slipUrl && item.slipUrl !== '-') {
+            cellStyle.font = { name: "Prompt", sz: 10, color: { rgb: "EA580C" }, underline: true };
+          }
+
+          wsPayments[cellRef].s = cellStyle;
+        }
+      }
+
       XLSX.utils.book_append_sheet(wb, wsPayments, "รายชื่อและการชำระเงิน");
 
-      // Summary Sheet
-      const unpaidTotal = studentDatabase.length - (Object.values(paymentRecords).filter(p => p && p.paid).length);
+      // 6. Summary Sheet
+      const unpaidCount = studentDatabase.length - (Object.values(paymentRecords).filter(p => p && p.paid).length);
       const summaryData = [
         { "รายการ": "สาขาวิชา", "รายละเอียด": "คอมพิวเตอร์ศึกษา (รหัส 69) คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น" },
         { "รายการ": "โครงการ / รายการ", "รายละเอียด": "ค่าทำป้ายสาขาวิชาเอก คนละ ฿190" },
         { "รายการ": "รูปแบบรายงาน", "รายละเอียด": getExportModeTitle(sortOpt) },
-        { "รายการ": "จำนวนรายการในรายงาน", "รายละเอียด": `${excelData.length} คน` },
+        { "รายการ": "รูปแบบสี", "รายละเอียด": colorStyle === 'highlight' ? "แบบ Highlight สี (เขียว=จ่ายแล้ว, แดง=ยังไม่จ่าย)" : "แบบปกติ (Clean)" },
+        { "รายการ": "จำนวนรายการในรายงาน", "รายละเอียด": `${rows.length} คน` },
         { "รายการ": "ชำระเงินแล้ว (ในรายงาน)", "รายละเอียด": `${paidCount} คน` },
-        { "รายการ": "ยังไม่ชำระเงิน (ในรายงาน)", "รายละเอียด": `${excelData.length - paidCount} คน` },
+        { "รายการ": "ยังไม่ชำระเงิน (ในรายงาน)", "รายละเอียด": `${rows.length - paidCount} คน` },
         { "รายการ": "ยอดเงินรวมในรายงาน", "รายละเอียด": `฿${totalAmount.toLocaleString()} บาท` },
         { "รายการ": "วันที่ส่งออกรายงาน (Export Date)", "รายละเอียด": new Date().toLocaleString('th-TH') }
       ];
       const wsSummary = XLSX.utils.json_to_sheet(summaryData);
-      wsSummary['!cols'] = [{ wch: 30 }, { wch: 65 }];
+      wsSummary['!cols'] = [{ wch: 30 }, { wch: 70 }];
+      
+      // Style Summary Sheet Header
+      const summaryRange = XLSX.utils.decode_range(wsSummary['!ref']);
+      for (let C = summaryRange.s.c; C <= summaryRange.e.c; ++C) {
+        const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+        if (wsSummary[cellRef]) {
+          wsSummary[cellRef].s = {
+            font: { name: "Prompt", sz: 11, bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "0F172A" } },
+            alignment: { horizontal: "center", vertical: "center" }
+          };
+        }
+      }
+
       XLSX.utils.book_append_sheet(wb, wsSummary, "สรุปภาพรวม");
 
+      // 7. Write and Download True Native .xlsx File
       const nowStr = new Date().toISOString().slice(0, 10);
       XLSX.writeFile(wb, `ComEd69_Report_${sortOpt}_${nowStr}.xlsx`);
 
       if (loadingToast) loadingToast.remove();
       if (typeof showToastNotification === 'function') {
-        showToastNotification(`✨ ส่งออกรายงาน Excel สำเร็จ (${excelData.length} รายการ)`);
-      }
-    }
-
-    // Helper: Export Excel with Color Highlights (Green = Paid, Red = Unpaid)
-    function exportStyledExcelHtml(dataset, sortOpt, paidCount, totalAmount, loadingToast) {
-      const modeTitle = getExportModeTitle(sortOpt);
-      const nowStr = new Date().toLocaleString('th-TH');
-      const filenameDate = new Date().toISOString().slice(0, 10);
-
-      let rowsHtml = '';
-      dataset.forEach((item, idx) => {
-        const bgStatus = item.isPaid ? '#dcfce7' : '#fee2e2'; // Light Green vs Light Red
-        const textStatus = item.isPaid ? '#15803d' : '#b91c1c'; // Deep Green vs Deep Red
-        const bgRow = (idx % 2 === 0) ? '#ffffff' : '#f8fafc';
-        
-        rowsHtml += `
-          <tr style="background-color: ${bgRow};">
-            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px;">${idx + 1}</td>
-            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px; font-weight: bold; mso-number-format:'\\@';">${item.id}</td>
-            <td style="border: 1px solid #cbd5e1; padding: 8px;">${item.name}</td>
-            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px;">${item.nickname}</td>
-            <td style="border: 1px solid #cbd5e1; padding: 8px;">${item.email}</td>
-            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px; background-color: ${bgStatus}; color: ${textStatus}; font-weight: bold;">
-              ${item.isPaid ? '✔ ชำระเงินแล้ว' : '✖ ยังไม่ชำระเงิน'}
-            </td>
-            <td style="text-align: right; border: 1px solid #cbd5e1; padding: 8px; font-weight: bold; ${item.isPaid ? 'color:#15803d;' : 'color:#64748b;'}">
-              ${item.amount.toLocaleString()} ฿
-            </td>
-            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px; color: #475569;">${item.timestamp}</td>
-            <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px; font-family: monospace; color: #64748b;">${item.refCode}</td>
-            <td style="border: 1px solid #cbd5e1; padding: 8px;">
-              ${item.slipUrl !== '-' ? `<a href="${item.slipUrl}" target="_blank" style="color: #ea580c; text-decoration: underline;">เปิดดูสลิป</a>` : '-'}
-            </td>
-          </tr>
-        `;
-      });
-
-      const fullHtml = `
-        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-        <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-          <!--[if gte mso 9]>
-          <xml>
-            <x:ExcelWorkbook>
-              <x:ExcelWorksheets>
-                <x:ExcelWorksheet>
-                  <x:Name>รายชื่อและการชำระเงิน</x:Name>
-                  <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
-                </x:ExcelWorksheet>
-              </x:ExcelWorksheets>
-            </x:ExcelWorkbook>
-          </xml>
-          <![endif]-->
-          <style>
-            table { border-collapse: collapse; font-family: 'Prompt', 'Segoe UI', Tahoma, sans-serif; font-size: 13px; }
-            th { background-color: #0f172a; color: #ffffff; font-weight: bold; border: 1px solid #334155; padding: 10px; text-align: center; }
-          </style>
-        </head>
-        <body>
-          <h2 style="color: #0f172a; margin-bottom: 4px;">รายงานการชำระเงินค่าทำป้ายสาขาวิชาเอก | COMED KKU 69</h2>
-          <p style="color: #475569; font-size: 12px; margin-top: 0;">
-            <strong>รูปแบบ:</strong> ${modeTitle} | <strong>ออกรายงานเมื่อ:</strong> ${nowStr} | 
-            <strong style="color: #15803d;">ชำระแล้ว: ${paidCount} คน (฿${totalAmount.toLocaleString()})</strong> | 
-            <strong style="color: #b91c1c;">ยังไม่ชำระ: ${dataset.length - paidCount} คน</strong>
-          </p>
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 50px;">ลำดับ</th>
-                <th style="width: 130px;">รหัสนักศึกษา</th>
-                <th style="width: 200px;">ชื่อ - นามสกุล</th>
-                <th style="width: 100px;">ชื่อเล่น</th>
-                <th style="width: 240px;">อีเมล (KKU Mail)</th>
-                <th style="width: 150px;">สถานะการชำระ</th>
-                <th style="width: 110px;">ยอดเงิน (บาท)</th>
-                <th style="width: 170px;">วัน-เวลาที่ชำระ</th>
-                <th style="width: 140px;">รหัสอ้างอิง</th>
-                <th style="width: 160px;">ลิงก์ภาพสลิป</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rowsHtml}
-            </tbody>
-          </table>
-        </body>
-        </html>
-      `;
-
-      const blob = new Blob([fullHtml], { type: 'application/vnd.ms-excel;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `ComEd69_Report_Highlight_${sortOpt}_${filenameDate}.xls`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      if (loadingToast) loadingToast.remove();
-      if (typeof showToastNotification === 'function') {
-        showToastNotification(`✨ ส่งออกรายงาน Excel แบบ Highlight สำเร็จ (${dataset.length} รายการ)`);
+        showToastNotification(`✨ ส่งออกไฟล์ Excel แท้ (.xlsx) สำเร็จ (${rows.length} รายการ)`);
       }
     }
 
@@ -2231,6 +2227,9 @@
     async function exportToExcel() {
       openExportModal();
     }
+  </script>
+</body>
+</html>
   </script>
 </body>
 </html>
