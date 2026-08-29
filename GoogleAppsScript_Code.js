@@ -1,39 +1,81 @@
 /**
  * =========================================================================
- * GOOGLE APPS SCRIPT: Auto-Sync, 2-Stage Recycle Bin & Folder Mover
+ * GOOGLE APPS SCRIPT: Auto-Sync, 2-Stage Recycle Bin, Help Desk Issues & Admin Logs
  * =========================================================================
  */
 
 const GOOGLE_DRIVE_FOLDER_ID = "1KaE-6GyKd0mafFBYTp-fAlAG4YAJWrFa6xxUov59JvktlP5fVBQDKzJEBlc1b2GWDcuNYxJI";
 
-// ฟังก์ชันหาหรือสร้างโฟลเดอร์ถังขยะใน Google Drive
-function getOrCreateTrashFolder() {
+function getOrCreateFolder(name) {
   try {
     const parentFolder = DriveApp.getFolderById(GOOGLE_DRIVE_FOLDER_ID);
-    const subfolders = parentFolder.getFoldersByName("Trash_Slips_ถังขยะ");
+    const subfolders = parentFolder.getFoldersByName(name);
     if (subfolders.hasNext()) {
       return subfolders.next();
     }
-    const trashFolder = parentFolder.createFolder("Trash_Slips_ถังขยะ");
-    trashFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    return trashFolder;
+    const newFolder = parentFolder.createFolder(name);
+    newFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    return newFolder;
   } catch(e) {
     return DriveApp.getRootFolder();
   }
 }
 
-// 1. GET: อ่านข้อมูลทั้งชีต Payments ปกติ และชีต Trash_ถังขยะ
+// 1. GET: อ่านข้อมูล Payments, Trash, Issues, Logs
 function doGet(e) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheets = ss.getSheets();
     const result = {
       active: {},
-      trash: {}
+      trash: {},
+      issues: [],
+      logs: []
     };
+
+    // อ่านชีต Issues (ถ้ามี)
+    const issueSheet = ss.getSheetByName("Issues_ปัญหาผู้ใช้");
+    if (issueSheet) {
+      const issueData = issueSheet.getDataRange().getValues();
+      for (let i = 1; i < issueData.length; i++) {
+        const row = issueData[i];
+        if (row[0]) {
+          result.issues.push({
+            id: row[0],
+            studentId: row[1],
+            name: row[2],
+            contact: row[3],
+            category: row[4],
+            detail: row[5],
+            evidenceUrl: row[6],
+            status: row[7] || "รอดำเนินการ",
+            timestamp: row[8]
+          });
+        }
+      }
+    }
+
+    // อ่านชีต Logs (ถ้ามี)
+    const logSheet = ss.getSheetByName("Admin_Logs");
+    if (logSheet) {
+      const logData = logSheet.getDataRange().getValues();
+      for (let i = 1; i < logData.length; i++) {
+        const row = logData[i];
+        if (row[0]) {
+          result.logs.push({
+            timestamp: row[0],
+            adminEmail: row[1],
+            action: row[2],
+            detail: row[3]
+          });
+        }
+      }
+    }
 
     for (let sheet of sheets) {
       const sheetName = sheet.getName();
+      if (sheetName === "Issues_ปัญหาผู้ใช้" || sheetName === "Admin_Logs") continue;
+
       const data = sheet.getDataRange().getValues();
       if (data.length < 2) continue;
 
@@ -54,7 +96,6 @@ function doGet(e) {
         const row = data[i];
         let foundId = "";
         
-        // สแกนหาตัวเลขรหัสนักศึกษา 693050... อย่างแม่นยำ
         if (idCol !== -1 && row[idCol] && String(row[idCol]).replace(/\D/g, '').startsWith('693050')) {
           foundId = String(row[idCol]).trim();
         } else {
@@ -118,7 +159,9 @@ function doGet(e) {
 
     return ContentService.createTextOutput(JSON.stringify({
       ...result.active,
-      _trash: result.trash
+      _trash: result.trash,
+      _issues: result.issues,
+      _logs: result.logs
     })).setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
@@ -126,7 +169,7 @@ function doGet(e) {
   }
 }
 
-// 2. POST: จัดการส่งสลิป, ย้ายไปถังขยะ, กู้คืน, หรือลบถาวร
+// 2. POST: ชำระเงิน, ถังขยะ, ปัญหาผู้ใช้ (Issues), บันทึก Logs
 function doPost(e) {
   const lock = LockService.getScriptLock();
   lock.tryLock(30000);
@@ -142,6 +185,74 @@ function doPost(e) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const action = data.action || "pay";
     const targetDigits = String(data.studentId || "").replace(/\D/g, '');
+
+    // ----------------------------------------------------
+    // CASE: แจ้งปัญหาผู้ใช้ (Report Issue)
+    // ----------------------------------------------------
+    if (action === "report_issue") {
+      let issueSheet = ss.getSheetByName("Issues_ปัญหาผู้ใช้");
+      if (!issueSheet) {
+        issueSheet = ss.insertSheet("Issues_ปัญหาผู้ใช้");
+        issueSheet.appendRow(["รหัสปัญหา", "รหัสนักศึกษา", "ชื่อ-นามสกุล", "ช่องทางติดต่อ", "หัวข้อปัญหา", "รายละเอียด", "ลิงก์หลักฐาน", "สถานะ", "เวลาที่แจ้ง"]);
+        issueSheet.setFrozenRows(1);
+      }
+
+      const issueId = "ISSUE-" + Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyyMMdd-HHmmss");
+      const timeStr = Utilities.formatDate(new Date(), "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss");
+
+      issueSheet.appendRow([
+        issueId,
+        data.studentId || "-",
+        data.name || "-",
+        data.contact || "-",
+        data.category || "ทั่วไป",
+        data.detail || "-",
+        data.evidenceUrl || "-",
+        "รอดำเนินการ",
+        timeStr
+      ]);
+
+      return ContentService.createTextOutput(JSON.stringify({ success: true, issueId: issueId })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ----------------------------------------------------
+    // CASE: บันทึก Logs ของ Admin
+    // ----------------------------------------------------
+    if (action === "log_admin") {
+      let logSheet = ss.getSheetByName("Admin_Logs");
+      if (!logSheet) {
+        logSheet = ss.insertSheet("Admin_Logs");
+        logSheet.appendRow(["วัน-เวลา", "อีเมลแอดมิน", "กิจกรรม", "รายละเอียด"]);
+        logSheet.setFrozenRows(1);
+      }
+
+      const timeStr = Utilities.formatDate(new Date(), "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss");
+      logSheet.appendRow([
+        timeStr,
+        data.adminEmail || "Admin",
+        data.logAction || "-",
+        data.logDetail || "-"
+      ]);
+
+      return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ----------------------------------------------------
+    // CASE: อัปเดตสถานะปัญหา (Update Issue Status)
+    // ----------------------------------------------------
+    if (action === "update_issue_status") {
+      let issueSheet = ss.getSheetByName("Issues_ปัญหาผู้ใช้");
+      if (issueSheet) {
+        const vals = issueSheet.getDataRange().getValues();
+        for (let i = 1; i < vals.length; i++) {
+          if (String(vals[i][0]).trim() === String(data.issueId).trim()) {
+            issueSheet.getRange(i + 1, 8).setValue(data.newStatus || "แก้ไขแล้ว");
+            break;
+          }
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
+    }
 
     // ----------------------------------------------------
     // CASE 1: ย้ายไปยังถังขยะ (Move to Trash)
@@ -161,7 +272,7 @@ function doPost(e) {
       let movedRows = [];
 
       for (let sheet of sheets) {
-        if (sheet.getName() === "Trash_ถังขยะ") continue;
+        if (sheet.getName() === "Trash_ถังขยะ" || sheet.getName() === "Issues_ปัญหาผู้ใช้" || sheet.getName() === "Admin_Logs") continue;
         const vals = sheet.getDataRange().getValues();
         
         for (let i = vals.length - 1; i >= 1; i--) {
@@ -194,7 +305,7 @@ function doPost(e) {
         if (idMatch) {
           try {
             const file = DriveApp.getFileById(idMatch[0]);
-            const trashFolder = getOrCreateTrashFolder();
+            const trashFolder = getOrCreateFolder("Trash_Slips_ถังขยะ");
             file.moveTo(trashFolder);
           } catch(err){}
         }
@@ -308,7 +419,7 @@ function doPost(e) {
     }
 
     // ----------------------------------------------------
-    // CASE 4: ชำระเงิน / อัปโหลดสลิปปกติ (Pay)
+    // CASE 4: ชำระเงิน / อัปโหลดสลิปปกติ (Pay หรือ Admin Verified)
     // ----------------------------------------------------
     let paySheet = ss.getSheetByName("Payments");
     if (!paySheet) {
@@ -334,6 +445,8 @@ function doPost(e) {
       const file = folder.createFile(decodedBlob);
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       driveFileUrl = file.getUrl();
+    } else if (data.slipUrl) {
+      driveFileUrl = data.slipUrl;
     }
 
     const values = paySheet.getDataRange().getValues();

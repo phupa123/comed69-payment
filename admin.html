@@ -76,42 +76,80 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased bg-slate-900 text-slate-100 selection:bg-orange-500 selection:text-white">
+<body class="min-h-screen flex flex-col antialiased bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white overflow-x-hidden">
 
-  <!-- ================= 1. LOGIN SCREEN (IF NOT AUTHENTICATED) ================= -->
-  <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
+  <!-- ================= ULTRA TECH INTRO SPLASH OVERLAY ================= -->
+  <div id="adminIntroSplash" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black text-white pointer-events-auto">
+    <div class="text-center space-y-5 max-w-sm px-6">
+      <div class="relative w-24 h-24 mx-auto intro-logo-anim">
+        <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-500 blur-xl opacity-60 animate-pulse"></div>
+        <div class="relative w-full h-full rounded-3xl bg-slate-900 border border-orange-500/40 p-3 flex items-center justify-center shadow-2xl">
+          <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
+        </div>
+      </div>
+      <div class="space-y-2 intro-text-anim">
+        <span class="text-[11px] font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300 uppercase">HOST ADMIN CONTROL PORTAL</span>
+        <h2 class="text-2xl font-extrabold text-white tracking-tight">ระบบควบคุมและจัดการหลังบ้าน</h2>
+        <p class="text-xs text-slate-400">สาขาคอมพิวเตอร์ศึกษา มข. (รหัส 69)</p>
+      </div>
+      <div class="w-48 h-1.5 bg-slate-800 rounded-full mx-auto overflow-hidden">
+        <div id="adminIntroProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 w-0 transition-all duration-700"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 1. LOGIN SCREEN (SECURE EMAIL + PASSWORD AUTH) ================= -->
+  <div id="loginScreen" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
     <div class="max-w-md w-full bg-slate-900/90 backdrop-blur-2xl border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6 text-center">
       <div class="w-18 h-18 mx-auto rounded-3xl bg-white p-2 border border-slate-700 shadow-lg flex items-center justify-center">
         <img src="logo.png" alt="โลโก้" class="w-12 h-12 object-contain">
       </div>
       <div>
-        <span class="text-xs font-black tracking-widest text-orange-500 uppercase">Admin Portal</span>
+        <span class="text-xs font-black tracking-widest text-orange-500 uppercase">Secure Host Admin</span>
         <h2 class="text-2xl font-black text-white mt-1">เข้าสู่ระบบผู้ดูแลระบบ</h2>
-        <p class="text-xs text-slate-400 mt-1">ระบบจัดการและตรวจสอบการชำระเงินค่าป้ายสาขา 69</p>
+        <p class="text-xs text-slate-400 mt-1">เฉพาะอีเมลและรหัสผ่านของผู้ดูแลระบบที่ได้รับอนุญาตเท่านั้น</p>
       </div>
 
       <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-left">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5">รหัสผ่านแอดมิน (Admin PIN / Password)</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">อีเมลแอดมิน (KKU Mail)</label>
+          <div class="relative">
+            <input 
+              type="email" 
+              id="adminEmailInput"
+              placeholder="เช่น thitiwut.a@kkumail.com" 
+              class="w-full pl-11 pr-4 py-3 bg-slate-800/90 border border-slate-700 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition"
+              required
+            >
+            <i data-lucide="mail" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5"></i>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">รหัสผ่านแอดมิน (Password)</label>
           <div class="relative">
             <input 
               type="password" 
               id="adminPasswordInput"
-              placeholder="กรอกรหัสผ่าน (ค่าเริ่มต้น: admin69)" 
-              class="w-full pl-11 pr-4 py-3 bg-slate-800/90 border border-slate-700 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition"
+              placeholder="กรอกรหัสผ่านของคุณ" 
+              class="w-full pl-11 pr-11 py-3 bg-slate-800/90 border border-slate-700 rounded-2xl text-white text-sm placeholder-slate-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition"
               required
             >
             <i data-lucide="lock" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5"></i>
+            <button type="button" onclick="togglePasswordVisibility('adminPasswordInput', 'pwdToggleIcon')" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-white transition">
+              <i data-lucide="eye" id="pwdToggleIcon" class="w-5 h-5"></i>
+            </button>
           </div>
         </div>
 
         <div id="loginErrorMsg" class="hidden text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-2">
-          <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400"></i>
-          <span>รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</span>
+          <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 flex-shrink-0"></i>
+          <span id="loginErrorText">อีเมลหรือรหัสผ่านไม่ถูกต้อง</span>
         </div>
 
         <button 
           type="submit" 
+          id="btnLoginSubmit"
           class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/25 transition transform active:scale-98 flex items-center justify-center gap-2"
         >
           <i data-lucide="log-in" class="w-4 h-4"></i>
@@ -252,20 +290,32 @@
             </h2>
           </div>
 
-          <!-- Status Filter Tabs -->
-          <div class="flex items-center gap-1 p-1 bg-slate-950 rounded-2xl border border-slate-800 text-xs font-bold">
-            <button onclick="setFilter('all')" id="fBtnAll" class="px-4 py-2 rounded-xl bg-slate-800 text-white shadow-sm transition">
+          <!-- Status & Management Filter Tabs -->
+          <div class="flex items-center gap-1 p-1 bg-slate-950 rounded-2xl border border-slate-800 text-xs font-bold flex-wrap">
+            <button onclick="setFilter('all')" id="fBtnAll" class="px-3.5 py-2 rounded-xl bg-slate-800 text-white shadow-sm transition">
               ทั้งหมด (60)
             </button>
-            <button onclick="setFilter('paid')" id="fBtnPaid" class="px-4 py-2 rounded-xl text-slate-400 hover:text-emerald-400 transition">
+            <button onclick="setFilter('paid')" id="fBtnPaid" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-emerald-400 transition">
               จ่ายแล้ว (<span id="countFPaid">0</span>)
             </button>
-            <button onclick="setFilter('unpaid')" id="fBtnUnpaid" class="px-4 py-2 rounded-xl text-slate-400 hover:text-rose-400 transition">
+            <button onclick="setFilter('unpaid')" id="fBtnUnpaid" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-rose-400 transition">
               ยังไม่จ่าย (<span id="countFUnpaid">60</span>)
             </button>
-            <button onclick="setFilter('trash')" id="fBtnTrash" class="px-4 py-2 rounded-xl text-slate-400 hover:text-amber-400 transition flex items-center gap-1">
+            <button onclick="setFilter('trash')" id="fBtnTrash" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-amber-400 transition flex items-center gap-1">
               <i data-lucide="trash-2" class="w-3.5 h-3.5 text-amber-500"></i>
               <span>ถังขยะ (<span id="countFTrash">0</span>)</span>
+            </button>
+            <button onclick="setFilter('issues')" id="fBtnIssues" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-pink-400 transition flex items-center gap-1">
+              <i data-lucide="help-circle" class="w-3.5 h-3.5 text-pink-500"></i>
+              <span>ปัญหาผู้ใช้ (<span id="countFIssues">0</span>)</span>
+            </button>
+            <button onclick="setFilter('admins')" id="fBtnAdmins" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-indigo-400 transition flex items-center gap-1">
+              <i data-lucide="shield" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span>จัดการแอดมิน</span>
+            </button>
+            <button onclick="setFilter('logs')" id="fBtnLogs" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-sky-400 transition flex items-center gap-1">
+              <i data-lucide="activity" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>Logs ระบบ</span>
             </button>
           </div>
         </div>
@@ -328,16 +378,124 @@
     </div>
   </div>
 
+  <!-- ================= 4. MODAL: ADMIN MANUAL PAYMENT WITH REQUIRED SLIP ATTACHMENT ================= -->
+  <div id="modalAdminUploadSlip" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+            <i data-lucide="upload" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">ยืนยันการชำระเงิน</h3>
+            <p class="text-xs text-slate-400">จำเป็นต้องแนบหลักฐานสลิปเพื่อส่งขึ้น Drive & Sheets</p>
+          </div>
+        </div>
+        <button onclick="closeAdminUploadModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="adminModalStudentInfo" class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 text-xs space-y-1">
+        <!-- Student Info -->
+      </div>
+
+      <div class="space-y-3">
+        <label class="block text-xs font-bold text-slate-300">เลือกไฟล์ภาพสลิปหลักฐาน <span class="text-rose-400">*จำเป็น</span></label>
+        <div class="relative border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-2xl p-4 text-center cursor-pointer transition" onclick="document.getElementById('adminSlipFileInput').click()">
+          <input type="file" id="adminSlipFileInput" accept="image/*" class="hidden" onchange="handleAdminSlipSelected(event)">
+          <div id="adminSlipUploadPrompt" class="space-y-1">
+            <i data-lucide="image-plus" class="w-8 h-8 text-slate-400 mx-auto"></i>
+            <span class="text-xs text-slate-300 font-bold block">คลิกเพื่ออัปโหลดภาพสลิป</span>
+            <span class="text-[10px] text-slate-500 block">PNG, JPG, JPEG (ไม่เกิน 10MB)</span>
+          </div>
+          <div id="adminSlipPreviewContainer" class="hidden space-y-2">
+            <img id="adminSlipPreviewImg" src="" alt="Slip Preview" class="max-h-40 mx-auto rounded-xl border border-slate-700">
+            <span class="text-[11px] text-emerald-400 font-bold block">แนบไฟล์สลิปเรียบร้อยแล้ว</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="closeAdminUploadModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition">
+          ยกเลิก
+        </button>
+        <button type="button" id="btnAdminConfirmPay" onclick="submitAdminManualPayment()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 transition">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>ยืนยันและอัปโหลดขึ้น Cloud</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 5. MODAL: ADD / MANAGE ADMIN ACCOUNTS ================= -->
+  <div id="modalAddAdmin" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+            <i data-lucide="user-plus" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">เพิ่มผู้ดูแลระบบ (Admin)</h3>
+            <p class="text-xs text-slate-400">กำหนดสิทธิ์และสร้างรหัสผ่านความปลอดภัย</p>
+          </div>
+        </div>
+        <button onclick="closeAddAdminModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateAdminSubmit(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ชื่อ - นามสกุล / ชื่อเล่น <span class="text-rose-400">*</span></label>
+          <input type="text" id="newAdminNameInput" required placeholder="เช่น สมชาย ใจดี (เจมส์)" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white outline-none focus:border-indigo-500">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">อีเมลแอดมิน (KKU Mail) <span class="text-rose-400">*</span></label>
+          <input type="email" id="newAdminEmailInput" required placeholder="เช่น somchai.j@kkumail.com" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white outline-none focus:border-indigo-500">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1 flex items-center justify-between">
+            <span>รหัสผ่านเริ่มต้น <span class="text-rose-400">*</span></span>
+            <button type="button" onclick="generateRandomPasswordForNewAdmin()" class="text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1 text-[11px]">
+              <i data-lucide="dice-5" class="w-3.5 h-3.5"></i> สุ่มรหัสผ่าน
+            </button>
+          </label>
+          <div class="relative">
+            <input type="text" id="newAdminPasswordInput" required placeholder="กรอกรหัสผ่าน หรือกดสุ่มรหัส" class="w-full pl-3.5 pr-10 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white font-mono outline-none focus:border-indigo-500">
+            <button type="button" onclick="togglePasswordVisibility('newAdminPasswordInput', 'newPwdEyeIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-white">
+              <i data-lucide="eye" id="newPwdEyeIcon" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeAddAdminModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white font-bold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold transition flex items-center gap-1.5 shadow-md shadow-indigo-600/25">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>บันทึกบัญชีแอดมิน</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Load Student Database -->
   <script src="students_data.js"></script>
 
   <!-- Admin Dashboard Logic -->
   <script>
-    // รหัสผ่านหลังบ้านเข้ารหัสด้วย SHA-256 Cryptographic Hash ป้องกันการแอบดู Source Code
-    const ADMIN_PASSWORD_HASH = "728b7f9b970d0c72956d7b5d745c3c2055833f5278866d6c2ed80db60b707283"; 
     const STORAGE_KEY = 'COMED_KKU69_PAYMENT_DATA_V1';
     const CLOUD_URL_KEY = 'COMED_KKU69_CLOUD_WEBAPP_URL';
-    const ADMIN_SESSION_KEY = 'COMED_KKU69_ADMIN_SECURE_TOKEN';
+    const ADMIN_SESSION_KEY = 'COMED_KKU69_ADMIN_LOGGED_USER';
+    const ADMIN_ACCOUNTS_KEY = 'COMED_KKU69_ADMIN_ACCOUNTS_V2';
+    const ADMIN_LOGS_KEY = 'COMED_KKU69_ADMIN_LOGS_V2';
+    const ISSUES_KEY = 'COMED_KKU69_ISSUES_V2';
 
     // Helper: คำนวณ SHA-256 ใน Browser
     async function sha256(message) {
@@ -347,11 +505,52 @@
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // Rate Limiting (ป้องกัน Brute Force Login)
+    // ฟังก์ชันสุ่มรหัสผ่านปลอดภัย
+    function generateSecurePassword(length = 10) {
+      const charset = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789#@!";
+      let ret = "";
+      for (let i = 0; i < length; i++) {
+        ret += charset.charAt(Math.floor(Math.random() * charset.length));
+      }
+      return ret;
+    }
+
+    // Initial default admin accounts
+    const DEFAULT_ADMINS = [
+      { email: 'thitiwut.a@kkumail.com', name: 'ธิติวุฒิ อารีเอื้อ (ภูผา)', password: 'Phupa#69ComEd', hash: '59de3e916100d7316a353db05617c31de97697ec474e47be6af4168e5ae55e47', role: 'Super Admin' },
+      { email: 'pichamon.sam@kkumail.com', name: 'พิชามญธุ์ สามสี (หมูหวาน)', password: 'MooWan#69ComEd', hash: '41d0b334f78c302fb30d6b73041fec5aeaf78982ce6d90ef30113cde7974399a', role: 'Admin' },
+      { email: 'nattachai.p@kkumail.com', name: 'ณัฏฐชัย โพธิ์ทับไทย (โอ้)', password: 'OhNatta#69ComEd', hash: 'd6dbff479a49739cc1d20ad7704993174f5f9f7fb34f1bc756f4d7afb9017e45', role: 'Admin' }
+    ];
+
+    let adminAccounts = [];
+    try {
+      const storedAdmins = localStorage.getItem(ADMIN_ACCOUNTS_KEY);
+      adminAccounts = storedAdmins ? JSON.parse(storedAdmins) : DEFAULT_ADMINS;
+    } catch(e) {
+      adminAccounts = DEFAULT_ADMINS;
+    }
+
+    let adminLogs = [];
+    try {
+      const storedLogs = localStorage.getItem(ADMIN_LOGS_KEY);
+      adminLogs = storedLogs ? JSON.parse(storedLogs) : [];
+    } catch(e) {
+      adminLogs = [];
+    }
+
+    let userIssues = [];
+    try {
+      const storedIssues = localStorage.getItem(ISSUES_KEY);
+      userIssues = storedIssues ? JSON.parse(storedIssues) : [];
+    } catch(e) {
+      userIssues = [];
+    }
+
+    let currentLoggedInAdmin = null;
     let loginAttempts = 0;
     let lockoutUntil = 0;
 
-    // รายชื่อนักศึกษาทั้ง 60 คน (Embedded Safe Fallback)
+    // รายชื่อนักศึกษาทั้ง 60 คน
     const DEFAULT_STUDENTS = [
       {"id": "693050120-5", "name": "กชกร แสนอินทร์", "nickname": "มิวสิค", "email": "kodchakon.sa@kkumail.com"},
       {"id": "693050121-3", "name": "กนกพร คำพิทูล", "nickname": "โดนัท", "email": "kanokporn.kump@kkumail.com"},
@@ -418,17 +617,67 @@
     let googleAppsScriptUrl = "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
     let studentDatabase = DEFAULT_STUDENTS;
     let paymentRecords = {};
+    let trashRecords = {};
     let currentFilter = 'all';
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // Check if logged in
-      if (sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true') {
+      runAdminIntroAnimation();
+      
+      const loggedEmail = sessionStorage.getItem(ADMIN_SESSION_KEY);
+      if (loggedEmail) {
+        currentLoggedInAdmin = adminAccounts.find(a => a.email.toLowerCase() === loggedEmail.toLowerCase()) || { email: loggedEmail, name: "Admin" };
         showDashboard();
       } else {
         showLoginScreen();
       }
       lucide.createIcons();
+
+      // Silent Auto-refresh background polling every 20s
+      setInterval(async () => {
+        if (!document.getElementById('adminDashboard').classList.contains('hidden')) {
+          await loadAllPayments(true);
+          renderStats();
+          if (currentFilter !== 'admins') {
+            renderAdminTable();
+          }
+        }
+      }, 20000);
     });
+
+    function runAdminIntroAnimation() {
+      const splash = document.getElementById('adminIntroSplash');
+      const pBar = document.getElementById('adminIntroProgressBar');
+      if (!splash) return;
+
+      setTimeout(() => {
+        if (pBar) pBar.style.width = '100%';
+      }, 100);
+
+      setTimeout(() => {
+        gsap.to(".intro-logo-anim", { scale: 1.1, opacity: 0, duration: 0.4 });
+        gsap.to(".intro-text-anim", { y: -20, opacity: 0, duration: 0.4 });
+        gsap.to(splash, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.inOut",
+          onComplete: () => splash.remove()
+        });
+      }, 1100);
+    }
+
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        if (icon) icon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
 
     function showLoginScreen() {
       document.getElementById('loginScreen').classList.remove('hidden');
@@ -444,7 +693,6 @@
       renderStats();
       renderAdminTable();
 
-      // GSAP Dashboard Stagger Animations
       gsap.fromTo("header", { y: -25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" });
       gsap.fromTo(".admin-stat-card", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power3.out" });
       gsap.fromTo("#adminTableContainer", { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, delay: 0.2, ease: "power3.out" });
@@ -453,6 +701,30 @@
       renderStats();
       renderAdminTable();
       lucide.createIcons();
+    }
+
+    async function logAdminAction(action, detail) {
+      const email = currentLoggedInAdmin ? currentLoggedInAdmin.email : "Unknown";
+      const timestamp = new Date().toLocaleString('th-TH');
+      const newLog = { timestamp, adminEmail: email, action, detail };
+      adminLogs.unshift(newLog);
+      localStorage.setItem(ADMIN_LOGS_KEY, JSON.stringify(adminLogs.slice(0, 200)));
+
+      if (googleAppsScriptUrl) {
+        try {
+          fetch(googleAppsScriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: "log_admin",
+              adminEmail: email,
+              logAction: action,
+              logDetail: detail
+            })
+          });
+        } catch(e){}
+      }
     }
 
     async function handleAdminLogin(e) {
@@ -464,31 +736,50 @@
         return;
       }
 
+      const emailInput = document.getElementById('adminEmailInput').value.trim().toLowerCase();
       const pwdInput = document.getElementById('adminPasswordInput').value;
-      const pwdHash = await sha256(pwdInput);
 
-      if (pwdHash === ADMIN_PASSWORD_HASH) {
+      const admin = adminAccounts.find(a => a.email.toLowerCase() === emailInput);
+      let isValid = false;
+
+      if (admin) {
+        if (admin.password && admin.password === pwdInput) {
+          isValid = true;
+        } else if (admin.hash) {
+          const inputHash = await sha256(emailInput + ':' + pwdInput);
+          if (inputHash === admin.hash) {
+            isValid = true;
+          }
+        }
+      }
+
+      if (isValid) {
         loginAttempts = 0;
-        sessionStorage.setItem(ADMIN_SESSION_KEY, pwdHash);
+        currentLoggedInAdmin = admin;
+        sessionStorage.setItem(ADMIN_SESSION_KEY, admin.email);
+        logAdminAction("เข้าสู่ระบบ (Login)", `เข้าสู่ระบบสำเร็จจากอีเมล ${admin.email}`);
         showDashboard();
       } else {
         loginAttempts++;
         if (loginAttempts >= 5) {
-          lockoutUntil = Date.now() + 30000; // Lock 30 วินาที
+          lockoutUntil = Date.now() + 30000;
           alert("⚠️ กรอกรหัสผิด 5 ครั้ง! ระบบถูกระงับชั่วคราว 30 วินาทีเพื่อความปลอดภัย");
         }
         document.getElementById('loginErrorMsg').classList.remove('hidden');
+        document.getElementById('loginErrorText').textContent = "อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง";
+        lucide.createIcons();
       }
     }
 
     function handleAdminLogout() {
-      sessionStorage.removeItem(ADMIN_SESSION_KEY);
-      location.reload();
+      if (confirm("ต้องการออกจากระบบผู้ดูแลระบบหรือไม่?")) {
+        logAdminAction("ออกจากระบบ (Logout)", `แอดมิน ${currentLoggedInAdmin?.email || ''} ออกจากระบบ`);
+        sessionStorage.removeItem(ADMIN_SESSION_KEY);
+        location.reload();
+      }
     }
 
-    let trashRecords = {};
-
-    async function loadAllPayments() {
+    async function loadAllPayments(silent = false) {
       if (googleAppsScriptUrl) {
         try {
           const res = await fetch(googleAppsScriptUrl);
@@ -498,6 +789,16 @@
               trashRecords = raw._trash;
               delete raw._trash;
             }
+            if (raw._issues) {
+              userIssues = raw._issues;
+              localStorage.setItem(ISSUES_KEY, JSON.stringify(userIssues));
+              delete raw._issues;
+            }
+            if (raw._logs && Array.isArray(raw._logs) && raw._logs.length > 0) {
+              adminLogs = raw._logs;
+              localStorage.setItem(ADMIN_LOGS_KEY, JSON.stringify(adminLogs));
+              delete raw._logs;
+            }
             paymentRecords = raw;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
             localStorage.setItem('COMED_KKU69_TRASH_RECORDS', JSON.stringify(trashRecords));
@@ -505,15 +806,6 @@
           }
         } catch (err) {}
       }
-
-      try {
-        const res = await fetch('/api/payments');
-        if (res.ok) {
-          paymentRecords = await res.json();
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
-          return;
-        }
-      } catch (err) {}
 
       const local = localStorage.getItem(STORAGE_KEY);
       paymentRecords = local ? JSON.parse(local) : {};
@@ -549,11 +841,180 @@
       document.getElementById('countFPaid').textContent = paidCount;
       document.getElementById('countFUnpaid').textContent = unpaidCount;
       document.getElementById('countFTrash').textContent = Object.keys(trashRecords).length;
+      document.getElementById('countFIssues').textContent = userIssues.length;
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      const btnMap = {
+        all: 'fBtnAll',
+        paid: 'fBtnPaid',
+        unpaid: 'fBtnUnpaid',
+        trash: 'fBtnTrash',
+        issues: 'fBtnIssues',
+        admins: 'fBtnAdmins',
+        logs: 'fBtnLogs'
+      };
+
+      Object.keys(btnMap).forEach(key => {
+        const el = document.getElementById(btnMap[key]);
+        if (!el) return;
+        if (key === filter) {
+          el.className = 'px-3.5 py-2 rounded-xl bg-orange-600 text-white font-bold shadow-sm transition flex items-center gap-1';
+        } else {
+          el.className = 'px-3.5 py-2 rounded-xl text-slate-400 hover:text-slate-200 transition flex items-center gap-1';
+        }
+      });
+
+      renderAdminTable();
     }
 
     function renderAdminTable() {
       const tbody = document.getElementById('adminTableBody');
+      const tableHead = tbody.previousElementSibling;
       const searchVal = (document.getElementById('adminSearchInput')?.value || '').toLowerCase().trim();
+
+      // ================= VIEW: ISSUES TAB =================
+      if (currentFilter === 'issues') {
+        tableHead.innerHTML = `
+          <tr class="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-800">
+            <th class="p-4 text-center w-16">#</th>
+            <th class="p-4">รหัส / ผู้แจ้ง</th>
+            <th class="p-4">ช่องทางติดต่อ</th>
+            <th class="p-4">หัวข้อปัญหา</th>
+            <th class="p-4">รายละเอียด</th>
+            <th class="p-4 text-center">หลักฐาน</th>
+            <th class="p-4 text-center">สถานะ</th>
+            <th class="p-4 text-center w-36">จัดการ</th>
+          </tr>
+        `;
+        if (userIssues.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="text-center py-12 text-slate-500 text-xs font-bold">ไม่มีรายการแจ้งปัญหาในขณะนี้</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = userIssues.map((iss, idx) => `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="p-4 text-center text-slate-500 font-mono text-xs">${idx + 1}</td>
+            <td class="p-4">
+              <span class="font-mono font-bold text-orange-400 block">${iss.studentId}</span>
+              <span class="text-xs text-slate-300">${iss.name || ''}</span>
+            </td>
+            <td class="p-4 font-bold text-sky-400 text-xs">${iss.contact}</td>
+            <td class="p-4 font-bold text-amber-300 text-xs">${iss.category}</td>
+            <td class="p-4 text-xs text-slate-300 max-w-xs">${iss.detail}</td>
+            <td class="p-4 text-center">
+              ${iss.evidenceUrl && iss.evidenceUrl !== '-' 
+                ? `<a href="${iss.evidenceUrl}" target="_blank" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg text-xs font-bold inline-flex items-center gap-1 border border-slate-700"><i data-lucide="external-link" class="w-3 h-3"></i> ดูหลักฐาน</a>`
+                : '<span class="text-slate-600 text-xs">-</span>'
+              }
+            </td>
+            <td class="p-4 text-center">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${iss.status === 'แก้ไขแล้ว' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}">
+                ${iss.status || 'รอดำเนินการ'}
+              </span>
+            </td>
+            <td class="p-4 text-center">
+              <button onclick="resolveIssue('${iss.id || iss.studentId}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition">
+                ทำเครื่องหมายว่าแก้แล้ว
+              </button>
+            </td>
+          </tr>
+        `).join('');
+        lucide.createIcons();
+        return;
+      }
+
+      // ================= VIEW: ADMIN ACCOUNTS TAB =================
+      if (currentFilter === 'admins') {
+        tableHead.innerHTML = `
+          <tr class="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-800">
+            <th class="p-4 text-center w-16">#</th>
+            <th class="p-4">ชื่อ - นามสกุล</th>
+            <th class="p-4">อีเมลแอดมิน (KKU Mail)</th>
+            <th class="p-4">ตำแหน่ง / สิทธิ์</th>
+            <th class="p-4">รหัสผ่าน</th>
+            <th class="p-4 text-center w-40">
+              <button onclick="openAddAdminModal()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1 mx-auto transition">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> เพิ่ม Admin
+              </button>
+            </th>
+          </tr>
+        `;
+        tbody.innerHTML = adminAccounts.map((adm, idx) => `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="p-4 text-center text-slate-500 font-mono text-xs">${idx + 1}</td>
+            <td class="p-4 font-bold text-white">${adm.name}</td>
+            <td class="p-4 font-mono text-xs text-sky-400">${adm.email}</td>
+            <td class="p-4">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${adm.role === 'Super Admin' ? 'bg-orange-500/20 text-orange-300 border border-orange-500/40' : 'bg-slate-800 text-slate-300'}">
+                ${adm.role || 'Admin'}
+              </span>
+            </td>
+            <td class="p-4 font-mono text-xs">
+              <div class="flex items-center gap-2">
+                <span id="adminPwdText_${idx}" class="text-slate-400">••••••••••</span>
+                <button onclick="revealAdminPassword('${adm.email}', 'adminPwdText_${idx}')" class="text-slate-400 hover:text-white p-1" title="ดูรหัสผ่าน">
+                  <i data-lucide="eye" class="w-4 h-4"></i>
+                </button>
+                <button onclick="regenerateAdminPassword('${adm.email}')" class="text-indigo-400 hover:text-indigo-300 p-1" title="สุ่มรหัสผ่านใหม่">
+                  <i data-lucide="dice-5" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </td>
+            <td class="p-4 text-center">
+              ${adm.role !== 'Super Admin' ? `
+                <button onclick="deleteAdminAccount('${adm.email}')" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-bold transition">
+                  ลบสิทธิ์
+                </button>
+              ` : '<span class="text-xs text-slate-600">หลัก</span>'}
+            </td>
+          </tr>
+        `).join('');
+        lucide.createIcons();
+        return;
+      }
+
+      // ================= VIEW: LOGS TAB =================
+      if (currentFilter === 'logs') {
+        tableHead.innerHTML = `
+          <tr class="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-800">
+            <th class="p-4 text-center w-16">#</th>
+            <th class="p-4 w-44">วัน - เวลา</th>
+            <th class="p-4">อีเมลแอดมิน</th>
+            <th class="p-4">กิจกรรม (Action)</th>
+            <th class="p-4">รายละเอียด</th>
+          </tr>
+        `;
+        if (adminLogs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-slate-500 text-xs font-bold">ยังไม่มีประวัติ Logs ในระบบ</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = adminLogs.map((log, idx) => `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="p-4 text-center text-slate-500 font-mono text-xs">${idx + 1}</td>
+            <td class="p-4 font-mono text-xs text-slate-400">${log.timestamp}</td>
+            <td class="p-4 font-mono text-xs font-bold text-sky-400">${log.adminEmail}</td>
+            <td class="p-4 font-bold text-amber-300 text-xs">${log.action}</td>
+            <td class="p-4 text-xs text-slate-300">${log.detail}</td>
+          </tr>
+        `).join('');
+        lucide.createIcons();
+        return;
+      }
+
+      // Restore Standard Student Table Header
+      tableHead.innerHTML = `
+        <tr class="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-800">
+          <th class="p-4 text-center w-16">ลำดับ</th>
+          <th class="p-4">รหัสนักศึกษา</th>
+          <th class="p-4">ชื่อ - นามสกุล</th>
+          <th class="p-4">ชื่อเล่น</th>
+          <th class="p-4 hidden md:table-cell">อีเมล</th>
+          <th class="p-4 text-center">สถานะ</th>
+          <th class="p-4 text-center">หลักฐานสลิป</th>
+          <th class="p-4 text-center w-40">จัดการ</th>
+        </tr>
+      `;
 
       // VIEW TRASH TAB
       if (currentFilter === 'trash') {
@@ -646,8 +1107,8 @@
                 ? `<button onclick="adminMoveToTrash('${st.id}')" class="px-3 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto">
                     <i data-lucide="trash-2" class="w-3 h-3"></i> ย้ายไปถังขยะ
                    </button>`
-                : `<button onclick="adminTogglePayment('${st.id}', true)" class="px-3 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition">
-                    ทำเครื่องหมายว่าจ่ายแล้ว
+                : `<button onclick="openAdminUploadModal('${st.id}')" class="px-3 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl transition flex items-center gap-1 mx-auto">
+                    <i data-lucide="upload" class="w-3 h-3"></i> ยืนยันชำระ (แนบสลิป)
                    </button>`
               }
             </td>
@@ -658,16 +1119,207 @@
       lucide.createIcons();
     }
 
-    function setFilter(filter) {
-      currentFilter = filter;
-      document.getElementById('fBtnAll').className = filter === 'all' ? 'px-4 py-2 rounded-xl bg-slate-800 text-white shadow-sm transition' : 'px-4 py-2 rounded-xl text-slate-400 hover:text-slate-200 transition';
-      document.getElementById('fBtnPaid').className = filter === 'paid' ? 'px-4 py-2 rounded-xl bg-emerald-600 text-white shadow-sm transition' : 'px-4 py-2 rounded-xl text-slate-400 hover:text-emerald-400 transition';
-      document.getElementById('fBtnUnpaid').className = filter === 'unpaid' ? 'px-4 py-2 rounded-xl bg-rose-600 text-white shadow-sm transition' : 'px-4 py-2 rounded-xl text-slate-400 hover:text-rose-400 transition';
-      document.getElementById('fBtnTrash').className = filter === 'trash' ? 'px-4 py-2 rounded-xl bg-amber-600 text-white shadow-sm transition flex items-center gap-1 font-bold' : 'px-4 py-2 rounded-xl text-slate-400 hover:text-amber-400 transition flex items-center gap-1';
-      renderAdminTable();
+    // ================= ADMIN MANUAL PAYMENT WITH SLIP =================
+    let currentAdminTargetStudent = null;
+    let adminTempSlipBase64 = null;
+
+    function openAdminUploadModal(studentId) {
+      const st = studentDatabase.find(s => s.id === studentId);
+      if (!st) return;
+      currentAdminTargetStudent = st;
+      adminTempSlipBase64 = null;
+
+      document.getElementById('adminModalStudentInfo').innerHTML = `
+        <div class="flex justify-between"><span class="text-slate-400">ชื่อ-นามสกุล:</span><span class="font-bold text-white">${st.name} (น้อง${st.nickname})</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">รหัสนักศึกษา:</span><span class="font-mono text-orange-400 font-bold">${st.id}</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">ยอดชำระ:</span><span class="font-bold text-emerald-400">฿190 บาท</span></div>
+      `;
+
+      document.getElementById('adminSlipUploadPrompt').classList.remove('hidden');
+      document.getElementById('adminSlipPreviewContainer').classList.add('hidden');
+      document.getElementById('adminSlipFileInput').value = '';
+      document.getElementById('modalAdminUploadSlip').classList.remove('hidden');
+      lucide.createIcons();
     }
 
-    // 1. Move to Trash (ย้ายไปยังถังขยะ + ย้ายไฟล์ Drive ไปโฟลเดอร์ถังขยะ)
+    function closeAdminUploadModal() {
+      document.getElementById('modalAdminUploadSlip').classList.add('hidden');
+    }
+
+    function handleAdminSlipSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 10 * 1024 * 1024) {
+        alert("⚠️ ขนาดไฟล์ภาพเกิน 10 MB กรุณาเลือกไฟล์ใหม่");
+        e.target.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        adminTempSlipBase64 = ev.target.result;
+        document.getElementById('adminSlipPreviewImg').src = adminTempSlipBase64;
+        document.getElementById('adminSlipUploadPrompt').classList.add('hidden');
+        document.getElementById('adminSlipPreviewContainer').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function submitAdminManualPayment() {
+      if (!currentAdminTargetStudent) return;
+      if (!adminTempSlipBase64) {
+        alert("⚠️ กรุณาแนบภาพสลิปหลักฐานก่อนกดยืนยัน");
+        return;
+      }
+
+      const btn = document.getElementById('btnAdminConfirmPay');
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> <span>กำลังอัปโหลดขึ้น Drive & Sheets...</span>`;
+      lucide.createIcons();
+
+      const studentId = currentAdminTargetStudent.id;
+      const timestamp = new Date().toLocaleString('th-TH');
+      const refCode = "ADMIN-VERIFIED-" + Date.now();
+
+      paymentRecords[studentId] = {
+        paid: true,
+        timestamp: timestamp,
+        slipUrl: adminTempSlipBase64,
+        refCode: refCode,
+        amount: 190
+      };
+
+      if (googleAppsScriptUrl) {
+        try {
+          await fetch(googleAppsScriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              studentId: studentId,
+              name: currentAdminTargetStudent.name,
+              nickname: currentAdminTargetStudent.nickname,
+              email: currentAdminTargetStudent.email,
+              slipBase64: adminTempSlipBase64,
+              timestamp: timestamp,
+              refCode: refCode,
+              source: "Admin Manual Verified"
+            })
+          });
+        } catch(err){}
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
+      logAdminAction("ยืนยันการชำระเงิน", `แอดมินยืนยันยอดเงิน ฿190 พร้อมแนบสลิปให้ ${currentAdminTargetStudent.name} (${studentId})`);
+
+      closeAdminUploadModal();
+      btn.disabled = false;
+      btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> <span>ยืนยันและอัปโหลดขึ้น Cloud</span>`;
+      renderStats();
+      renderAdminTable();
+      showToastNotification(`✅ บันทึกและอัปโหลดสลิปของ ${currentAdminTargetStudent.name} ขึ้น Cloud สำเร็จ!`);
+    }
+
+    // ================= ADMIN ACCOUNT MANAGEMENT =================
+    function openAddAdminModal() {
+      document.getElementById('newAdminNameInput').value = '';
+      document.getElementById('newAdminEmailInput').value = '';
+      document.getElementById('newAdminPasswordInput').value = generateSecurePassword(10);
+      document.getElementById('modalAddAdmin').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeAddAdminModal() {
+      document.getElementById('modalAddAdmin').classList.add('hidden');
+    }
+
+    function generateRandomPasswordForNewAdmin() {
+      document.getElementById('newAdminPasswordInput').value = generateSecurePassword(10);
+    }
+
+    function handleCreateAdminSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('newAdminNameInput').value.trim();
+      const email = document.getElementById('newAdminEmailInput').value.trim().toLowerCase();
+      const password = document.getElementById('newAdminPasswordInput').value.trim();
+
+      if (adminAccounts.some(a => a.email.toLowerCase() === email)) {
+        alert("⚠️ อีเมลนี้มีอยู่ในระบบผู้ดูแลระบบแล้ว");
+        return;
+      }
+
+      const newAdmin = { email, name, password, role: 'Admin' };
+      adminAccounts.push(newAdmin);
+      localStorage.setItem(ADMIN_ACCOUNTS_KEY, JSON.stringify(adminAccounts));
+      logAdminAction("เพิ่มผู้ดูแลระบบ", `เพิ่มแอดมินใหม่: ${name} (${email})`);
+
+      closeAddAdminModal();
+      renderAdminTable();
+      showToastNotification(`✨ เพิ่มผู้ดูแลระบบ "${name}" สำเร็จเรียบร้อย!`);
+    }
+
+    function revealAdminPassword(email, elementId) {
+      const adm = adminAccounts.find(a => a.email === email);
+      if (!adm) return;
+      const el = document.getElementById(elementId);
+      if (el.textContent.includes('•')) {
+        el.textContent = adm.password || '(รหัสเข้ารหัส SHA-256)';
+        el.classList.remove('text-slate-400');
+        el.classList.add('text-emerald-400', 'font-bold');
+      } else {
+        el.textContent = '••••••••••';
+        el.classList.remove('text-emerald-400', 'font-bold');
+        el.classList.add('text-slate-400');
+      }
+    }
+
+    function regenerateAdminPassword(email) {
+      const adm = adminAccounts.find(a => a.email === email);
+      if (!adm) return;
+      const newPwd = generateSecurePassword(10);
+      if (confirm(`คุณต้องการสุ่มรหัสผ่านใหม่ให้กับ "${adm.name}" หรือไม่?\n\nรหัสผ่านใหม่ที่จะตั้งคือ: ${newPwd}`)) {
+        adm.password = newPwd;
+        localStorage.setItem(ADMIN_ACCOUNTS_KEY, JSON.stringify(adminAccounts));
+        logAdminAction("เปลี่ยนรหัสผ่านแอดมิน", `สุ่มรหัสผ่านใหม่ให้กับ ${adm.email}`);
+        renderAdminTable();
+        alert(`✅ รหัสผ่านใหม่ของ ${adm.name} คือ:\n\n${newPwd}\n\n(โปรดแจ้งรหัสนี้ให้กับผู้ใช้)`);
+      }
+    }
+
+    function deleteAdminAccount(email) {
+      if (confirm(`คุณต้องการลบสิทธิ์ผู้ดูแลระบบของอีเมล "${email}" ใช่หรือไม่?`)) {
+        adminAccounts = adminAccounts.filter(a => a.email !== email);
+        localStorage.setItem(ADMIN_ACCOUNTS_KEY, JSON.stringify(adminAccounts));
+        logAdminAction("ลบผู้ดูแลระบบ", `ลบสิทธิ์แอดมิน ${email}`);
+        renderAdminTable();
+        showToastNotification(`ลบสิทธิ์แอดมิน ${email} เรียบร้อยแล้ว`);
+      }
+    }
+
+    async function resolveIssue(issueId) {
+      const iss = userIssues.find(i => (i.id === issueId || i.studentId === issueId));
+      if (iss) {
+        iss.status = 'แก้ไขแล้ว';
+        localStorage.setItem(ISSUES_KEY, JSON.stringify(userIssues));
+        if (googleAppsScriptUrl) {
+          try {
+            fetch(googleAppsScriptUrl, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: "update_issue_status", issueId: iss.id || issueId, newStatus: "แก้ไขแล้ว" })
+            });
+          } catch(e){}
+        }
+        logAdminAction("แก้ไขปัญหาผู้ใช้", `ทำเครื่องหมายปัญหาของ ${iss.studentId} (${iss.name || ''}) ว่าแก้ไขแล้ว`);
+        renderStats();
+        renderAdminTable();
+        showToastNotification(`✅ ทำเครื่องหมายว่าแก้ไขปัญหาเรียบร้อยแล้ว`);
+      }
+    }
+
+    // 1. Move to Trash
     async function adminMoveToTrash(studentId) {
       const st = studentDatabase.find(s => s.id === studentId);
       const name = st ? st.name : studentId;
@@ -707,12 +1359,14 @@
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
         localStorage.setItem('COMED_KKU69_TRASH_RECORDS', JSON.stringify(trashRecords));
+        logAdminAction("ย้ายไปถังขยะ", `ย้ายข้อมูลของ ${name} (${studentId}) ไปถังขยะ`);
         renderStats();
         renderAdminTable();
+        showToastNotification(`ย้ายข้อมูลของ ${name} ไปถังขยะเรียบร้อย`);
       }
     }
 
-    // 2. Restore from Trash (กู้คืนกลับมาสถานะเดิม)
+    // 2. Restore from Trash
     async function adminRestoreFromTrash(studentId) {
       const item = trashRecords[studentId];
       if (!item) return;
@@ -743,12 +1397,14 @@
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
         localStorage.setItem('COMED_KKU69_TRASH_RECORDS', JSON.stringify(trashRecords));
+        logAdminAction("กู้คืนข้อมูล", `กู้คืนข้อมูลของ ${item.name} (${studentId}) จากถังขยะ`);
         renderStats();
         renderAdminTable();
+        showToastNotification(`กู้คืนข้อมูลของ ${item.name} สำเร็จ`);
       }
     }
 
-    // 3. Delete Permanently (ลบถาวร ทั้งชีตและไฟล์ใน Drive)
+    // 3. Delete Permanently
     async function adminDeletePermanently(studentId) {
       const item = trashRecords[studentId];
       if (!item) return;
@@ -771,42 +1427,10 @@
         }
 
         localStorage.setItem('COMED_KKU69_TRASH_RECORDS', JSON.stringify(trashRecords));
+        logAdminAction("ลบถาวร", `ลบข้อมูลและสลิปของ ${item.name} (${studentId}) ถาวร`);
         renderStats();
         renderAdminTable();
-      }
-    }
-
-    async function adminTogglePayment(studentId, setPaid) {
-      const st = studentDatabase.find(s => s.id === studentId);
-      if (!st) return;
-
-      if (confirm(`ต้องการทำเครื่องหมายว่า "${st.name}" ชำระเงินแล้ว ฿190 หรือไม่?`)) {
-        paymentRecords[studentId] = {
-          paid: true,
-          timestamp: new Date().toLocaleString('th-TH'),
-          slipUrl: '',
-          refCode: 'ADMIN-MANUAL-' + Date.now(),
-          amount: 190
-        };
-        if (googleAppsScriptUrl) {
-          try {
-            fetch(googleAppsScriptUrl, {
-              method: 'POST',
-              mode: 'no-cors',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                studentId: studentId,
-                name: st.name,
-                nickname: st.nickname,
-                email: st.email,
-                source: "Admin Manual"
-              })
-            });
-          } catch(e){}
-        }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
-        renderStats();
-        renderAdminTable();
+        showToastNotification(`ลบข้อมูลของ ${item.name} อย่างถาวรแล้ว`);
       }
     }
 
@@ -843,34 +1467,6 @@
       `;
       document.getElementById('modalSlipInspector').classList.remove('hidden');
       lucide.createIcons();
-    }
-
-    // Helper: แปลงลิงก์ Google Drive ให้อยู่ในรูปแบบเปิดดูรูปและดาวน์โหลดได้ 100%
-    function formatDriveImageUrl(url) {
-      if (!url) return '';
-      let fileId = '';
-      
-      // กรณีเป็นลิงก์ Google Drive รูปแบบต่างๆ
-      if (url.includes('drive.google.com')) {
-        const idMatch = url.match(/[-\w]{25,}/);
-        if (idMatch) {
-          fileId = idMatch[0];
-          // ลิงก์ตรงสำหรับ Preview รูปภาพ
-          return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1200`;
-        }
-      }
-      return url;
-    }
-
-    function getDriveDirectViewUrl(url) {
-      if (!url) return '#';
-      if (url.includes('drive.google.com')) {
-        const idMatch = url.match(/[-\w]{25,}/);
-        if (idMatch) {
-          return `https://drive.google.com/file/d/${idMatch[0]}/view?usp=sharing`;
-        }
-      }
-      return url;
     }
 
     function inspectSlip(studentId) {
@@ -913,7 +1509,6 @@
             </div>
           </div>
 
-          <!-- Embedded Google Drive Interactive Viewer (Direct Image Display) -->
           <div class="w-full h-96 rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden shadow-inner flex flex-col relative">
             <iframe 
               src="${drivePreviewUrl}" 
@@ -947,16 +1542,28 @@
       const icon = document.getElementById('adminRefreshIcon');
       if (icon) icon.classList.add('animate-spin');
 
+      // Showing animated loading toast popup
+      const loadingToast = showLoadingToast("🔄 กำลังดึงและซิงค์ข้อมูลล่าสุดจาก Google Cloud...");
+
       await loadAllPayments();
       renderStats();
       renderAdminTable();
 
       setTimeout(() => {
         if (icon) icon.classList.remove('animate-spin');
-      }, 600);
+        if (loadingToast) loadingToast.remove();
+        showToastNotification("✨ ซิงค์ข้อมูลล่าสุดจาก Google Cloud สำเร็จเรียบร้อยแล้ว!");
+      }, 700);
+    }
 
-      // Animated Toast Popup Notification
-      showToastNotification("✨ ซิงค์ข้อมูลล่าสุดจาก Google Cloud สำเร็จเรียบร้อยแล้ว!");
+    function showLoadingToast(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-6 right-6 z-50 bg-slate-900/90 text-sky-300 font-bold text-xs sm:text-sm px-5 py-3.5 rounded-2xl shadow-2xl border border-sky-500/40 flex items-center gap-2.5 backdrop-blur-xl';
+      toast.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin text-sky-400"></i><span>${msg}</span>`;
+      document.body.appendChild(toast);
+      lucide.createIcons();
+      gsap.fromTo(toast, { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "power2.out" });
+      return toast;
     }
 
     function showToastNotification(msg) {
