@@ -194,6 +194,8 @@
 
         if (typeof showDashboard === 'function') {
           showDashboard();
+        } else if (typeof window.initAdminDashboard === 'function') {
+          window.initAdminDashboard();
         }
       } else {
         if (errBox) {
@@ -815,10 +817,12 @@
     ];
 
     let googleAppsScriptUrl = "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
-    let studentDatabase = DEFAULT_STUDENTS;
+    let studentDatabase = (typeof window.STUDENTS_DATA !== 'undefined' && window.STUDENTS_DATA.length > 0) ? window.STUDENTS_DATA : DEFAULT_STUDENTS;
     let paymentRecords = {};
     let trashRecords = {};
     let currentFilter = 'all';
+
+    window.initAdminDashboard = showDashboard;
 
     document.addEventListener('DOMContentLoaded', async () => {
       try {
@@ -890,7 +894,16 @@
         dash.classList.remove('hidden');
       }
 
-      studentDatabase = DEFAULT_STUDENTS;
+      studentDatabase = (typeof window.STUDENTS_DATA !== 'undefined' && window.STUDENTS_DATA.length > 0) ? window.STUDENTS_DATA : DEFAULT_STUDENTS;
+      
+      // Load cached payments immediately
+      try {
+        const local = localStorage.getItem(STORAGE_KEY);
+        if (local) paymentRecords = JSON.parse(local);
+        const localTrash = localStorage.getItem('COMED_KKU69_TRASH_RECORDS');
+        if (localTrash) trashRecords = JSON.parse(localTrash);
+      } catch(e) {}
+
       renderStats();
       renderAdminTable();
 
