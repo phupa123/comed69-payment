@@ -42,18 +42,20 @@ function doGet(e) {
       
       let idCol = -1, nameCol = -1, nickCol = -1, emailCol = -1, slipCol = -1, timeCol = -1;
       headers.forEach((h, idx) => {
-        if (h.includes("รหัส") || h.includes("id")) idCol = idx;
+        if (h.includes("รหัส") || h.includes("student id") || h.includes("id")) idCol = idx;
         else if (h.includes("ชื่อ-") || h.includes("ชื่อ -") || (h.includes("ชื่อ") && !h.includes("เล่น"))) nameCol = idx;
         else if (h.includes("ชื่อเล่น") || h.includes("nickname")) nickCol = idx;
         else if (h.includes("เมล") || h.includes("mail")) emailCol = idx;
-        else if (h.includes("สลิป") || h.includes("หลักฐาน") || h.includes("slip") || h.includes("drive")) slipCol = idx;
+        else if (h.includes("สลิป") || h.includes("หลักฐาน") || h.includes("slip") || h.includes("แนบ") || h.includes("drive")) slipCol = idx;
         else if (h.includes("ประทับเวลา") || h.includes("timestamp") || h.includes("วัน") || h.includes("เวลา")) timeCol = idx;
       });
 
       for (let i = 1; i < data.length; i++) {
         const row = data[i];
         let foundId = "";
-        if (idCol !== -1 && row[idCol]) {
+        
+        // สแกนหาตัวเลขรหัสนักศึกษา 693050... อย่างแม่นยำ
+        if (idCol !== -1 && row[idCol] && String(row[idCol]).replace(/\D/g, '').startsWith('693050')) {
           foundId = String(row[idCol]).trim();
         } else {
           for (let cell of row) {
@@ -162,7 +164,6 @@ function doPost(e) {
         if (sheet.getName() === "Trash_ถังขยะ") continue;
         const vals = sheet.getDataRange().getValues();
         
-        // ค้นหาแถวที่ตรงกับรหัสนักศึกษา (สแกนทุกคอลัมน์เพื่อความแม่นยำ 100%)
         for (let i = vals.length - 1; i >= 1; i--) {
           let isMatch = false;
           let rowSlip = "";
@@ -181,12 +182,11 @@ function doPost(e) {
               row: vals[i],
               slip: rowSlip || data.slipUrl || ""
             });
-            sheet.deleteRow(i + 1); // ลบออกจากชีตเดิม (ทั้ง Form Responses หรือ Payments)
+            sheet.deleteRow(i + 1);
           }
         }
       }
 
-      // นำไปใส่ในชีตถังขยะ + ย้ายไฟล์ใน Drive
       const slipToMove = (movedRows.length > 0 && movedRows[0].slip) ? movedRows[0].slip : (data.slipUrl || "");
       
       if (slipToMove && slipToMove.includes("drive.google.com")) {
@@ -242,7 +242,7 @@ function doPost(e) {
               const idMatch = slipUrl.match(/[-\w]{25,}/);
               if (idMatch) {
                 try {
-                  DriveApp.getFileById(idMatch[0]).setTrashed(true); // ลบไฟล์ลงถังขยะของ Drive จริง
+                  DriveApp.getFileById(idMatch[0]).setTrashed(true);
                 } catch(err){}
               }
             }
@@ -339,17 +339,19 @@ function doPost(e) {
     const values = paySheet.getDataRange().getValues();
     let rowIndex = -1;
     for (let i = 1; i < values.length; i++) {
-      if (String(values[i][0]).trim() === String(data.studentId).trim()) {
+      const rowIdDigits = String(values[i][0]).replace(/\D/g, '');
+      if (rowIdDigits === targetDigits && targetDigits !== "") {
         rowIndex = i + 1;
         break;
       }
     }
 
     const timestamp = data.timestamp || Utilities.formatDate(new Date(), "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss");
-    const refCode = data.refCode || ("TXN-COMED-" + new Date().getTime());
+    const refCode = data.refCode || ("TXN-COMED-" + targetDigits);
 
     if (rowIndex > 0) {
-      paySheet.getRange(rowIndex, 5, 1, 6).setValues([[
+      paySheet.getRange(rowIndex, 1, 1, 10).setValues([[
+        data.studentId, data.name || values[rowIndex-1][1], data.nickname || values[rowIndex-1][2], data.email || values[rowIndex-1][3],
         "ชำระเงินแล้ว", 190, driveFileUrl || values[rowIndex-1][6], timestamp, refCode, data.source || "Website"
       ]]);
     } else {
