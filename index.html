@@ -63,6 +63,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- GSAP Animation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
     body {
@@ -107,7 +109,47 @@
   </style>
 </head>
 
-<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-orange-500 selection:text-white overflow-x-hidden">
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-orange-500 selection:text-white overflow-x-hidden opacity-0 transition-opacity duration-700" id="mainBody">
+
+  <!-- ================= LUXURY WELCOME LOGIN SUCCESS POPUP ================= -->
+  <div id="modalLoginSuccess" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-2xl flex items-center justify-center p-4">
+    <div id="loginSuccessCard" class="relative bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-orange-200/80 text-center space-y-6 overflow-hidden">
+      
+      <!-- Top Decorative Glow bar -->
+      <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400"></div>
+
+      <!-- User Avatar with Rotating Glow Ring -->
+      <div class="relative w-24 h-24 mx-auto mt-2">
+        <div class="absolute -inset-2 rounded-full bg-gradient-to-tr from-orange-500 via-amber-400 to-emerald-400 blur-md opacity-70 animate-spin" style="animation-duration: 4s;"></div>
+        <img id="welcomeSuccessAvatar" src="" alt="User Avatar" class="relative w-full h-full rounded-full object-cover border-4 border-white shadow-xl">
+        <div class="absolute bottom-0 right-0 w-7 h-7 bg-emerald-500 text-white rounded-full flex items-center justify-center border-2 border-white shadow-md">
+          <i data-lucide="check" class="w-4 h-4"></i>
+        </div>
+      </div>
+
+      <!-- Text Details -->
+      <div class="space-y-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-black uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span>เข้าสู่ระบบสำเร็จ</span>
+        </span>
+        <h3 id="welcomeSuccessName" class="text-2xl font-black text-slate-900 tracking-tight">ยินดีต้อนรับ</h3>
+        <p id="welcomeSuccessEmail" class="text-xs text-orange-600 font-mono font-bold">user@kkumail.com</p>
+        <p class="text-xs text-slate-400 pt-1">
+          สาขาวิชาคอมพิวเตอร์ศึกษา (COMED KKU 69)
+        </p>
+      </div>
+
+      <!-- Action CTA -->
+      <div class="pt-2">
+        <button onclick="closeLoginSuccessModal()" class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-orange-500/30 transition transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>เข้าสู่หน้าเว็บไซต์</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
 
   <!-- ================= TOP NAVIGATION BAR ================= -->
   <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-sm transition-all">
@@ -876,7 +918,55 @@
       localStorage.setItem('COMED_USER_SESSION', JSON.stringify(userSession));
       updateUserUI(userSession);
       closeGoogleLoginModal();
-      alert(`🎉 ยินดีต้อนรับคุณ ${userSession.name} เข้าสู่ระบบด้วยบัญชี ${userSession.email}`);
+      
+      // Trigger Luxury Welcome Success Popup
+      showLoginSuccessPopup(userSession);
+    }
+
+    function showLoginSuccessPopup(user) {
+      const modal = document.getElementById('modalLoginSuccess');
+      const card = document.getElementById('loginSuccessCard');
+      const avatar = document.getElementById('welcomeSuccessAvatar');
+      const name = document.getElementById('welcomeSuccessName');
+      const email = document.getElementById('welcomeSuccessEmail');
+
+      avatar.src = user.avatar;
+      name.textContent = user.nickname ? `${user.name} (น้อง${user.nickname})` : user.name;
+      email.textContent = user.email;
+
+      modal.classList.remove('hidden');
+      
+      // GSAP Pop & Spring Animation
+      gsap.fromTo(card, 
+        { opacity: 0, scale: 0.6, y: 50 }, 
+        { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.8)" }
+      );
+
+      // Confetti Explosion
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+
+      lucide.createIcons();
+    }
+
+    function closeLoginSuccessModal() {
+      const modal = document.getElementById('modalLoginSuccess');
+      const card = document.getElementById('loginSuccessCard');
+      gsap.to(card, {
+        opacity: 0,
+        scale: 0.8,
+        y: -30,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => {
+          modal.classList.add('hidden');
+        }
+      });
     }
 
     function showAuthError(msg) {
@@ -975,6 +1065,13 @@
 
     // Initial render & Google One-Tap Setup
     document.addEventListener('DOMContentLoaded', () => {
+      // 1. Page Fade-in Animation
+      const body = document.getElementById('mainBody');
+      if (body) {
+        body.classList.remove('opacity-0');
+        body.classList.add('opacity-100');
+      }
+
       checkUserSession();
       renderRoster(window.STUDENTS_DATA || []);
 
