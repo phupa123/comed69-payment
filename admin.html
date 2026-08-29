@@ -692,42 +692,21 @@
     let trashRecords = {};
     let currentFilter = 'all';
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      runAdminIntroAnimation();
+    // Start dismiss timer immediately on script parse
+    setTimeout(() => {
+      dismissAdminIntro();
+    }, 1100);
 
-      const loggedEmail = sessionStorage.getItem(ADMIN_SESSION_KEY);
-      if (loggedEmail) {
-        currentLoggedInAdmin = adminAccounts.find(a => a.email.toLowerCase() === loggedEmail.toLowerCase()) || { email: loggedEmail, name: "Admin" };
-        showDashboard();
-      } else {
-        showLoginScreen();
-      }
-      lucide.createIcons();
-
-      // Silent Auto-refresh background polling every 20s
-      setInterval(async () => {
-        if (!document.getElementById('adminDashboard').classList.contains('hidden')) {
-          await loadAllPayments(true);
-          renderStats();
-          if (currentFilter !== 'admins') {
-            renderAdminTable();
-          }
-        }
-      }, 20000);
-    });
-
-    function runAdminIntroAnimation() {
+    function dismissAdminIntro() {
       const splash = document.getElementById('adminIntroSplash');
       if (!splash) return;
-
-      setTimeout(() => {
+      
+      try {
         if (typeof gsap !== 'undefined') {
-          gsap.to(".intro-logo-anim", { scale: 1.1, opacity: 0, duration: 0.3 });
-          gsap.to(".intro-text-anim", { y: -15, opacity: 0, duration: 0.3 });
           gsap.to(splash, {
             opacity: 0,
             duration: 0.35,
-            ease: "power2.inOut",
+            ease: "power2.out",
             onComplete: () => {
               splash.style.display = 'none';
               splash.remove();
@@ -737,17 +716,41 @@
           splash.style.display = 'none';
           splash.remove();
         }
-      }, 1000);
-
-      // Failsafe auto-dismiss
-      setTimeout(() => {
-        const remaining = document.getElementById('adminIntroSplash');
-        if (remaining) {
-          remaining.style.display = 'none';
-          remaining.remove();
-        }
-      }, 1300);
+      } catch (e) {
+        splash.style.display = 'none';
+        splash.remove();
+      }
     }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const loggedEmail = sessionStorage.getItem(ADMIN_SESSION_KEY);
+        if (loggedEmail) {
+          currentLoggedInAdmin = adminAccounts.find(a => a.email.toLowerCase() === loggedEmail.toLowerCase()) || { email: loggedEmail, name: "Admin" };
+          showDashboard();
+        } else {
+          showLoginScreen();
+        }
+      } catch (e) {
+        showLoginScreen();
+      }
+
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      // Silent Auto-refresh background polling every 20s
+      setInterval(async () => {
+        const dash = document.getElementById('adminDashboard');
+        if (dash && !dash.classList.contains('hidden')) {
+          await loadAllPayments(true);
+          renderStats();
+          if (currentFilter !== 'admins') {
+            renderAdminTable();
+          }
+        }
+      }, 20000);
+    });
 
     function togglePasswordVisibility(inputId, iconId) {
       const input = document.getElementById(inputId);
