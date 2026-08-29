@@ -87,6 +87,11 @@
       0% { width: 0%; }
       100% { width: 100%; }
     }
+    @keyframes fadeOutSplash {
+      0% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; }
+      100% { opacity: 0; visibility: hidden; display: none; }
+    }
   </style>
 </head>
 
@@ -95,7 +100,8 @@
 
   <!-- ================= ULTRA TECH INTRO SPLASH OVERLAY ================= -->
   <div id="adminIntroSplash"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black text-white pointer-events-auto">
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-md text-white transition-opacity duration-500 pointer-events-none"
+    style="animation: fadeOutSplash 0.5s ease-out 1.2s forwards;">
     <div class="text-center space-y-5 max-w-sm px-6">
       <div class="relative w-24 h-24 mx-auto intro-logo-anim">
         <div
