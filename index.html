@@ -1304,13 +1304,37 @@
       const btn = document.getElementById('card1StatusActionBtn');
       const payBtn = document.getElementById('card1PayBtn');
 
-      if (!user) return;
+      if (!user || !box) return;
 
-      // Show Loading / Checking
-      title.textContent = `สถานะของคุณ (${user.nickname || user.name})`;
-      sub.textContent = "กำลังซิงค์ข้อมูลกับ Google Cloud...";
-      icon.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin text-orange-500"></i>';
-      lucide.createIcons();
+      const myId = (user.studentId || '').replace(/-/g, '').trim();
+      const myEmail = (user.email || '').toLowerCase().trim();
+      const myName = (user.name || '').trim();
+
+      // Instantly set to "Pending Payment" for logged in user (Immediate feedback, no waiting for slow network)
+      box.className = "p-3.5 rounded-2xl bg-amber-50 border border-amber-300 text-xs flex items-center justify-between shadow-xs";
+      icon.className = "w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold";
+      icon.innerHTML = '<i data-lucide="clock" class="w-4 h-4"></i>';
+      title.textContent = `รอการชำระเงิน (${user.nickname || user.name})`;
+      sub.textContent = "ยังไม่พบข้อมูลการชำระเงินของคุณ";
+      btn.className = "px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[11px] rounded-xl transition shadow-sm cursor-pointer";
+      btn.innerHTML = '<span>ไปชำระเงิน</span>';
+      btn.onclick = () => window.location.href = "payment.html?auto=pay";
+
+      if (payBtn) {
+        payBtn.className = "flex-grow py-3 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm text-center shadow-md shadow-orange-500/25 transition flex items-center justify-center gap-2 cursor-pointer";
+        payBtn.innerHTML = '<i data-lucide="upload" class="w-4 h-4"></i><span>คลิกเพื่อแนบสลิปชำระเงิน</span>';
+        payBtn.onclick = () => window.location.href = "payment.html?auto=pay";
+      }
+
+      // Check local cache first
+      const localCache = JSON.parse(localStorage.getItem('COMED_LOCAL_PAYMENTS') || '{}');
+      let cachedSlip = null;
+      if (myId && localCache[myId] && localCache[myId].paid) cachedSlip = localCache[myId];
+      if (!cachedSlip && user.studentId && localCache[user.studentId] && localCache[user.studentId].paid) cachedSlip = localCache[user.studentId];
+
+      if (cachedSlip) {
+        applyPaidUI(user, cachedSlip, box, icon, title, sub, btn, payBtn);
+      }
 
       const cloudUrl = localStorage.getItem('COMED_GOOGLE_SHEETS_URL') || "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
 
@@ -1325,10 +1349,9 @@
           } else if (result.data && Array.isArray(result.data)) {
             slips = result.data;
           } else if (typeof result === 'object' && result !== null) {
-            // Google Apps Script returns { "693050120-5": { ... }, ... }
             Object.keys(result).forEach(k => {
               if (!k.startsWith('_') && result[k] && typeof result[k] === 'object') {
-                slips.push(result[k]);
+                if (result[k].paid !== false) slips.push(result[k]);
               }
             });
           }
@@ -1337,52 +1360,41 @@
           const userSlip = slips.find(s => {
             const sEmail = (s.email || '').toLowerCase().trim();
             const sId = (s.studentId || s.id || '').replace(/-/g, '').trim();
-            const myEmail = (user.email || '').toLowerCase().trim();
-            const myId = (user.studentId || '').replace(/-/g, '').trim();
             const sName = (s.name || s.studentName || '').trim();
-            const myName = (user.name || '').trim();
 
             return (myEmail && sEmail === myEmail) ||
                    (myId && sId && sId === myId) ||
-                   (myName && sName && sName.includes(myName));
+                   (myName && sName && (sName.includes(myName) || myName.includes(sName)));
           });
 
           if (userSlip) {
-            // PAID SUCCESS
-            window.currentUserPaymentRecord = userSlip;
-            box.className = "p-3.5 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-xs flex items-center justify-between shadow-sm";
-            icon.className = "w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-500/20";
-            icon.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
-            title.innerHTML = '<span class="text-emerald-900 font-extrabold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>ชำระเงินเรียบร้อยแล้ว</span>';
-            sub.textContent = `ยอด ฿190.00 | บันทึกเมื่อ ${userSlip.timestamp || 'ล่าสุด'}`;
-            btn.className = "px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] rounded-xl transition shadow-sm flex items-center gap-1";
-            btn.innerHTML = '<i data-lucide="file-text" class="w-3.5 h-3.5"></i><span>ดูรายละเอียด</span>';
-            btn.onclick = () => openPaymentDetailsModal(user, userSlip);
-
-            payBtn.className = "flex-grow py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm text-center shadow-md transition flex items-center justify-center gap-2";
-            payBtn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i><span>คุณชำระเงินแล้ว (ดูข้อมูล)</span>';
-            payBtn.onclick = (e) => {
-              e.preventDefault();
-              openPaymentDetailsModal(user, userSlip);
-            };
-          } else {
-            // NOT PAID YET
-            box.className = "p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs flex items-center justify-between";
-            icon.className = "w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold";
-            icon.innerHTML = '<i data-lucide="clock" class="w-4 h-4"></i>';
-            title.textContent = `รอการชำระเงิน (${user.nickname || user.name})`;
-            sub.textContent = "ยังไม่พบการแนบสลิปของคุณ";
-            btn.className = "px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[11px] rounded-xl transition shadow-sm cursor-pointer";
-            btn.innerHTML = '<span>ไปชำระเงิน</span>';
-            btn.onclick = () => window.location.href = "payment.html?auto=pay";
-
-            payBtn.className = "flex-grow py-3 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm text-center shadow-md shadow-orange-500/25 transition flex items-center justify-center gap-2 cursor-pointer";
-            payBtn.innerHTML = '<i data-lucide="upload" class="w-4 h-4"></i><span>คลิกเพื่อแนบสลิปชำระเงิน</span>';
-            payBtn.onclick = () => window.location.href = "payment.html?auto=pay";
+            applyPaidUI(user, userSlip, box, icon, title, sub, btn, payBtn);
           }
         }
       } catch (err) {
-        sub.textContent = "ไม่สามารถเชื่อมต่อ Cloud ได้ชั่วคราว";
+        console.warn("Cloud sync status check warning:", err);
+      }
+      lucide.createIcons();
+    }
+
+    function applyPaidUI(user, userSlip, box, icon, title, sub, btn, payBtn) {
+      window.currentUserPaymentRecord = userSlip;
+      box.className = "p-3.5 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-xs flex items-center justify-between shadow-sm";
+      icon.className = "w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-500/20";
+      icon.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
+      title.innerHTML = '<span class="text-emerald-900 font-extrabold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>ชำระเงินเรียบร้อยแล้ว</span>';
+      sub.textContent = `ยอด ฿190.00 | บันทึกเมื่อ ${userSlip.timestamp || 'ล่าสุด'}`;
+      btn.className = "px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] rounded-xl transition shadow-sm flex items-center gap-1 cursor-pointer";
+      btn.innerHTML = '<i data-lucide="file-text" class="w-3.5 h-3.5"></i><span>ดูรายละเอียด</span>';
+      btn.onclick = () => openPaymentDetailsModal(user, userSlip);
+
+      if (payBtn) {
+        payBtn.className = "flex-grow py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm text-center shadow-md transition flex items-center justify-center gap-2 cursor-pointer";
+        payBtn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i><span>คุณชำระเงินแล้ว (ดูข้อมูล)</span>';
+        payBtn.onclick = (e) => {
+          e.preventDefault();
+          openPaymentDetailsModal(user, userSlip);
+        };
       }
       lucide.createIcons();
     }
