@@ -2840,10 +2840,15 @@
         if (searchInput) searchInput.value = `${student.id} - ${student.name}`;
         selectStudent(student);
         
-        // If query has auto=pay or on direct arrival
+        // If query has auto=pay, scroll once and clean query param
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('auto') === 'pay') {
-          setTimeout(scrollToUploadForm, 500);
+          setTimeout(() => {
+            scrollToUploadForm();
+            // Clean URL param so user can switch tabs freely without loop
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+          }, 400);
         }
       }
     }
@@ -2861,9 +2866,9 @@
           uploadArea.classList.add('ring-4', 'ring-orange-500', 'ring-offset-2');
           setTimeout(() => {
             uploadArea.classList.remove('ring-4', 'ring-orange-500', 'ring-offset-2');
-          }, 2500);
+          }, 2000);
         }
-      }, 200);
+      }, 150);
     }
 
     function openMyProfileModal() {

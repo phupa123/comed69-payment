@@ -95,6 +95,60 @@
       animation: floatSlow 6s ease-in-out infinite;
     }
 
+    /* Modern Navbar Slide Underline Effect */
+    .nav-link-modern {
+      position: relative;
+      color: #334155;
+      font-weight: 700;
+      padding: 0.5rem 0.85rem;
+      transition: color 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .nav-link-modern::after {
+      content: '';
+      position: absolute;
+      bottom: 0px;
+      left: 50%;
+      width: 0%;
+      height: 2.5px;
+      background: linear-gradient(90deg, #ea580c, #f59e0b);
+      border-radius: 9999px;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-link-modern:hover {
+      color: #ea580c;
+    }
+
+    .nav-link-modern:hover::after,
+    .nav-link-modern.active::after {
+      width: 80%;
+      left: 10%;
+    }
+
+    /* Navbar Transparent to Solid Dynamic Transition */
+    #mainNavbar {
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #mainNavbar.scrolled {
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+    }
+
+    #mainNavbar.transparent-top {
+      background-color: transparent;
+      border-bottom: 1px solid transparent;
+      box-shadow: none;
+    }
+
     @keyframes floatSlow {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       50% { transform: translateY(-12px) rotate(2deg); }
@@ -242,75 +296,106 @@
     </div>
   </div>
 
-  <!-- ================= TOP NAVIGATION BAR ================= -->
-  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-sm transition-all">
+  <!-- ================= MODERN STICKY NAVIGATION BAR ================= -->
+  <header id="mainNavbar" class="sticky top-0 z-50 transparent-top backdrop-blur-xl border-b border-transparent transition-all duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
       
-      <!-- Logo Branding -->
-      <a href="index.html" class="flex items-center gap-3 group">
-        <div class="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-100 via-white to-amber-50 p-1.5 border border-orange-200 shadow-md group-hover:scale-105 transition-all">
+      <!-- 1. Logo on the Left -->
+      <a href="index.html" class="flex items-center gap-3 group flex-shrink-0">
+        <div class="relative w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-orange-100 via-white to-amber-50 p-1.5 border border-orange-200 shadow-md group-hover:scale-105 transition-all">
           <img src="logo.png" alt="โลโก้สาขาคอมพิวเตอร์ศึกษา" class="w-full h-full object-contain">
           <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
         </div>
         <div>
           <div class="flex items-center gap-1.5">
             <span class="text-[11px] font-black tracking-wider text-orange-600 uppercase">COMED KKU 69</span>
-            <span class="hidden md:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-800">คณะศึกษาศาสตร์ มข.</span>
+            <span class="hidden md:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-800">ศึกษาศาสตร์ มข.</span>
           </div>
-          <h1 class="text-base sm:text-lg font-black text-slate-900 leading-tight">สาขาวิชาคอมพิวเตอร์ศึกษา</h1>
+          <h1 class="text-sm sm:text-base font-black text-slate-900 leading-tight">สาขาวิชาคอมพิวเตอร์ศึกษา</h1>
         </div>
       </a>
 
-      <!-- Desktop Nav Menu -->
+      <!-- 2. Navigation Links in the Center (with Smooth Hover Underline Animation) -->
       <nav class="hidden lg:flex items-center gap-1">
-        <a href="#payments-list" class="px-4 py-2 rounded-xl text-sm font-bold text-orange-600 bg-orange-50/80 transition flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+        <a href="#payments-list" class="nav-link-modern active">
+          <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse mr-1.5"></span>
           <span>รายการต้องชำระ</span>
         </a>
-        <a href="#about" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-orange-600 hover:bg-orange-50/80 transition">เกี่ยวกับสาขา</a>
-        <a href="#curriculum" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-orange-600 hover:bg-orange-50/80 transition">หลักสูตร</a>
-        <a href="#careers" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-orange-600 hover:bg-orange-50/80 transition">อาชีพในอนาคต</a>
-        <a href="#students" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-orange-600 hover:bg-orange-50/80 transition">ทำเนียบรุ่น 69</a>
+        <a href="#about" class="nav-link-modern">เกี่ยวกับสาขา</a>
+        <a href="#curriculum" class="nav-link-modern">หลักสูตร</a>
+        <a href="#careers" class="nav-link-modern">อาชีพในอนาคต</a>
+        <a href="#students" class="nav-link-modern">ทำเนียบรุ่น 69</a>
       </nav>
 
-      <!-- Auth & Action Area -->
+      <!-- 3. Prominent CTA Button & Auth on the Right -->
       <div class="flex items-center gap-2 sm:gap-3">
         
         <!-- Not Logged In State (Default) -->
         <div id="navUserGuest" class="flex items-center gap-2">
-          <button onclick="openGoogleLoginModal()" class="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white border-2 border-slate-200 hover:border-orange-500 text-slate-800 font-bold text-xs sm:text-sm shadow-sm transition transform active:scale-95">
-            <!-- Google G Logo SVG -->
-            <svg class="w-4 h-4" viewBox="0 0 24 24">
+          <button onclick="openGoogleLoginModal()" class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white border border-slate-300 hover:border-orange-500 text-slate-800 font-bold text-xs shadow-sm hover:shadow-md transition transform active:scale-95 cursor-pointer">
+            <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
               <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
               <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
               <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
             </svg>
-            <span>เข้าสู่ระบบ (KKU Mail)</span>
+            <span>เข้าสู่ระบบ KKU</span>
           </button>
         </div>
 
         <!-- Logged In State (When authenticated) -->
         <div id="navUserLoggedIn" class="hidden items-center gap-2">
-          <div class="flex items-center gap-2 p-1.5 pr-3 rounded-2xl bg-orange-50 border border-orange-200">
-            <img id="navUserAvatar" src="" alt="Avatar" class="w-8 h-8 rounded-xl object-cover border border-orange-300">
-            <div class="text-left hidden sm:block">
-              <span id="navUserName" class="text-xs font-bold text-slate-800 block leading-tight">ชื่อผู้ใช้</span>
-              <span id="navUserEmail" class="text-[10px] text-orange-600 font-mono block leading-tight">xxx@kkumail.com</span>
-            </div>
-            <button onclick="handleGoogleLogout()" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-white transition" title="ออกจากระบบ">
-              <i data-lucide="log-out" class="w-4 h-4"></i>
+          <div class="flex items-center gap-2 p-1.5 pr-2.5 rounded-2xl bg-orange-50/90 border border-orange-200 shadow-sm">
+            <img id="navUserAvatar" src="" alt="Avatar" class="w-7 h-7 rounded-xl object-cover border border-orange-300">
+            <span id="navUserName" class="text-xs font-bold text-slate-800 hidden md:inline max-w-[100px] truncate">ชื่อผู้ใช้</span>
+            <button onclick="handleGoogleLogout()" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition" title="ออกจากระบบ">
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             </button>
           </div>
         </div>
 
-        <!-- Payment Link -->
-        <a href="payment.html" class="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm shadow-md shadow-orange-500/25 transition transform active:scale-95">
+        <!-- Prominent CTA Button: ชำระเงิน -->
+        <a href="payment.html?auto=pay" class="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2.5 rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm shadow-md shadow-orange-500/25 transition transform active:scale-95 cursor-pointer">
           <i data-lucide="credit-card" class="w-4 h-4"></i>
           <span>ชำระเงิน</span>
         </a>
+
+        <!-- Hamburger Toggle Button for Mobile Screen -->
+        <button id="hamburgerBtn" onclick="toggleMobileNavMenu()" class="lg:hidden p-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer" aria-label="Toggle Menu">
+          <i data-lucide="menu" id="hamburgerIcon" class="w-5 h-5"></i>
+        </button>
       </div>
 
+    </div>
+
+    <!-- Responsive Mobile Hamburger Drawer Menu -->
+    <div id="mobileMenuDrawer" class="hidden lg:hidden bg-white/98 backdrop-blur-2xl border-b border-slate-200 shadow-xl px-4 pt-2 pb-6 space-y-2">
+      <a href="#payments-list" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-orange-50 text-orange-700 font-black text-sm">
+        <i data-lucide="bell-ring" class="w-4 h-4 text-orange-600"></i>
+        <span>รายการต้องชำระ (Active Dues)</span>
+      </a>
+      <a href="#about" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 font-bold text-sm">
+        <i data-lucide="info" class="w-4 h-4 text-slate-400"></i>
+        <span>เกี่ยวกับสาขาวิชา</span>
+      </a>
+      <a href="#curriculum" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 font-bold text-sm">
+        <i data-lucide="book-open" class="w-4 h-4 text-slate-400"></i>
+        <span>โครงสร้างหลักสูตร</span>
+      </a>
+      <a href="#careers" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 font-bold text-sm">
+        <i data-lucide="briefcase" class="w-4 h-4 text-slate-400"></i>
+        <span>อาชีพในอนาคต</span>
+      </a>
+      <a href="#students" onclick="toggleMobileNavMenu()" class="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-slate-700 hover:bg-slate-50 font-bold text-sm">
+        <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+        <span>ทำเนียบรุ่น 69</span>
+      </a>
+      <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+        <button onclick="toggleMobileNavMenu(); openGoogleLoginModal();" class="w-full flex items-center justify-center gap-2 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs shadow-md">
+          <i data-lucide="log-in" class="w-4 h-4 text-orange-400"></i>
+          <span>เข้าสู่ระบบด้วย KKU Mail</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -378,13 +463,13 @@
             🔥 เปิดรับชำระอยู่
           </div>
 
-          <div class="flex items-start gap-3.5">
-            <div class="w-13 h-13 rounded-2xl bg-orange-100 text-orange-600 p-2.5 flex items-center justify-center flex-shrink-0 shadow-md">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 p-1.5 flex items-center justify-center flex-shrink-0 border border-orange-200 shadow-sm">
               <img src="logo.png" alt="Logo" class="w-full h-full object-contain">
             </div>
             <div>
-              <span class="text-[11px] font-bold text-orange-600 uppercase tracking-wider block">กิจกรรมชั้นปีที่ 1 (COMED 69)</span>
-              <h3 class="text-lg font-black text-slate-900 leading-tight">ค่าทำป้ายสาขาวิชาเอก</h3>
+              <span class="text-[10px] font-bold text-orange-600 uppercase tracking-wider block">กิจกรรมชั้นปีที่ 1 (COMED 69)</span>
+              <h3 class="text-base font-black text-slate-900 leading-tight">ค่าทำป้ายสาขาวิชาเอก</h3>
               <p class="text-xs text-slate-500 mt-0.5">สำหรับนักศึกษาชั้นปีที่ 1 ทั้งหมด 60 คน</p>
             </div>
           </div>
@@ -1490,6 +1575,45 @@
       }
     }
 
+    // ================= MODERN STICKY NAVBAR CONTROLLER =================
+    function initNavbarScrollEffect() {
+      const navbar = document.getElementById('mainNavbar');
+      if (!navbar) return;
+
+      function handleScroll() {
+        if (window.scrollY > 30) {
+          navbar.classList.add('scrolled');
+          navbar.classList.remove('transparent-top');
+        } else {
+          navbar.classList.remove('scrolled');
+          navbar.classList.add('transparent-top');
+        }
+      }
+
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      handleScroll(); // Initial check
+    }
+
+    function toggleMobileNavMenu() {
+      const drawer = document.getElementById('mobileMenuDrawer');
+      const icon = document.getElementById('hamburgerIcon');
+      if (!drawer) return;
+
+      const isHidden = drawer.classList.contains('hidden');
+      if (isHidden) {
+        drawer.classList.remove('hidden');
+        if (typeof gsap !== 'undefined') {
+          gsap.fromTo(drawer, 
+            { opacity: 0, y: -15 }, 
+            { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
+          );
+        }
+      } else {
+        drawer.classList.add('hidden');
+      }
+      lucide.createIcons();
+    }
+
     // Initial render & Google One-Tap Setup
     document.addEventListener('DOMContentLoaded', () => {
       // 1. Page Fade-in Animation
@@ -1498,6 +1622,9 @@
         body.classList.remove('opacity-0');
         body.classList.add('opacity-100');
       }
+
+      // Initialize Modern Navbar Scroll Effect
+      initNavbarScrollEffect();
 
       checkUserSession();
       renderRoster(window.STUDENTS_DATA || []);
