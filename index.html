@@ -244,18 +244,37 @@
     </div>
   </header>
 
-  <!-- MOBILE BOTTOM STICKY NAVIGATION BAR (NATIVE APP FEELING) -->
-  <div class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 py-1.5 px-4 flex items-center justify-around shadow-2xl">
-    <button id="mobileNavPayment" onclick="switchMainTab('payment')" class="flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-orange-600 font-extrabold text-[11px] transition">
-      <i data-lucide="credit-card" class="w-5 h-5"></i>
+  <!-- MOBILE BOTTOM FLOATING DOCK (ULTRA TACTILE HAPTIC & BOUNCY SPRING) -->
+  <div class="sm:hidden fixed bottom-3 left-3 right-3 z-40 bg-slate-900/90 backdrop-blur-2xl border border-white/20 rounded-3xl p-1.5 flex items-center justify-around shadow-[0_12px_40px_rgba(0,0,0,0.4)]">
+    <button 
+      id="mobileNavPayment" 
+      onclick="switchMainTab('payment')" 
+      class="flex-1 py-2 px-2 rounded-2xl text-orange-400 bg-white/10 font-black text-xs transition-all duration-200 transform active:scale-90 flex flex-col items-center gap-1"
+    >
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30">
+        <i data-lucide="credit-card" class="w-4 h-4"></i>
+      </div>
       <span>ชำระเงิน</span>
     </button>
-    <button id="mobileNavStatus" onclick="switchMainTab('status')" class="flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-slate-500 font-semibold text-[11px] transition">
-      <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+
+    <button 
+      id="mobileNavStatus" 
+      onclick="switchMainTab('status')" 
+      class="flex-1 py-2 px-2 rounded-2xl text-slate-400 font-bold text-xs transition-all duration-200 transform active:scale-90 flex flex-col items-center gap-1 hover:text-white"
+    >
+      <div class="w-8 h-8 rounded-xl bg-white/5 text-slate-400 flex items-center justify-center">
+        <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+      </div>
       <span>รายชื่อ</span>
     </button>
-    <button onclick="openIssueModal()" class="flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-slate-500 font-semibold text-[11px] transition">
-      <i data-lucide="help-circle" class="w-5 h-5 text-amber-500"></i>
+
+    <button 
+      onclick="openIssueModal()" 
+      class="flex-1 py-2 px-2 rounded-2xl text-slate-400 font-bold text-xs transition-all duration-200 transform active:scale-90 flex flex-col items-center gap-1 hover:text-amber-300"
+    >
+      <div class="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
+        <i data-lucide="help-circle" class="w-4 h-4"></i>
+      </div>
       <span>แจ้งปัญหา</span>
     </button>
   </div>
@@ -2038,7 +2057,7 @@
       document.getElementById('modalStudentDetail').classList.add('hidden');
     }
 
-    // --- TAB SWITCHER WITH GSAP FADE TRANSITIONS ---
+    // --- TAB SWITCHER WITH GSAP SPRING & FADE TRANSITIONS ---
     function switchMainTab(tab) {
       const tabPayment = document.getElementById('tabContentPayment');
       const tabStatus = document.getElementById('tabContentStatus');
@@ -2054,10 +2073,30 @@
         if (navPayment) navPayment.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm';
         if (navStatus) navStatus.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900';
 
-        if (mobPayment) mobPayment.className = 'flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-orange-600 font-black text-[11px] transition';
-        if (mobStatus) mobStatus.className = 'flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-slate-400 font-semibold text-[11px] transition';
+        if (mobPayment) {
+          mobPayment.className = 'flex-1 py-2 px-2 rounded-2xl text-orange-400 bg-white/10 font-black text-xs transition-all duration-200 transform active:scale-90 flex flex-col items-center gap-1';
+          mobPayment.innerHTML = `
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30">
+              <i data-lucide="credit-card" class="w-4 h-4"></i>
+            </div>
+            <span>ชำระเงิน</span>
+          `;
+        }
+        if (mobStatus) {
+          mobStatus.className = 'flex-1 py-2 px-2 rounded-2xl text-slate-400 font-bold text-xs transition-all duration-200 transform active:scale-90 flex flex-col items-center gap-1 hover:text-white';
+          mobStatus.innerHTML = `
+            <div class="w-8 h-8 rounded-xl bg-white/5 text-slate-400 flex items-center justify-center">
+              <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+            </div>
+            <span>รายชื่อ</span>
+          `;
+        }
 
-        gsap.fromTo(tabPayment, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
+        // GSAP Bouncy Spring Slide-Up Fade
+        gsap.fromTo(tabPayment, 
+          { opacity: 0, y: 30, scale: 0.98 }, 
+          { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.4)" }
+        );
       } else {
         tabPayment.classList.add('hidden');
         tabStatus.classList.remove('hidden');
@@ -2065,11 +2104,31 @@
         if (navStatus) navStatus.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm';
         if (navPayment) navPayment.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900';
 
-        if (mobPayment) mobPayment.className = 'flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-slate-400 font-semibold text-[11px] transition';
-        if (mobStatus) mobStatus.className = 'flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-orange-600 font-black text-[11px] transition';
+        if (mobPayment) {
+          mobPayment.className = 'flex-1 py-2 px-2 rounded-2xl text-slate-400 font-bold text-xs transition-all duration-200 transform active:scale-90 flex flex-col items-center gap-1 hover:text-white';
+          mobPayment.innerHTML = `
+            <div class="w-8 h-8 rounded-xl bg-white/5 text-slate-400 flex items-center justify-center">
+              <i data-lucide="credit-card" class="w-4 h-4"></i>
+            </div>
+            <span>ชำระเงิน</span>
+          `;
+        }
+        if (mobStatus) {
+          mobStatus.className = 'flex-1 py-2 px-2 rounded-2xl text-emerald-400 bg-white/10 font-black text-xs transition-all duration-200 transform active:scale-90 flex flex-col items-center gap-1';
+          mobStatus.innerHTML = `
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
+              <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+            </div>
+            <span>รายชื่อ</span>
+          `;
+        }
         
         renderStatusTable();
-        gsap.fromTo(tabStatus, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
+        // GSAP Bouncy Spring Slide-Up Fade
+        gsap.fromTo(tabStatus, 
+          { opacity: 0, y: 30, scale: 0.98 }, 
+          { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.4)" }
+        );
       }
       lucide.createIcons();
     }
