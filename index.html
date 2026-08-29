@@ -57,8 +57,6 @@
     }
   </script>
 
-  <!-- Google Identity Services (Sign in with Google) -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- GSAP Animation -->
@@ -790,29 +788,15 @@
     // Initialize Lucide Icons
     lucide.createIcons();
 
-    // ================= GOOGLE AUTHENTICATION SYSTEM (KKUMAIL ONLY) =================
-    const GOOGLE_CLIENT_ID = "1049285098251-google-oauth-comed69.apps.googleusercontent.com"; // Sample ID / Ready for real OAuth
-
     function openGoogleLoginModal() {
       document.getElementById('modalGoogleLogin').classList.remove('hidden');
       document.getElementById('googleAuthError').classList.add('hidden');
-      lucide.createIcons();
-
-      // Render Google Sign-in Button if available
-      try {
-        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-          google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
-            callback: handleGoogleCredentialResponse
-          });
-          google.accounts.id.renderButton(
-            document.getElementById('googleButtonWrapper'),
-            { theme: "outline", size: "large", width: 280, text: "signin_with", shape: "pill" }
-          );
-        }
-      } catch (e) {
-        console.warn("Google One-Tap Init", e);
+      const input = document.getElementById('kkuMailInput');
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 150);
       }
+      lucide.createIcons();
     }
 
     function closeGoogleLoginModal() {
