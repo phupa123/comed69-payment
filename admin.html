@@ -802,44 +802,51 @@
       const emailInput = document.getElementById('adminEmailInput').value.trim().toLowerCase();
       const pwdInput = document.getElementById('adminPasswordInput').value.trim();
 
-      // Find in storage or default list
-      let admin = adminAccounts.find(a => a.email.toLowerCase() === emailInput);
-      if (!admin) {
-        admin = DEFAULT_ADMINS.find(a => a.email.toLowerCase() === emailInput);
+      // Master check against DEFAULT_ADMINS or stored adminAccounts
+      let matchedAdmin = null;
+
+      // 1. Direct check with DEFAULT_ADMINS
+      for (const adm of DEFAULT_ADMINS) {
+        if (adm.email.toLowerCase() === emailInput && adm.password === pwdInput) {
+          matchedAdmin = adm;
+          break;
+        }
       }
 
-      let isValid = false;
-
-      if (admin) {
-        if (admin.password && admin.password === pwdInput) {
-          isValid = true;
-        } else if (admin.hash) {
-          const inputHash = await sha256(emailInput + ':' + pwdInput);
-          if (inputHash === admin.hash) {
-            isValid = true;
+      // 2. Check with stored adminAccounts (if customized)
+      if (!matchedAdmin && Array.isArray(adminAccounts)) {
+        for (const adm of adminAccounts) {
+          if (adm.email.toLowerCase() === emailInput) {
+            if (adm.password === pwdInput) {
+              matchedAdmin = adm;
+              break;
+            }
           }
         }
       }
 
-      // Special fallback for default 3 admins
-      if (!isValid) {
-        const matchedDefault = DEFAULT_ADMINS.find(a => a.email.toLowerCase() === emailInput && a.password === pwdInput);
-        if (matchedDefault) {
-          admin = matchedDefault;
-          isValid = true;
+      // 3. Fallback hash check
+      if (!matchedAdmin) {
+        for (const adm of [...DEFAULT_ADMINS, ...(adminAccounts || [])]) {
+          if (adm.email.toLowerCase() === emailInput && adm.hash) {
+            const inputHash = await sha256(emailInput + ':' + pwdInput);
+            if (inputHash === adm.hash) {
+              matchedAdmin = adm;
+              break;
+            }
+          }
         }
       }
 
-      if (isValid && admin) {
-        loginAttempts = 0;
-        currentLoggedInAdmin = admin;
-        sessionStorage.setItem(ADMIN_SESSION_KEY, admin.email);
-        logAdminAction("เข้าสู่ระบบ (Login)", `เข้าสู่ระบบสำเร็จจากอีเมล ${admin.email}`);
-        showDashboard();
+      if (matchedAdmin) {
+        currentLoggedInAdmin = matchedAdmin;
+        sessionStorage.setItem(ADMIN_SESSION_KEY, matchedAdmin.email);
+        logAdminAction("เข้าสู่ระบบ (Login)", `เข้าสู่ระบบสำเร็จจากอีเมล ${matchedAdmin.email}`);
+        await showDashboard();
       } else {
         if (errBox) {
           errBox.classList.remove('hidden');
-          errText.textContent = "อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง (โปรดตรวจสอบตัวพิมพ์เล็ก-ใหญ่)";
+          errText.textContent = "อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง";
         }
         lucide.createIcons();
       }
