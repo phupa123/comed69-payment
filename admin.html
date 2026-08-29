@@ -748,18 +748,21 @@
     function showLoginScreen() {
       const login = document.getElementById('loginScreen');
       const dash = document.getElementById('adminDashboard');
-      if (login) login.classList.remove('hidden');
-      if (dash) dash.classList.add('hidden');
+      if (login) login.style.display = 'flex';
+      if (dash) dash.style.display = 'none';
     }
 
     async function showDashboard() {
       const login = document.getElementById('loginScreen');
       const dash = document.getElementById('adminDashboard');
       
-      if (login) login.classList.add('hidden');
+      if (login) {
+        login.style.display = 'none';
+        login.classList.add('hidden');
+      }
       if (dash) {
-        dash.classList.remove('hidden');
         dash.style.display = 'flex';
+        dash.classList.remove('hidden');
       }
 
       studentDatabase = DEFAULT_STUDENTS;
@@ -768,13 +771,13 @@
 
       try {
         if (typeof gsap !== 'undefined') {
-          gsap.fromTo("header", { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" });
-          gsap.fromTo(".admin-stat-card", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: "power3.out" });
+          gsap.fromTo("header", { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power3.out" });
+          gsap.fromTo(".admin-stat-card", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, stagger: 0.05, ease: "power3.out" });
         }
       } catch (e) {}
 
       try {
-        await loadAllPayments();
+        await loadAllPayments(true);
       } catch(e) {}
       
       renderStats();
@@ -789,7 +792,9 @@
       const timestamp = new Date().toLocaleString('th-TH');
       const newLog = { timestamp, adminEmail: email, action, detail };
       adminLogs.unshift(newLog);
-      localStorage.setItem(ADMIN_LOGS_KEY, JSON.stringify(adminLogs.slice(0, 200)));
+      try {
+        localStorage.setItem(ADMIN_LOGS_KEY, JSON.stringify(adminLogs.slice(0, 200)));
+      } catch(e) {}
 
       if (googleAppsScriptUrl) {
         try {
@@ -809,13 +814,22 @@
     }
 
     async function handleAdminLogin(e) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
+      
       const errBox = document.getElementById('loginErrorMsg');
       const errText = document.getElementById('loginErrorText');
       if (errBox) errBox.classList.add('hidden');
 
-      const emailInput = document.getElementById('adminEmailInput').value.trim().toLowerCase();
-      const pwdInput = document.getElementById('adminPasswordInput').value.trim();
+      const emailInput = (document.getElementById('adminEmailInput')?.value || '').trim().toLowerCase();
+      const pwdInput = (document.getElementById('adminPasswordInput')?.value || '').trim();
+
+      if (!emailInput || !pwdInput) {
+        if (errBox) {
+          errBox.classList.remove('hidden');
+          errText.textContent = "กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน";
+        }
+        return;
+      }
 
       // Master check against DEFAULT_ADMINS or stored adminAccounts
       let matchedAdmin = null;
@@ -831,11 +845,9 @@
       // 2. Check with stored adminAccounts (if customized)
       if (!matchedAdmin && Array.isArray(adminAccounts)) {
         for (const adm of adminAccounts) {
-          if (adm.email.toLowerCase() === emailInput) {
-            if (adm.password === pwdInput) {
-              matchedAdmin = adm;
-              break;
-            }
+          if (adm.email.toLowerCase() === emailInput && adm.password === pwdInput) {
+            matchedAdmin = adm;
+            break;
           }
         }
       }
@@ -855,7 +867,9 @@
 
       if (matchedAdmin) {
         currentLoggedInAdmin = matchedAdmin;
-        sessionStorage.setItem(ADMIN_SESSION_KEY, matchedAdmin.email);
+        try {
+          sessionStorage.setItem(ADMIN_SESSION_KEY, matchedAdmin.email);
+        } catch(e) {}
         logAdminAction("เข้าสู่ระบบ (Login)", `เข้าสู่ระบบสำเร็จจากอีเมล ${matchedAdmin.email}`);
         await showDashboard();
       } else {
@@ -863,7 +877,9 @@
           errBox.classList.remove('hidden');
           errText.textContent = "อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง";
         }
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
       }
     }
 
