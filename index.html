@@ -121,19 +121,37 @@
       animation: floatSlow 6s ease-in-out infinite;
     }
 
-    /* Dedicated Mobile App Styles */
+    /* Dedicated Native Mobile App Styles */
     @media (max-width: 640px) {
       body {
         font-size: 14px;
         -webkit-tap-highlight-color: transparent;
+        padding-bottom: 70px; /* Space for mobile sticky bottom navigation */
       }
       .mobile-card {
-        border-radius: 1.5rem !important;
-        padding: 1.25rem !important;
+        border-radius: 1.25rem !important;
+        padding: 1rem !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+      .mobile-header {
+        height: 64px !important;
+        padding: 0 12px !important;
       }
       .mobile-btn {
-        min-height: 48px;
-        font-size: 15px;
+        min-height: 46px;
+        font-size: 14px;
+      }
+      .mobile-stat-box {
+        padding: 12px !important;
+        border-radius: 16px !important;
+      }
+      .mobile-cd-box {
+        padding: 8px 2px !important;
+        border-radius: 12px !important;
+      }
+      .mobile-cd-num {
+        font-size: 20px !important;
       }
       .mobile-hide-scrollbar::-webkit-scrollbar {
         display: none;
@@ -166,15 +184,15 @@
   <!-- ================= ULTRA TECH INTRO SPLASH OVERLAY ================= -->
   <div id="introSplashOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black text-white pointer-events-auto">
     <div class="text-center space-y-6 max-w-sm px-6">
-      <div class="relative w-24 h-24 mx-auto intro-logo-anim">
+      <div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto intro-logo-anim">
         <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-400 blur-xl opacity-60 animate-pulse"></div>
         <div class="relative w-full h-full rounded-3xl bg-slate-900 border border-orange-500/40 p-3 flex items-center justify-center shadow-2xl">
           <img src="logo.png" alt="โลโก้" class="w-full h-full object-contain">
         </div>
       </div>
       <div class="space-y-2 intro-text-anim">
-        <span class="text-xs font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300 uppercase">COMPUTER EDUCATION KKU 69</span>
-        <h2 class="text-2xl font-extrabold text-white tracking-tight">ระบบบันทึกค่าป้ายสาขาวิชาเอก</h2>
+        <span class="text-[11px] sm:text-xs font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300 uppercase">COMPUTER EDUCATION KKU 69</span>
+        <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">ระบบบันทึกค่าป้ายสาขาวิชาเอก</h2>
         <p class="text-xs text-slate-400">คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</p>
       </div>
       <div class="w-48 h-1.5 bg-slate-800 rounded-full mx-auto overflow-hidden">
@@ -184,55 +202,69 @@
   </div>
 
   <!-- TOP HEADER / NAV BAR WITH LOGO -->
-  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 shadow-sm transition-all duration-300">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-sm transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
       
       <!-- LOGO & BRANDING -->
-      <div class="flex items-center gap-3.5 cursor-pointer group" onclick="switchMainTab('payment')">
-        <div class="relative w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-orange-50 via-white to-sky-50 shadow-md border border-orange-200/60 p-1.5 flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:shadow-glow-orange">
+      <div class="flex items-center gap-2.5 sm:gap-3.5 cursor-pointer group" onclick="switchMainTab('payment')">
+        <div class="relative w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-orange-50 via-white to-sky-50 shadow-md border border-orange-200/60 p-1 sm:p-1.5 flex items-center justify-center transition-all duration-300 flex-shrink-0">
           <img src="logo.png" alt="โลโก้สาขาวิชาคอมพิวเตอร์ศึกษา" class="w-full h-full object-contain">
-          <div class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+          <div class="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-600 uppercase block leading-tight">COMED KKU 69</span>
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] sm:text-xs font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-600 uppercase block leading-tight">COMED KKU 69</span>
+            <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> พร้อมเชื่อมต่อ Cloud
             </span>
           </div>
-          <h1 class="text-base sm:text-lg font-extrabold text-slate-800 tracking-tight leading-tight">ระบบชำระเงินค่าป้ายสาขาวิชาเอก</h1>
+          <h1 class="text-xs sm:text-lg font-extrabold text-slate-800 tracking-tight leading-tight line-clamp-1 sm:line-clamp-none">ระบบชำระเงินค่าป้ายเอก</h1>
         </div>
       </div>
 
-      <!-- Navigation Tabs & Refresh Button -->
-      <div class="flex items-center gap-2">
-        <div class="flex items-center gap-1 p-1 bg-slate-100/90 rounded-2xl border border-slate-200 shadow-inner">
+      <!-- Navigation Tabs (Desktop) & Refresh Button -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <div class="hidden sm:flex items-center gap-1 p-1 bg-slate-100/90 rounded-2xl border border-slate-200 shadow-inner">
           <button id="navTabPayment" onclick="switchMainTab('payment')" class="flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm">
             <i data-lucide="credit-card" class="w-4 h-4 text-orange-500"></i>
-            <span class="hidden sm:inline">ชำระเงิน & แจ้งสลิป</span>
-            <span class="sm:hidden">ชำระเงิน</span>
+            <span>ชำระเงิน & แจ้งสลิป</span>
           </button>
           <button id="navTabStatus" onclick="switchMainTab('status')" class="flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900">
             <i data-lucide="clipboard-check" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">ตรวจสอบรายชื่อ</span>
-            <span class="sm:hidden">รายชื่อ</span>
+            <span>ตรวจสอบรายชื่อ</span>
           </button>
         </div>
 
         <!-- Quick Refresh Button -->
-        <button id="btnQuickRefresh" onclick="manualRefreshData()" class="p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:text-orange-600 hover:border-orange-300 shadow-sm hover:shadow-glow-orange transition group flex items-center justify-center" title="รีเฟรชข้อมูลล่าสุด">
-          <i data-lucide="rotate-cw" id="refreshIcon" class="w-4 h-4 transition-transform group-hover:rotate-180 duration-500"></i>
+        <button id="btnQuickRefresh" onclick="manualRefreshData()" class="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-white border border-slate-200 text-slate-600 hover:text-orange-600 hover:border-orange-300 shadow-sm hover:shadow-glow-orange transition group flex items-center justify-center" title="รีเฟรชข้อมูลล่าสุด">
+          <i data-lucide="rotate-cw" id="refreshIcon" class="w-4 h-4"></i>
         </button>
       </div>
 
     </div>
   </header>
 
+  <!-- MOBILE BOTTOM STICKY NAVIGATION BAR (NATIVE APP FEELING) -->
+  <div class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 py-1.5 px-4 flex items-center justify-around shadow-2xl">
+    <button id="mobileNavPayment" onclick="switchMainTab('payment')" class="flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-orange-600 font-extrabold text-[11px] transition">
+      <i data-lucide="credit-card" class="w-5 h-5"></i>
+      <span>ชำระเงิน</span>
+    </button>
+    <button id="mobileNavStatus" onclick="switchMainTab('status')" class="flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-slate-500 font-semibold text-[11px] transition">
+      <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+      <span>รายชื่อ</span>
+    </button>
+    <button onclick="openIssueModal()" class="flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-slate-500 font-semibold text-[11px] transition">
+      <i data-lucide="help-circle" class="w-5 h-5 text-amber-500"></i>
+      <span>แจ้งปัญหา</span>
+    </button>
+  </div>
+
   <!-- MAIN CONTAINER -->
-  <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
+  <main class="flex-grow max-w-6xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-8">
 
     <!-- HERO & COUNTDOWN & STATS SECTION (MODERN LUXURY TECH AESTHETICS) -->
-    <section class="hero-card-animate relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-6 sm:p-10 shadow-2xl border border-slate-800">
+    <section class="hero-card-animate mobile-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-4 sm:p-8 md:p-10 shadow-2xl border border-slate-800">
       
       <!-- Glowing Orbs & Tech Geometry -->
       <div class="absolute -right-16 -top-16 w-96 h-96 bg-gradient-to-br from-orange-500/25 to-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -243,104 +275,104 @@
         <img src="logo.png" alt="watermark" class="w-full h-full object-contain filter invert drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
       </div>
 
-      <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center">
         <!-- Left: Info & Announcement -->
-        <div class="lg:col-span-7 space-y-4">
+        <div class="lg:col-span-7 space-y-3 sm:space-y-4">
           
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 backdrop-blur-md border border-orange-400/40 text-xs text-orange-300 font-bold shadow-sm">
-              <i data-lucide="tag" class="w-3.5 h-3.5 text-orange-400"></i>
-              <span>ค่าทำป้ายสาขาวิชาเอก คนละ ฿190</span>
+          <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <span class="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 backdrop-blur-md border border-orange-400/40 text-[10px] sm:text-xs text-orange-300 font-bold shadow-sm">
+              <i data-lucide="tag" class="w-3 h-3 text-orange-400"></i>
+              <span>ค่าทำป้าย คนละ ฿190</span>
             </span>
 
-            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-500/20 backdrop-blur-md border border-sky-400/30 text-xs text-sky-300 font-semibold">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sky-400"></i>
-              <span>ชั้นปีที่ 1 (รหัส 69)</span>
+            <span class="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1 rounded-full bg-sky-500/20 backdrop-blur-md border border-sky-400/30 text-[10px] sm:text-xs text-sky-300 font-semibold">
+              <i data-lucide="sparkles" class="w-3 h-3 text-sky-400"></i>
+              <span>ปี 1 (รหัส 69)</span>
             </span>
           </div>
 
-          <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+          <h2 class="text-xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
             สาขาวิชาคอมพิวเตอร์ศึกษา<br>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-amber-200 to-white font-medium text-lg sm:text-2xl block mt-1.5">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-amber-200 to-white font-medium text-sm sm:text-xl lg:text-2xl block mt-0.5 sm:mt-1.5">
               คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น
             </span>
           </h2>
 
           <!-- Countdown Timer Glass Card -->
-          <div class="bg-white/5 backdrop-blur-xl border border-white/15 rounded-3xl p-4 sm:p-5 inline-block w-full max-w-lg shadow-xl shadow-black/40">
-            <div class="flex items-center justify-between text-xs text-slate-300 mb-3">
-              <span class="flex items-center gap-2 font-bold text-amber-300">
-                <i data-lucide="timer" class="w-4 h-4 animate-spin text-amber-400" style="animation-duration: 10s;"></i>
-                กำหนดชำระถึง 5 ก.ย. 2569 เวลา 13:59 น.
+          <div class="bg-white/5 backdrop-blur-xl border border-white/15 rounded-2xl sm:rounded-3xl p-3 sm:p-5 inline-block w-full max-w-lg shadow-xl shadow-black/40">
+            <div class="flex items-center justify-between text-[11px] sm:text-xs text-slate-300 mb-2 sm:mb-3">
+              <span class="flex items-center gap-1.5 font-bold text-amber-300">
+                <i data-lucide="timer" class="w-3.5 h-3.5 animate-spin text-amber-400" style="animation-duration: 10s;"></i>
+                ถึง 5 ก.ย. 69 (13:59 น.)
               </span>
-              <span id="countdownStatusBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> กำลังเปิดรับชำระ
+              <span id="countdownStatusBadge" class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> เปิดรับชำระ
               </span>
             </div>
 
-            <!-- Countdown 4-Grid Cards -->
-            <div class="grid grid-cols-4 gap-2.5 text-center" id="countdownGrid">
-              <div class="bg-black/40 rounded-2xl py-2.5 px-1 border border-white/10 shadow-inner">
-                <span id="cdDays" class="text-2xl sm:text-3xl font-extrabold font-mono text-white block">00</span>
-                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">วัน</span>
+            <!-- Countdown 4-Grid Cards (Compact on Mobile) -->
+            <div class="grid grid-cols-4 gap-1.5 sm:gap-2.5 text-center" id="countdownGrid">
+              <div class="mobile-cd-box bg-black/40 rounded-xl sm:rounded-2xl py-2 px-1 border border-white/10 shadow-inner">
+                <span id="cdDays" class="mobile-cd-num text-xl sm:text-3xl font-extrabold font-mono text-white block">00</span>
+                <span class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold tracking-wider">วัน</span>
               </div>
-              <div class="bg-black/40 rounded-2xl py-2.5 px-1 border border-white/10 shadow-inner">
-                <span id="cdHours" class="text-2xl sm:text-3xl font-extrabold font-mono text-white block">00</span>
-                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">ชั่วโมง</span>
+              <div class="mobile-cd-box bg-black/40 rounded-xl sm:rounded-2xl py-2 px-1 border border-white/10 shadow-inner">
+                <span id="cdHours" class="mobile-cd-num text-xl sm:text-3xl font-extrabold font-mono text-white block">00</span>
+                <span class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold tracking-wider">ชม.</span>
               </div>
-              <div class="bg-black/40 rounded-2xl py-2.5 px-1 border border-white/10 shadow-inner">
-                <span id="cdMins" class="text-2xl sm:text-3xl font-extrabold font-mono text-white block">00</span>
-                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">นาที</span>
+              <div class="mobile-cd-box bg-black/40 rounded-xl sm:rounded-2xl py-2 px-1 border border-white/10 shadow-inner">
+                <span id="cdMins" class="mobile-cd-num text-xl sm:text-3xl font-extrabold font-mono text-white block">00</span>
+                <span class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold tracking-wider">นาที</span>
               </div>
-              <div class="bg-black/40 rounded-2xl py-2.5 px-1 border border-white/10 shadow-inner">
-                <span id="cdSecs" class="text-2xl sm:text-3xl font-extrabold font-mono text-amber-400 block">00</span>
-                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">วินาที</span>
+              <div class="mobile-cd-box bg-black/40 rounded-xl sm:rounded-2xl py-2 px-1 border border-white/10 shadow-inner">
+                <span id="cdSecs" class="mobile-cd-num text-xl sm:text-3xl font-extrabold font-mono text-amber-400 block">00</span>
+                <span class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold tracking-wider">วินาที</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Right: Dynamic Live Progress Dashboard Cards -->
-        <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+        <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-4">
           
           <!-- Money Progress Card -->
-          <div class="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/15 rounded-3xl p-5 shadow-lg transition-all hover:border-orange-400/40 group">
-            <div class="flex items-center justify-between text-xs text-slate-300 mb-2">
-              <span class="flex items-center gap-2 font-bold text-slate-200">
-                <div class="w-6 h-6 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
-                  <i data-lucide="wallet" class="w-3.5 h-3.5"></i>
+          <div class="mobile-stat-box bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-lg transition-all hover:border-orange-400/40 group">
+            <div class="flex items-center justify-between text-[11px] sm:text-xs text-slate-300 mb-1.5 sm:mb-2">
+              <span class="flex items-center gap-1.5 font-bold text-slate-200">
+                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+                  <i data-lucide="wallet" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
                 </div>
                 ยอดเงินที่ได้รับแล้ว
               </span>
-              <span id="moneyPercentBadge" class="font-black text-amber-300 text-sm bg-amber-500/20 px-2.5 py-0.5 rounded-full border border-amber-400/30">0%</span>
+              <span id="moneyPercentBadge" class="font-black text-amber-300 text-xs sm:text-sm bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-400/30">0%</span>
             </div>
-            <div class="flex items-baseline gap-2 mb-3">
-              <span id="totalMoneyPaid" class="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight">฿0</span>
-              <span id="targetMoney" class="text-xs text-slate-400 font-semibold">/ ฿11,400 (เป้าหมาย)</span>
+            <div class="flex items-baseline gap-2 mb-2 sm:mb-3">
+              <span id="totalMoneyPaid" class="text-2xl sm:text-4xl font-black text-white font-mono tracking-tight">฿0</span>
+              <span id="targetMoney" class="text-[10px] sm:text-xs text-slate-400 font-semibold">/ ฿11,400 (เป้าหมาย)</span>
             </div>
             <!-- Progress Bar -->
-            <div class="w-full bg-black/50 rounded-full h-3 overflow-hidden p-0.5 border border-white/10">
+            <div class="w-full bg-black/50 rounded-full h-2.5 sm:h-3 overflow-hidden p-0.5 border border-white/10">
               <div id="moneyProgressBar" class="bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400 h-full rounded-full transition-all duration-700 ease-out animate-shimmer" style="width: 0%"></div>
             </div>
           </div>
 
           <!-- People Count Progress Card -->
-          <div class="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/15 rounded-3xl p-5 shadow-lg transition-all hover:border-sky-400/40 group">
-            <div class="flex items-center justify-between text-xs text-slate-300 mb-2">
-              <span class="flex items-center gap-2 font-bold text-slate-200">
-                <div class="w-6 h-6 rounded-lg bg-sky-500/20 flex items-center justify-center text-sky-400">
-                  <i data-lucide="users" class="w-3.5 h-3.5"></i>
+          <div class="mobile-stat-box bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-lg transition-all hover:border-sky-400/40 group">
+            <div class="flex items-center justify-between text-[11px] sm:text-xs text-slate-300 mb-1.5 sm:mb-2">
+              <span class="flex items-center gap-1.5 font-bold text-slate-200">
+                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-sky-500/20 flex items-center justify-center text-sky-400">
+                  <i data-lucide="users" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
                 </div>
-                จำนวนเพื่อนที่ชำระแล้ว
+                จำนวนคนที่ชำระแล้ว
               </span>
-              <span id="peoplePercentBadge" class="font-black text-sky-300 text-sm bg-sky-500/20 px-2.5 py-0.5 rounded-full border border-sky-400/30">0%</span>
+              <span id="peoplePercentBadge" class="font-black text-sky-300 text-xs sm:text-sm bg-sky-500/20 px-2 py-0.5 rounded-full border border-sky-400/30">0%</span>
             </div>
-            <div class="flex items-baseline gap-2 mb-3">
-              <span id="totalPeoplePaid" class="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight">0</span>
-              <span id="targetPeople" class="text-xs text-slate-400 font-semibold">/ 60 คนทั้งหมด</span>
+            <div class="flex items-baseline gap-2 mb-2 sm:mb-3">
+              <span id="totalPeoplePaid" class="text-2xl sm:text-4xl font-black text-white font-mono tracking-tight">0</span>
+              <span id="targetPeople" class="text-[10px] sm:text-xs text-slate-400 font-semibold">/ 60 คนทั้งหมด</span>
             </div>
             <!-- Progress Bar -->
-            <div class="w-full bg-black/50 rounded-full h-3 overflow-hidden p-0.5 border border-white/10">
+            <div class="w-full bg-black/50 rounded-full h-2.5 sm:h-3 overflow-hidden p-0.5 border border-white/10">
               <div id="peopleProgressBar" class="bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-400 h-full rounded-full transition-all duration-700 ease-out animate-shimmer" style="width: 0%"></div>
             </div>
           </div>
@@ -353,47 +385,47 @@
     <div id="tabContentPayment" class="space-y-6">
       
       <!-- Search & Autocomplete Card -->
-      <div class="search-card-animate premium-glass rounded-3xl p-6 sm:p-10 shadow-card-premium relative overflow-hidden">
+      <div class="search-card-animate mobile-card premium-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-card-premium relative overflow-hidden">
         
         <!-- Subtle background deco -->
         <div class="absolute right-0 top-0 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div class="max-w-2xl mx-auto space-y-6 relative z-10">
+        <div class="max-w-2xl mx-auto space-y-4 sm:space-y-6 relative z-10">
           
-          <div class="text-center space-y-2">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-tr from-orange-100 via-orange-50 to-amber-100 text-orange-600 mb-2 shadow-sm border border-orange-200/80">
-              <img src="logo.png" alt="โลโก้" class="w-10 h-10 object-contain">
+          <div class="text-center space-y-1.5 sm:space-y-2">
+            <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-orange-100 via-orange-50 to-amber-100 text-orange-600 mb-1 sm:mb-2 shadow-sm border border-orange-200/80">
+              <img src="logo.png" alt="โลโก้" class="w-8 h-8 sm:w-10 sm:h-10 object-contain">
             </div>
-            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">ค้นหาข้อมูลเพื่อบันทึกการชำระเงิน</h2>
-            <p class="text-xs sm:text-sm text-slate-500">
-              พิมพ์ <span class="text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded">รหัสนักศึกษา</span> (มีหรือไม่มีขีดก็ได้), <span class="text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded">อีเมล KKU</span> หรือ <span class="text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded">ชื่อ-นามสกุล / ชื่อเล่น</span>
+            <h2 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">ค้นหาข้อมูลเพื่อบันทึกการชำระเงิน</h2>
+            <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+              พิมพ์ <span class="text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded">รหัสนักศึกษา</span>, <span class="text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded">ชื่อเล่น</span> หรือ <span class="text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded">ชื่อ-นามสกุล</span>
             </p>
           </div>
 
           <!-- Input Group with Auto-formatting -->
           <div class="relative" id="searchContainer">
-            <label for="smartSearchInput" class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2 flex items-center justify-between">
-              <span>ช่องค้นหาอัจฉริยะ (Smart Search & Auto-dash)</span>
-              <span class="text-[11px] font-normal text-orange-600">เช่น 693050120-5 หรือ โดนัท</span>
+            <label for="smartSearchInput" class="block text-[11px] sm:text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 sm:mb-2 flex items-center justify-between">
+              <span>ช่องค้นหาอัจฉริยะ</span>
+              <span class="text-[10px] sm:text-[11px] font-normal text-orange-600">เช่น 693050120-5 หรือ โดนัท</span>
             </label>
             <div class="relative flex items-center">
-              <div class="absolute left-4 text-slate-400 pointer-events-none">
-                <i data-lucide="search" class="w-5 h-5"></i>
+              <div class="absolute left-3.5 sm:left-4 text-slate-400 pointer-events-none">
+                <i data-lucide="search" class="w-4 h-4 sm:w-5 sm:h-5"></i>
               </div>
               <input 
                 type="text" 
                 id="smartSearchInput"
                 autocomplete="off"
-                placeholder="กรอกรหัสนักศึกษา 693050XXX-1 หรือ ชื่อ นามสกุล อีเมล..." 
-                class="w-full pl-12 pr-28 py-4 bg-white/90 border-2 border-slate-200 rounded-2xl text-slate-900 text-base font-semibold placeholder-slate-400 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 shadow-sm transition-all outline-none"
+                placeholder="กรอกรหัส 693050... หรือ ชื่อเล่น..." 
+                class="w-full pl-10 sm:pl-12 pr-24 sm:pr-28 py-3.5 sm:py-4 bg-white/90 border-2 border-slate-200 rounded-2xl text-slate-900 text-sm sm:text-base font-semibold placeholder-slate-400 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 shadow-sm transition-all outline-none"
               >
               <!-- Quick Paste / Clear Button -->
-              <div class="absolute right-2.5 flex items-center gap-1.5">
-                <button type="button" id="btnClearSearch" onclick="clearSearchInput()" class="hidden p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition">
+              <div class="absolute right-2 flex items-center gap-1">
+                <button type="button" id="btnClearSearch" onclick="clearSearchInput()" class="hidden p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition">
                   <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
-                <button type="button" onclick="pasteFromClipboard()" class="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-orange-700 bg-orange-50 hover:bg-orange-100 rounded-xl transition border border-orange-200 shadow-sm">
-                  <i data-lucide="clipboard" class="w-3.5 h-3.5"></i>
+                <button type="button" onclick="pasteFromClipboard()" class="flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-orange-700 bg-orange-50 hover:bg-orange-100 rounded-xl transition border border-orange-200 shadow-sm">
+                  <i data-lucide="clipboard" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
                   <span>วางรหัส</span>
                 </button>
               </div>
@@ -406,42 +438,40 @@
           </div>
 
           <!-- Quick Selector Hints -->
-          <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
-            <span>✨ ระบบจะใส่เครื่องหมายขีด (-) ให้อัตโนมัติเมื่อพิมพ์ตัวเลข</span>
+          <div class="flex items-center justify-between text-[11px] sm:text-xs text-slate-400 pt-0.5">
+            <span>✨ ใส่ขีด (-) ให้อัตโนมัติเมื่อพิมพ์</span>
             <span id="matchCountHint" class="hidden font-bold text-orange-600"></span>
           </div>
         </div>
       </div>
 
       <!-- Student Profile Card (Appears when selected) -->
-      <div id="studentProfileCard" class="hidden premium-glass rounded-3xl p-6 sm:p-10 shadow-card-premium border-2 border-orange-200/80 transition-all">
-        <div class="max-w-4xl mx-auto space-y-6">
+      <div id="studentProfileCard" class="hidden mobile-card premium-glass rounded-3xl p-4 sm:p-8 md:p-10 shadow-card-premium border-2 border-orange-200/80 transition-all">
+        <div class="max-w-4xl mx-auto space-y-4 sm:space-y-6">
           
           <!-- Top Profile Header -->
-          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-slate-200/80">
-            <div class="flex items-center gap-4">
-              <div class="w-18 h-18 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-tr from-orange-600 via-amber-500 to-orange-400 flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-orange-500/30 border-2 border-white">
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-slate-200/80">
+            <div class="flex items-center gap-3 sm:gap-4 w-full md:w-auto">
+              <div class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-orange-600 via-amber-500 to-orange-400 flex items-center justify-center text-white text-2xl sm:text-3xl font-black shadow-lg shadow-orange-500/30 border-2 border-white flex-shrink-0">
                 <span id="profileAvatarText">ข</span>
               </div>
-              <div>
-                <div class="flex items-center gap-2.5 flex-wrap">
-                  <h3 id="profileFullName" class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">ชื่อ นามสกุล</h3>
-                  <span id="profileNickname" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300/80 shadow-sm">
+              <div class="flex-grow">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 id="profileFullName" class="text-lg sm:text-3xl font-black text-slate-900 tracking-tight">ชื่อ นามสกุล</h3>
+                  <span id="profileNickname" class="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300/80 shadow-sm">
                     ชื่อเล่น: -
                   </span>
                 </div>
-                <div class="flex items-center gap-2 text-xs sm:text-sm text-slate-500 mt-1.5 font-mono">
-                  <i data-lucide="id-card" class="w-4 h-4 text-orange-600"></i>
+                <div class="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm text-slate-500 mt-1 font-mono flex-wrap">
                   <span id="profileStudentId" class="font-extrabold text-slate-800">693050XXX-X</span>
-                  <span>•</span>
-                  <i data-lucide="mail" class="w-4 h-4 text-sky-600"></i>
-                  <span id="profileEmail" class="text-slate-600">xxx@kkumail.com</span>
+                  <span class="text-slate-300">•</span>
+                  <span id="profileEmail" class="text-slate-600 text-[10px] sm:text-xs">xxx@kkumail.com</span>
                 </div>
               </div>
             </div>
 
             <!-- Payment Status Tag -->
-            <div id="profileStatusBadgeContainer">
+            <div id="profileStatusBadgeContainer" class="w-full md:w-auto">
               <!-- Injected dynamically: Paid or Unpaid -->
             </div>
           </div>
@@ -2014,21 +2044,29 @@
       const tabStatus = document.getElementById('tabContentStatus');
       const navPayment = document.getElementById('navTabPayment');
       const navStatus = document.getElementById('navTabStatus');
+      const mobPayment = document.getElementById('mobileNavPayment');
+      const mobStatus = document.getElementById('mobileNavStatus');
 
       if (tab === 'payment') {
         tabPayment.classList.remove('hidden');
         tabStatus.classList.add('hidden');
 
-        navPayment.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm';
-        navStatus.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900';
+        if (navPayment) navPayment.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm';
+        if (navStatus) navStatus.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900';
+
+        if (mobPayment) mobPayment.className = 'flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-orange-600 font-black text-[11px] transition';
+        if (mobStatus) mobStatus.className = 'flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-slate-400 font-semibold text-[11px] transition';
 
         gsap.fromTo(tabPayment, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
       } else {
         tabPayment.classList.add('hidden');
         tabStatus.classList.remove('hidden');
 
-        navStatus.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm';
-        navPayment.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900';
+        if (navStatus) navStatus.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-orange-600 shadow-sm';
+        if (navPayment) navPayment.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900';
+
+        if (mobPayment) mobPayment.className = 'flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-slate-400 font-semibold text-[11px] transition';
+        if (mobStatus) mobStatus.className = 'flex flex-col items-center gap-1 py-1 px-4 rounded-xl text-orange-600 font-black text-[11px] transition';
         
         renderStatusTable();
         gsap.fromTo(tabStatus, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
