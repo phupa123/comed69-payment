@@ -731,19 +731,37 @@
         </p>
       </div>
 
-      <!-- Google Sign-in Trigger Container -->
-      <div class="space-y-3 pt-2">
-        <div id="googleButtonWrapper" class="flex justify-center"></div>
+      <!-- Direct KKU Mail Login Box -->
+      <div class="space-y-4 pt-2">
+        <div class="space-y-3">
+          <label class="block text-xs font-bold text-slate-700 text-left">กรอกอีเมล KKU Mail ของคุณ:</label>
+          <div class="relative">
+            <input type="email" id="kkuMailInput" placeholder="เช่น thitiwut.a@kkumail.com"
+              class="w-full pl-11 pr-4 py-3 bg-slate-50 border-2 border-slate-200 focus:border-orange-500 rounded-2xl text-sm font-semibold outline-none transition">
+            <i data-lucide="mail" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none"></i>
+          </div>
+          
+          <button onclick="handleDirectKKUMailLogin()"
+            class="w-full py-3.5 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-orange-500/25 transition transform active:scale-98 flex items-center justify-center gap-2">
+            <!-- Google Logo SVG -->
+            <svg class="w-4 h-4 bg-white rounded-full p-0.5" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <span>ยืนยันเข้าสู่ระบบด้วย KKU Mail</span>
+          </button>
+        </div>
         
-        <div class="relative flex py-2 items-center">
+        <div class="relative flex py-1 items-center">
           <div class="flex-grow border-t border-slate-200"></div>
-          <span class="flex-shrink mx-3 text-slate-400 text-xs font-semibold">หรือทดสอบด้วยบัญชีในระบบ</span>
+          <span class="flex-shrink mx-3 text-slate-400 text-xs font-semibold">หรือเลือกจากรายชื่อด่วน</span>
           <div class="flex-grow border-t border-slate-200"></div>
         </div>
 
         <!-- Quick One-Click KKUMail Select for Demo/Verification -->
         <div class="space-y-2 text-left">
-          <label class="block text-xs font-bold text-slate-700">เลือกบัญชีนักศึกษาเพื่อจำลองเข้าสู่ระบบ:</label>
           <div class="flex gap-2">
             <select id="quickStudentLoginSelect" class="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 focus:border-orange-500 outline-none">
               <option value="thitiwut.a@kkumail.com">ธิติวุฒิ อารีเอื้อ (ภูผา) - thitiwut.a@kkumail.com</option>
@@ -752,7 +770,7 @@
               <option value="kanokporn.kump@kkumail.com">กนกพร คำพิทูล (โดนัท) - kanokporn.kump@kkumail.com</option>
             </select>
             <button onclick="handleManualKKULogin()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition flex-shrink-0">
-              เข้าใช้งาน
+              เลือก
             </button>
           </div>
         </div>
@@ -823,6 +841,18 @@
       }
 
       validateAndSetUser(data.email, data.name || data.email, data.picture || "");
+    }
+
+    function handleDirectKKUMailLogin() {
+      const input = document.getElementById('kkuMailInput');
+      const email = (input ? input.value : '').trim();
+      if (!email) {
+        showAuthError("กรุณากรอกอีเมล KKU Mail ของคุณ");
+        return;
+      }
+      const st = (window.STUDENTS_DATA || []).find(s => s.email.toLowerCase() === email.toLowerCase());
+      const name = st ? `${st.name} (${st.nickname})` : email;
+      validateAndSetUser(email, name, "");
     }
 
     function handleManualKKULogin() {
