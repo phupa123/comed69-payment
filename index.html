@@ -121,6 +121,29 @@
       animation: floatSlow 6s ease-in-out infinite;
     }
 
+    /* Dedicated Mobile App Styles */
+    @media (max-width: 640px) {
+      body {
+        font-size: 14px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .mobile-card {
+        border-radius: 1.5rem !important;
+        padding: 1.25rem !important;
+      }
+      .mobile-btn {
+        min-height: 48px;
+        font-size: 15px;
+      }
+      .mobile-hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .mobile-hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    }
+
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -655,12 +678,16 @@
                 <div class="flex flex-col p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
                   <span class="text-xs font-bold text-slate-700 block text-center">ภาพสลิปหลักฐาน:</span>
                   <div id="paidSectionIframeWrapper" class="w-full h-72 sm:h-80 rounded-xl bg-white border border-slate-200 overflow-hidden shadow-inner flex items-center justify-center">
-                    <span class="text-xs text-slate-400 font-medium">กำลังโหลดสลิปจาก Google Drive...</span>
+                    <span class="text-xs text-slate-400 font-medium">กำลังโหลดสลิป...</span>
                   </div>
-                  <div class="text-center">
-                    <a id="paidSectionDriveLink" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-black rounded-xl transition inline-flex items-center gap-1.5 shadow-md shadow-orange-600/25">
+                  <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                    <button type="button" onclick="downloadCurrentSlip()" class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/25 active:scale-95">
+                      <i data-lucide="download" class="w-4 h-4"></i>
+                      <span>ดาวน์โหลดสลิป</span>
+                    </button>
+                    <a id="paidSectionDriveLink" href="#" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-md active:scale-95">
                       <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                      <span>เปิดดูรูปเต็มบน Google Drive</span>
+                      <span>เปิดดูรูปเต็ม</span>
                     </a>
                   </div>
                 </div>
@@ -941,21 +968,31 @@
   <div id="modalFullscreenSlip" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center">
       
-      <button 
-        type="button" 
-        onclick="closeFullscreenModal()"
-        class="absolute -top-12 right-0 sm:right-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2.5 rounded-full backdrop-blur-md transition flex items-center gap-1 text-xs font-bold"
-      >
-        <i data-lucide="x" class="w-5 h-5"></i>
-        <span class="hidden sm:inline">ปิดรูปภาพ (ESC)</span>
-      </button>
+      <div class="absolute -top-12 right-0 sm:right-2 flex items-center gap-2">
+        <button 
+          type="button" 
+          onclick="downloadFullscreenSlip()"
+          class="text-white/90 hover:text-white bg-emerald-600 hover:bg-emerald-500 px-3.5 py-2 rounded-full backdrop-blur-md transition flex items-center gap-1.5 text-xs font-bold shadow-lg"
+        >
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>ดาวน์โหลด</span>
+        </button>
+        <button 
+          type="button" 
+          onclick="closeFullscreenModal()"
+          class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2.5 rounded-full backdrop-blur-md transition flex items-center gap-1 text-xs font-bold"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+          <span class="hidden sm:inline">ปิด (ESC)</span>
+        </button>
+      </div>
 
-      <div class="w-full flex items-center justify-center p-2">
+      <div class="w-full flex items-center justify-center p-2 mt-4 sm:mt-0">
         <img id="fullscreenImg" src="" alt="ภาพสลิปเต็มจอ" class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl border border-white/20 bg-white/5">
       </div>
       
       <p class="text-white/60 text-xs mt-3 flex items-center gap-1">
-        <i data-lucide="info" class="w-3.5 h-3.5"></i> กดปุ่มปิด หรือคลิกพื้นที่ภายนอกเพื่อกลับสู่หน้าเดิม
+        <i data-lucide="info" class="w-3.5 h-3.5"></i> กดปุ่มดาวน์โหลดเพื่อบันทึกไฟล์สลิปลงในเครื่อง
       </p>
     </div>
   </div>
@@ -1852,6 +1889,45 @@
       return url;
     }
 
+    // --- SLIP DOWNLOAD HANDLERS ---
+    function triggerFileDownload(url, filename = 'slip-payment.png') {
+      if (!url) return;
+      
+      // If it's Google Drive link, extract direct download URL
+      let downloadUrl = url;
+      if (url.includes('drive.google.com')) {
+        const idMatch = url.match(/[-\w]{25,}/);
+        if (idMatch) {
+          downloadUrl = `https://drive.google.com/uc?export=download&id=${idMatch[0]}`;
+        }
+      }
+
+      if (downloadUrl.startsWith('data:image')) {
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } else {
+        window.open(downloadUrl, '_blank');
+      }
+    }
+
+    function downloadCurrentSlip() {
+      if (!currentStudentPaidSlip) {
+        alert("ไม่พบข้อมูลรูปภาพสลิป");
+        return;
+      }
+      const fname = `Slip-${currentSelectedStudent ? currentSelectedStudent.id : 'COMED69'}.png`;
+      triggerFileDownload(currentStudentPaidSlip, fname);
+    }
+
+    function downloadFullscreenSlip() {
+      const src = document.getElementById('fullscreenImg').src;
+      triggerFileDownload(src, 'Slip-COMED69-Full.png');
+    }
+
     function openStudentDetail(studentId) {
       const st = studentDatabase.find(s => s.id === studentId);
       const record = paymentRecords[studentId];
@@ -1903,9 +1979,14 @@
                   loading="lazy"
                 ></iframe>
               </div>
-              <div class="text-center pt-1">
-                <a href="${rawSlipUrl}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-orange-600 hover:text-orange-700 inline-flex items-center gap-1">
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> เปิดดูไฟล์ภาพต้นฉบับบน Google Drive
+              <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <button type="button" onclick="triggerFileDownload('${rawSlipUrl}', 'Slip-${st.id}.png')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 shadow-md active:scale-95">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span>ดาวน์โหลดสลิป</span>
+                </button>
+                <a href="${rawSlipUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-1.5 shadow-md active:scale-95">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> 
+                  <span>เปิดดูบน Google Drive</span>
                 </a>
               </div>
             </div>
