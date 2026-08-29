@@ -83,6 +83,10 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
+    @keyframes progress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
   </style>
 </head>
 
@@ -110,8 +114,7 @@
         <p class="text-xs text-slate-400">สาขาคอมพิวเตอร์ศึกษา มข. (รหัส 69)</p>
       </div>
       <div class="w-48 h-1.5 bg-slate-800 rounded-full mx-auto overflow-hidden">
-        <div id="adminIntroProgressBar"
-          class="h-full bg-gradient-to-r from-orange-500 to-amber-400 w-0 transition-all duration-700"></div>
+        <div id="adminIntroProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 w-full animate-[progress_1s_ease-in-out_forwards]"></div>
       </div>
     </div>
   </div>
@@ -715,21 +718,15 @@
 
     function runAdminIntroAnimation() {
       const splash = document.getElementById('adminIntroSplash');
-      const pBar = document.getElementById('adminIntroProgressBar');
       if (!splash) return;
 
       setTimeout(() => {
-        if (pBar) pBar.style.width = '100%';
-      }, 100);
-
-      // Smooth fadeout animation
-      setTimeout(() => {
         if (typeof gsap !== 'undefined') {
-          gsap.to(".intro-logo-anim", { scale: 1.1, opacity: 0, duration: 0.35 });
-          gsap.to(".intro-text-anim", { y: -20, opacity: 0, duration: 0.35 });
+          gsap.to(".intro-logo-anim", { scale: 1.1, opacity: 0, duration: 0.3 });
+          gsap.to(".intro-text-anim", { y: -15, opacity: 0, duration: 0.3 });
           gsap.to(splash, {
             opacity: 0,
-            duration: 0.4,
+            duration: 0.35,
             ease: "power2.inOut",
             onComplete: () => {
               splash.style.display = 'none';
@@ -740,16 +737,16 @@
           splash.style.display = 'none';
           splash.remove();
         }
-      }, 900);
+      }, 1000);
 
-      // Absolute safety fallback (always remove splash after 1.5s)
+      // Failsafe auto-dismiss
       setTimeout(() => {
-        const remainingSplash = document.getElementById('adminIntroSplash');
-        if (remainingSplash) {
-          remainingSplash.style.display = 'none';
-          remainingSplash.remove();
+        const remaining = document.getElementById('adminIntroSplash');
+        if (remaining) {
+          remaining.style.display = 'none';
+          remaining.remove();
         }
-      }, 1500);
+      }, 1300);
     }
 
     function togglePasswordVisibility(inputId, iconId) {
