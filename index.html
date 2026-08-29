@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>สาขาวิชาคอมพิวเตอร์ศึกษา (Computer Education) | คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</title>
   <meta name="description"
-    content="เว็บไซต์แนะนำสาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น หลักสูตรศึกษาศาสตรบัณฑิต นวัตกรรมครูคอมพิวเตอร์และเทคโนโลยีการศึกษา">
+    content="เว็บไซต์ทางการสาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น หลักสูตรศึกษาศาสตรบัณฑิต และระบบชำระเงินค่ากิจกรรมนักศึกษา">
   <link rel="icon" type="image/png" href="logo.png">
 
   <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
@@ -57,11 +57,12 @@
     }
   </script>
 
+  <!-- Google Identity Services (Sign in with Google) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- GSAP Animation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
   <style>
     body {
@@ -84,12 +85,6 @@
 
     .gradient-text-orange {
       background: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #f59e0b 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .gradient-text-cyan {
-      background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -135,26 +130,186 @@
 
       <!-- Desktop Nav Menu -->
       <nav class="hidden lg:flex items-center gap-1">
+        <a href="#payments-list" class="px-4 py-2 rounded-xl text-sm font-bold text-orange-600 bg-orange-50/80 transition flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+          <span>รายการต้องชำระ</span>
+        </a>
         <a href="#about" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-orange-600 hover:bg-orange-50/80 transition">เกี่ยวกับสาขา</a>
         <a href="#curriculum" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-orange-600 hover:bg-orange-50/80 transition">หลักสูตร</a>
-        <a href="#highlights" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-orange-600 hover:bg-orange-50/80 transition">จุดเด่น</a>
         <a href="#careers" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-orange-600 hover:bg-orange-50/80 transition">อาชีพในอนาคต</a>
         <a href="#students" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-orange-600 hover:bg-orange-50/80 transition">ทำเนียบรุ่น 69</a>
       </nav>
 
-      <!-- CTA Buttons -->
+      <!-- Auth & Action Area -->
       <div class="flex items-center gap-2 sm:gap-3">
+        
+        <!-- Not Logged In State (Default) -->
+        <div id="navUserGuest" class="flex items-center gap-2">
+          <button onclick="openGoogleLoginModal()" class="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white border-2 border-slate-200 hover:border-orange-500 text-slate-800 font-bold text-xs sm:text-sm shadow-sm transition transform active:scale-95">
+            <!-- Google G Logo SVG -->
+            <svg class="w-4 h-4" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <span>เข้าสู่ระบบ (KKU Mail)</span>
+          </button>
+        </div>
+
+        <!-- Logged In State (When authenticated) -->
+        <div id="navUserLoggedIn" class="hidden items-center gap-2">
+          <div class="flex items-center gap-2 p-1.5 pr-3 rounded-2xl bg-orange-50 border border-orange-200">
+            <img id="navUserAvatar" src="" alt="Avatar" class="w-8 h-8 rounded-xl object-cover border border-orange-300">
+            <div class="text-left hidden sm:block">
+              <span id="navUserName" class="text-xs font-bold text-slate-800 block leading-tight">ชื่อผู้ใช้</span>
+              <span id="navUserEmail" class="text-[10px] text-orange-600 font-mono block leading-tight">xxx@kkumail.com</span>
+            </div>
+            <button onclick="handleGoogleLogout()" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-white transition" title="ออกจากระบบ">
+              <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Payment Link -->
         <a href="payment.html" class="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm shadow-md shadow-orange-500/25 transition transform active:scale-95">
           <i data-lucide="credit-card" class="w-4 h-4"></i>
-          <span>ระบบชำระเงิน</span>
-        </a>
-        <a href="admin.html" class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition" title="ระบบหลังบ้าน Admin">
-          <i data-lucide="shield-lock" class="w-4 h-4"></i>
+          <span>ชำระเงิน</span>
         </a>
       </div>
 
     </div>
   </header>
+
+  <!-- ================= SECTION 0: ACTIVE PAYMENTS (หมวดหมู่รายการที่ต้องชำระตอนนี้) ================= -->
+  <section id="payments-list" class="bg-gradient-to-b from-orange-500/10 via-amber-500/5 to-transparent pt-10 pb-16 px-4 sm:px-6 lg:px-8 border-b border-orange-200/50">
+    <div class="max-w-7xl mx-auto space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500 text-white text-xs font-black uppercase tracking-wider shadow-sm">
+            <i data-lucide="bell-ring" class="w-3.5 h-3.5 animate-bounce"></i>
+            <span>รายการที่ต้องชำระเงินในขณะนี้ (Active Dues)</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+            ติดตามและชำระเงินค่ากิจกรรมสาขาวิชา
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-1">
+            โปรดตรวจสอบกำหนดการและแนบสลิปผ่านระบบออนไลน์ เพื่อความถูกต้องและรวดเร็ว
+          </p>
+        </div>
+
+        <a href="payment.html" class="inline-flex items-center gap-1.5 text-xs font-black text-orange-600 hover:text-orange-700 bg-white px-4 py-2.5 rounded-2xl border border-orange-200 shadow-sm transition">
+          <span>ตรวจสอบประวัติและรายชื่อผู้ชำระแล้ว</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- Payment Items Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Active Payment Item 1: ค่าทำป้ายสาขาวิชาเอก ฿190 -->
+        <div class="bg-white rounded-3xl p-6 sm:p-7 border-2 border-orange-300 shadow-xl shadow-orange-500/10 space-y-5 relative overflow-hidden group hover:border-orange-500 transition-all">
+          <div class="absolute top-0 right-0 bg-gradient-to-l from-orange-500 to-amber-500 text-white text-[11px] font-black px-4 py-1 rounded-bl-2xl shadow-sm">
+            🔥 เปิดรับชำระอยู่
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-orange-100 text-orange-600 p-2.5 flex items-center justify-center flex-shrink-0 shadow-md">
+              <img src="logo.png" alt="Logo" class="w-full h-full object-contain">
+            </div>
+            <div>
+              <span class="text-[11px] font-bold text-orange-600 uppercase tracking-wider block">กิจกรรมชั้นปีที่ 1 (COMED 69)</span>
+              <h3 class="text-lg font-black text-slate-900 leading-tight">ค่าทำป้ายสาขาวิชาเอก</h3>
+              <p class="text-xs text-slate-500 mt-1">สำหรับนักศึกษาชั้นปีที่ 1 ทั้งหมด 60 คน</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
+            <div class="flex justify-between">
+              <span class="text-slate-500">ยอดที่ต้องชำระ:</span>
+              <span class="font-black text-slate-900 text-base text-orange-600">฿190.00 บาท</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">กำหนดชำระภายใน:</span>
+              <span class="font-bold text-rose-600">4 ก.ย. 2569 (23:59 น.)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">บัญชีปลายทาง:</span>
+              <span class="font-medium text-slate-700">กสิกรไทย 236-2-47817-3</span>
+            </div>
+          </div>
+
+          <div class="pt-1 flex items-center gap-2">
+            <a href="payment.html" class="flex-grow py-3 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm text-center shadow-md shadow-orange-500/25 transition flex items-center justify-center gap-2">
+              <i data-lucide="upload" class="w-4 h-4"></i>
+              <span>คลิกเพื่อแนบสลิปชำระเงิน</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Upcoming Item 2: เสื้อสาขาวิชา (ตัวอย่างการ Scale รายการถัดไป) -->
+        <div class="bg-white/80 rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-md space-y-5 opacity-80">
+          <div class="flex items-start gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="shirt" class="w-7 h-7"></i>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">กิจกรรมประจำปีการศึกษา</span>
+              <h3 class="text-lg font-black text-slate-700 leading-tight">ค่าเสื้อสาขาวิชาเอก (Official Polo)</h3>
+              <p class="text-xs text-slate-400 mt-1">เสื้อโปโลสาขาวิชาคอมพิวเตอร์ศึกษา</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
+            <div class="flex justify-between">
+              <span class="text-slate-400">สถานะ:</span>
+              <span class="font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full">เร็วๆ นี้ (Coming Soon)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">ยอดเงิน:</span>
+              <span class="font-bold text-slate-600">จะแจ้งให้ทราบภายหลัง</span>
+            </div>
+          </div>
+
+          <button disabled class="w-full py-3 px-4 rounded-2xl bg-slate-200 text-slate-400 font-bold text-xs cursor-not-allowed">
+            ยังไม่เปิดรับชำระ
+          </button>
+        </div>
+
+        <!-- Upcoming Item 3: กิจกรรมค่ายสาขา -->
+        <div class="bg-white/80 rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-md space-y-5 opacity-80">
+          <div class="flex items-start gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="tent" class="w-7 h-7"></i>
+            </div>
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">โครงการพัฒนาทักษะวิชาชีพ</span>
+              <h3 class="text-lg font-black text-slate-700 leading-tight">กิจกรรมค่ายวิชาการคอมพิวเตอร์</h3>
+              <p class="text-xs text-slate-400 mt-1">ค่ายเสริมทักษะการสอนและ Coding นอกสถานที่</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
+            <div class="flex justify-between">
+              <span class="text-slate-400">สถานะ:</span>
+              <span class="font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full">แผนงานภาคการศึกษาที่ 2</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">ยอดเงิน:</span>
+              <span class="font-bold text-slate-600">จะแจ้งให้ทราบภายหลัง</span>
+            </div>
+          </div>
+
+          <button disabled class="w-full py-3 px-4 rounded-2xl bg-slate-200 text-slate-400 font-bold text-xs cursor-not-allowed">
+            ยังไม่เปิดรับชำระ
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
 
   <!-- ================= HERO SECTION (CYBER & MODERN TECH) ================= -->
   <section class="relative overflow-hidden bg-slate-950 text-white pt-12 sm:pt-20 pb-20 sm:pb-32 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
@@ -202,7 +357,7 @@
         <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
           <a href="payment.html" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-base shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2.5 transition transform active:scale-95">
             <i data-lucide="sparkles" class="w-5 h-5"></i>
-            <span>เข้าสู่ระบบชำระเงินค่าป้ายเอก</span>
+            <span>เข้าสู่ระบบชำระเงินค่าป้ายเอก ฿190</span>
           </a>
           <a href="#curriculum" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-base border border-slate-700 flex items-center justify-center gap-2 transition">
             <i data-lucide="book-open" class="w-5 h-5 text-orange-400"></i>
@@ -536,7 +691,7 @@
         <span>•</span>
         <a href="payment.html" class="text-white hover:text-orange-400 transition font-semibold">ระบบชำระเงิน</a>
         <span>•</span>
-        <a href="admin.html" class="text-white hover:text-orange-400 transition font-semibold">เข้าสู่ระบบ Admin</a>
+        <a href="admin.html" class="text-white hover:text-orange-400 transition font-semibold">ระบบจัดการหลังบ้าน (Host Admin)</a>
         <span>•</span>
         <a href="https://www.instagram.com/thitiphaua/" target="_blank" class="text-orange-400 hover:underline">IG: Thitipha</a>
       </div>
@@ -544,11 +699,214 @@
     </div>
   </footer>
 
+  <!-- ================= MODAL: SIGN IN WITH GOOGLE (KKUMAIL ONLY) ================= -->
+  <div id="modalGoogleLogin" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 text-center transform transition-all">
+      
+      <div class="flex justify-end">
+        <button onclick="closeGoogleLoginModal()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Icon & Header -->
+      <div class="space-y-3 -mt-6">
+        <div class="w-16 h-16 mx-auto rounded-3xl bg-orange-50 border-2 border-orange-200 flex items-center justify-center shadow-lg shadow-orange-500/15">
+          <img src="logo.png" alt="Logo" class="w-10 h-10 object-contain">
+        </div>
+        <h3 class="text-xl sm:text-2xl font-black text-slate-900">เข้าสู่ระบบด้วย KKU Mail</h3>
+        <p class="text-xs text-slate-500 max-w-xs mx-auto">
+          ระบบสงวนสิทธิ์การเข้าสู่ระบบเฉพาะบัญชีอีเมล <span class="font-bold text-orange-600">@kkumail.com</span> ของนักศึกษามหาวิทยาลัยขอนแก่นเท่านั้น
+        </p>
+      </div>
+
+      <!-- Notice Box -->
+      <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-left text-xs space-y-1 text-amber-900">
+        <div class="font-bold flex items-center gap-1.5">
+          <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600 flex-shrink-0"></i>
+          <span>เงื่อนไขการเข้าสู่ระบบ:</span>
+        </div>
+        <p class="text-[11px] text-amber-800 leading-relaxed">
+          หากล็อกอินด้วย Gmail ทั่วไป หรืออีเมลโดเมนอื่น ระบบจะไม่อนุญาตให้เข้าสู่ระบบโดยอัตโนมัติ
+        </p>
+      </div>
+
+      <!-- Google Sign-in Trigger Container -->
+      <div class="space-y-3 pt-2">
+        <div id="googleButtonWrapper" class="flex justify-center"></div>
+        
+        <div class="relative flex py-2 items-center">
+          <div class="flex-grow border-t border-slate-200"></div>
+          <span class="flex-shrink mx-3 text-slate-400 text-xs font-semibold">หรือทดสอบด้วยบัญชีในระบบ</span>
+          <div class="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        <!-- Quick One-Click KKUMail Select for Demo/Verification -->
+        <div class="space-y-2 text-left">
+          <label class="block text-xs font-bold text-slate-700">เลือกบัญชีนักศึกษาเพื่อจำลองเข้าสู่ระบบ:</label>
+          <div class="flex gap-2">
+            <select id="quickStudentLoginSelect" class="w-full text-xs font-medium px-3 py-2.5 rounded-xl border border-slate-200 focus:border-orange-500 outline-none">
+              <option value="thitiwut.a@kkumail.com">ธิติวุฒิ อารีเอื้อ (ภูผา) - thitiwut.a@kkumail.com</option>
+              <option value="pichamon.sam@kkumail.com">พิชามญธุ์ สามสี (หมูหวาน) - pichamon.sam@kkumail.com</option>
+              <option value="nattachai.p@kkumail.com">ณัฏฐชัย โพธิ์ทับไทย (โอ้) - nattachai.p@kkumail.com</option>
+              <option value="kanokporn.kump@kkumail.com">กนกพร คำพิทูล (โดนัท) - kanokporn.kump@kkumail.com</option>
+            </select>
+            <button onclick="handleManualKKULogin()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition flex-shrink-0">
+              เข้าใช้งาน
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="googleAuthError" class="hidden p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold flex items-center gap-2">
+        <i data-lucide="x-circle" class="w-4 h-4 flex-shrink-0"></i>
+        <span id="googleAuthErrorText">อีเมลนี้ไม่ใช่ @kkumail.com จึงไม่สามารถเข้าสู่ระบบได้</span>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Include Students Database Script -->
   <script src="students_data.js"></script>
   <script>
     // Initialize Lucide Icons
     lucide.createIcons();
+
+    // ================= GOOGLE AUTHENTICATION SYSTEM (KKUMAIL ONLY) =================
+    const GOOGLE_CLIENT_ID = "1049285098251-google-oauth-comed69.apps.googleusercontent.com"; // Sample ID / Ready for real OAuth
+
+    function openGoogleLoginModal() {
+      document.getElementById('modalGoogleLogin').classList.remove('hidden');
+      document.getElementById('googleAuthError').classList.add('hidden');
+      lucide.createIcons();
+
+      // Render Google Sign-in Button if available
+      try {
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredentialResponse
+          });
+          google.accounts.id.renderButton(
+            document.getElementById('googleButtonWrapper'),
+            { theme: "outline", size: "large", width: 280, text: "signin_with", shape: "pill" }
+          );
+        }
+      } catch (e) {
+        console.warn("Google One-Tap Init", e);
+      }
+    }
+
+    function closeGoogleLoginModal() {
+      document.getElementById('modalGoogleLogin').classList.add('hidden');
+    }
+
+    // Decode JWT from Google
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch(e) {
+        return null;
+      }
+    }
+
+    function handleGoogleCredentialResponse(response) {
+      const data = parseJwt(response.credential);
+      if (!data || !data.email) {
+        showAuthError("ไม่สามารถดึงข้อมูลบัญชีจาก Google ได้");
+        return;
+      }
+
+      validateAndSetUser(data.email, data.name || data.email, data.picture || "");
+    }
+
+    function handleManualKKULogin() {
+      const select = document.getElementById('quickStudentLoginSelect');
+      const email = select.value;
+      const st = (window.STUDENTS_DATA || []).find(s => s.email.toLowerCase() === email.toLowerCase());
+      const name = st ? `${st.name} (${st.nickname})` : email;
+      validateAndSetUser(email, name, "");
+    }
+
+    function validateAndSetUser(email, name, avatarUrl) {
+      const emailLower = email.toLowerCase().trim();
+
+      // CRITICAL CHECK: MUST BE @kkumail.com
+      if (!emailLower.endsWith('@kkumail.com')) {
+        showAuthError(`⚠️ บัญชี "${email}" ไม่ใช่บัญชี @kkumail.com ของมหาวิทยาลัยขอนแก่น จึงไม่อนุญาตให้เข้าสู่ระบบ`);
+        return;
+      }
+
+      // Check if student is in COMED 69 database
+      const student = (window.STUDENTS_DATA || []).find(st => st.email.toLowerCase() === emailLower);
+
+      const userSession = {
+        email: emailLower,
+        name: student ? student.name : name,
+        nickname: student ? student.nickname : "",
+        studentId: student ? student.id : "",
+        avatar: avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${emailLower}`,
+        loggedInAt: new Date().toISOString()
+      };
+
+      localStorage.setItem('COMED_USER_SESSION', JSON.stringify(userSession));
+      updateUserUI(userSession);
+      closeGoogleLoginModal();
+      alert(`🎉 ยินดีต้อนรับคุณ ${userSession.name} เข้าสู่ระบบด้วยบัญชี ${userSession.email}`);
+    }
+
+    function showAuthError(msg) {
+      const errBox = document.getElementById('googleAuthError');
+      const errText = document.getElementById('googleAuthErrorText');
+      errText.textContent = msg;
+      errBox.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function updateUserUI(user) {
+      const guestNav = document.getElementById('navUserGuest');
+      const loggedNav = document.getElementById('navUserLoggedIn');
+      const avatarEl = document.getElementById('navUserAvatar');
+      const nameEl = document.getElementById('navUserName');
+      const emailEl = document.getElementById('navUserEmail');
+
+      if (user && user.email) {
+        guestNav.classList.add('hidden');
+        loggedNav.classList.remove('hidden');
+        loggedNav.classList.add('flex');
+        avatarEl.src = user.avatar;
+        nameEl.textContent = user.nickname ? `${user.name} (${user.nickname})` : user.name;
+        emailEl.textContent = user.email;
+      } else {
+        guestNav.classList.remove('hidden');
+        loggedNav.classList.add('hidden');
+        loggedNav.classList.remove('flex');
+      }
+      lucide.createIcons();
+    }
+
+    function handleGoogleLogout() {
+      if (confirm("คุณต้องการออกจากระบบหรือไม่?")) {
+        localStorage.removeItem('COMED_USER_SESSION');
+        updateUserUI(null);
+      }
+    }
+
+    // Check existing session on load
+    function checkUserSession() {
+      try {
+        const session = localStorage.getItem('COMED_USER_SESSION');
+        if (session) {
+          const user = JSON.parse(session);
+          updateUserUI(user);
+        }
+      } catch(e) {}
+    }
 
     // Render Students Roster
     function renderRoster(students) {
@@ -598,6 +956,7 @@
 
     // Initial render
     document.addEventListener('DOMContentLoaded', () => {
+      checkUserSession();
       renderRoster(window.STUDENTS_DATA || []);
     });
   </script>
