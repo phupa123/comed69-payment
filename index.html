@@ -1277,19 +1277,34 @@
       const emailEl = document.getElementById('navUserEmail');
 
       if (user && user.email) {
-        guestNav.classList.add('hidden');
-        loggedNav.classList.remove('hidden');
-        loggedNav.classList.add('flex');
-        avatarEl.src = user.avatar;
-        nameEl.textContent = user.nickname ? `${user.name} (${user.nickname})` : user.name;
-        emailEl.textContent = user.email;
+        if (guestNav) guestNav.classList.add('hidden');
+        if (loggedNav) {
+          loggedNav.classList.remove('hidden');
+          loggedNav.classList.add('flex');
+        }
+        if (avatarEl) avatarEl.src = user.avatar;
+        if (nameEl) nameEl.textContent = user.nickname ? `${user.name} (${user.nickname})` : user.name;
+        if (emailEl) emailEl.textContent = user.email;
+
+        // Auto Enrich Student Info from window.STUDENTS_DATA if missing
+        if (!user.studentId && window.STUDENTS_DATA) {
+          const st = window.STUDENTS_DATA.find(s => s.email.toLowerCase() === user.email.toLowerCase());
+          if (st) {
+            user.studentId = st.id;
+            user.name = st.name;
+            user.nickname = st.nickname;
+            localStorage.setItem('COMED_USER_SESSION', JSON.stringify(user));
+          }
+        }
 
         // Fetch Real-time Payment Status from Cloud
         checkUserPaymentStatus(user);
       } else {
-        guestNav.classList.remove('hidden');
-        loggedNav.classList.add('hidden');
-        loggedNav.classList.remove('flex');
+        if (guestNav) guestNav.classList.remove('hidden');
+        if (loggedNav) {
+          loggedNav.classList.add('hidden');
+          loggedNav.classList.remove('flex');
+        }
         resetPaymentCardStatus();
       }
       lucide.createIcons();
