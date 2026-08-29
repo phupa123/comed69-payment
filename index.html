@@ -459,64 +459,56 @@
           <div id="unpaidSection" class="pt-4 space-y-6">
             
             <!-- QR Payment Guide & Bank Info -->
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 bg-gradient-to-br from-amber-50/80 via-white to-orange-50/60 p-6 sm:p-8 rounded-3xl border border-amber-200 shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 bg-gradient-to-br from-emerald-50/80 via-white to-orange-50/60 p-6 sm:p-8 rounded-3xl border-2 border-emerald-200 shadow-md">
               
-              <!-- QR Code Mock / Display -->
-              <div class="md:col-span-5 flex flex-col items-center justify-center p-5 bg-white rounded-2xl border border-slate-200 shadow-md text-center">
-                <span class="text-xs font-black text-slate-600 mb-3 uppercase tracking-wider flex items-center gap-1.5">
-                  <i data-lucide="qr-code" class="w-4 h-4 text-orange-600"></i>
-                  สแกนชำระเงินผ่าน PromptPay
+              <!-- Real QR Code Image Display -->
+              <div class="md:col-span-5 flex flex-col items-center justify-center p-5 bg-white rounded-2xl border border-slate-200 shadow-lg text-center relative group">
+                <span class="text-xs font-black text-emerald-800 mb-3 uppercase tracking-wider flex items-center gap-1.5 bg-emerald-100/80 px-3 py-1 rounded-full border border-emerald-300">
+                  <i data-lucide="qr-code" class="w-4 h-4 text-emerald-600"></i>
+                  สแกนชำระเงินผ่าน K PLUS / ทุกธนาคาร
                 </span>
                 
-                <div class="relative p-3 bg-white rounded-2xl border-2 border-slate-200 shadow-inner group">
-                  <!-- PromptPay QR Code Canvas / Visual -->
-                  <div class="w-48 h-48 bg-slate-900 rounded-xl flex flex-col items-center justify-between text-white p-2.5 relative overflow-hidden">
-                    <div class="w-full h-full bg-white p-2 flex flex-col items-center justify-between rounded-lg">
-                      <div class="flex justify-between w-full">
-                        <div class="w-9 h-9 bg-slate-900 rounded p-1"><div class="w-full h-full bg-white p-1"><div class="w-full h-full bg-slate-900"></div></div></div>
-                        <div class="w-9 h-9 bg-slate-900 rounded p-1"><div class="w-full h-full bg-white p-1"><div class="w-full h-full bg-slate-900"></div></div></div>
-                      </div>
-                      <div class="text-center my-auto">
-                        <div class="px-2.5 py-0.5 bg-blue-900 text-white rounded-md text-[10px] font-black">พร้อมเพย์</div>
-                        <span class="text-slate-950 font-black text-xl block mt-0.5 font-mono">฿190.00</span>
-                        <span class="text-[9px] font-semibold text-slate-500">บัญชีกลางสาขาคอมฯ</span>
-                      </div>
-                      <div class="flex justify-between w-full">
-                        <div class="w-9 h-9 bg-slate-900 rounded p-1"><div class="w-full h-full bg-white p-1"><div class="w-full h-full bg-slate-900"></div></div></div>
-                        <div class="w-9 h-9 flex items-center justify-center text-orange-600 font-black text-xs">KKU</div>
-                      </div>
-                    </div>
+                <!-- Real QR Image Box with Click to Zoom -->
+                <div class="relative p-2 bg-white rounded-2xl border-2 border-emerald-500/40 shadow-inner group cursor-pointer" onclick="openFullscreenModal('qr_payment.png')">
+                  <img src="qr_payment.png" alt="Thai QR Payment" class="w-56 h-auto object-contain rounded-xl shadow-sm transition-transform duration-300 group-hover:scale-102">
+                  <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white text-xs font-bold transition-opacity rounded-2xl">
+                    <i data-lucide="zoom-in" class="w-6 h-6 mb-1"></i>
+                    <span>คลิกเพื่อดูรูป QR เต็ม</span>
                   </div>
                 </div>
 
-                <div class="mt-3 text-xs text-slate-600">
-                  ยอดโอนตรงตามจำนวน: <strong class="text-orange-600 text-base font-black">190 บาท</strong>
+                <div class="mt-3 text-xs text-slate-700 font-medium">
+                  ยอดโอนตรงตามจำนวน: <strong class="text-emerald-700 text-base font-black">190 บาท</strong>
                 </div>
               </div>
 
               <!-- Bank & Transfer Details -->
               <div class="md:col-span-7 flex flex-col justify-between space-y-4">
                 <div>
-                  <h4 class="text-base font-black text-slate-900 flex items-center gap-2 mb-3">
-                    <i data-lucide="info" class="w-5 h-5 text-orange-500"></i>
-                    รายละเอียดการโอนชำระเงิน
+                  <h4 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 mb-3">
+                    <i data-lucide="building-2" class="w-5 h-5 text-emerald-600"></i>
+                    รายละเอียดบัญชีรับโอนเงิน
                   </h4>
-                  <ul class="space-y-2.5 text-xs sm:text-sm text-slate-700">
+                  <ul class="space-y-3 text-xs sm:text-sm text-slate-700">
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>รายการ:</strong> ค่าทำป้ายสาขาวิชาเอกคอมพิวเตอร์ศึกษา</span>
+                      <span><strong>รายการ:</strong> ค่าทำป้ายสาขาวิชาเอกคอมพิวเตอร์ศึกษา (รหัส 69)</span>
                     </li>
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>จำนวนเงิน:</strong> <span class="font-black text-slate-900">฿190.00 บาท / คน</span></span>
+                      <span><strong>จำนวนเงิน:</strong> <span class="font-black text-emerald-700 text-base">฿190.00 บาท / คน</span></span>
                     </li>
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>ธนาคาร:</strong> ธนาคารกรุงไทย (Krungthai Bank)</span>
+                      <span><strong>ธนาคาร:</strong> <span class="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">ธนาคารกสิกรไทย (KBank / K PLUS)</span></span>
                     </li>
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>เลขที่บัญชี:</strong> <span class="font-mono font-black text-slate-950 bg-amber-100/80 px-2 py-0.5 rounded-lg select-all border border-amber-200">987-6-54321-0</span></span>
+                      <span><strong>เลขที่บัญชี:</strong> <span class="font-mono font-black text-emerald-950 bg-emerald-100/90 px-2.5 py-1 rounded-xl select-all border-2 border-emerald-300 tracking-wider text-sm sm:text-base">236-2-47817-3</span></span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+                      <span><strong>ชื่อบัญชี:</strong> <span class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">น.ส. พิชามญธุ์ สามสี</span></span>
                     </li>
                   </ul>
                 </div>
