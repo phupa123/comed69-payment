@@ -113,7 +113,7 @@
         <p class="text-xs text-slate-400 mt-1">เฉพาะอีเมลและรหัสผ่านของผู้ดูแลระบบที่ได้รับอนุญาตเท่านั้น</p>
       </div>
 
-      <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-left">
+      <form id="adminLoginForm" onsubmit="event.preventDefault(); handleAdminLogin(event);" class="space-y-4 text-left">
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1.5">อีเมลแอดมิน (KKU Mail)</label>
           <div class="relative">
@@ -144,8 +144,8 @@
           <span id="loginErrorText">อีเมลหรือรหัสผ่านไม่ถูกต้อง</span>
         </div>
 
-        <button type="submit" id="btnLoginSubmit"
-          class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/25 transition transform active:scale-98 flex items-center justify-center gap-2">
+        <button type="button" id="btnLoginSubmit" onclick="handleAdminLogin(event)"
+          class="w-full py-3.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-sm rounded-2xl shadow-lg shadow-orange-500/25 transition transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer">
           <i data-lucide="log-in" class="w-4 h-4"></i>
           <span>เข้าสู่ระบบ Dashboard</span>
         </button>
