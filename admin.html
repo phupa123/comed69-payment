@@ -1660,28 +1660,95 @@
       }, 3000);
     }
 
-    function exportToExcel() {
+    async function exportToExcel() {
+      // 1. Show loading toast
+      const loadingToast = (typeof showLoadingToast === 'function') 
+        ? showLoadingToast("📊 กำลังดึงข้อมูลล่าสุดจาก Google Cloud เพื่อ Export Excel...") 
+        : null;
+
+      // 2. Fetch fresh real-time data from Cloud & LocalStorage
+      try {
+        await loadAllPayments(true);
+      } catch(e) {}
+
+      // Refresh in-memory records
+      try {
+        const local = localStorage.getItem(STORAGE_KEY);
+        if (local) paymentRecords = JSON.parse(local);
+      } catch(e) {}
+
+      // 3. Prepare detailed dataset
+      let paidCount = 0;
+      let totalAmount = 0;
+
       const data = studentDatabase.map((st, idx) => {
         const record = paymentRecords[st.id];
         const isPaid = record && record.paid;
+        if (isPaid) {
+          paidCount++;
+          totalAmount += (record.amount || 190);
+        }
+
         return {
           "ลำดับ": idx + 1,
           "รหัสนักศึกษา": st.id,
           "ชื่อ - นามสกุล": st.name,
-          "ชื่อเล่น": st.nickname,
-          "อีเมล": st.email,
-          "สถานะ": isPaid ? "ชำระเงินแล้ว" : "ยังไม่ชำระเงิน",
-          "ยอดเงิน (บาท)": isPaid ? 190 : 0,
+          "ชื่อเล่น": `น้อง${st.nickname}`,
+          "อีเมล (KKU Mail)": st.email,
+          "สถานะการชำระ": isPaid ? "ชำระเงินแล้ว" : "ยังไม่ชำระเงิน",
+          "ยอดเงิน (บาท)": isPaid ? (record.amount || 190) : 0,
           "วัน-เวลาที่ชำระ": record?.timestamp || "-",
           "รหัสอ้างอิง": record?.refCode || "-",
-          "ลิงก์สลิป": record?.slipUrl || "-"
+          "ลิงก์ภาพสลิป": record?.slipUrl || "-"
         };
       });
 
-      const ws = XLSX.utils.json_to_sheet(data);
+      // 4. Create Workbook and Sheets
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "ComEd69_Payments");
-      XLSX.writeFile(wb, `ComEd69_Payment_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+      // Sheet 1: Main Payments Table
+      const wsPayments = XLSX.utils.json_to_sheet(data);
+      
+      // Auto column widths
+      wsPayments['!cols'] = [
+        { wch: 8 },  // ลำดับ
+        { wch: 16 }, // รหัสนักศึกษา
+        { wch: 26 }, // ชื่อ - นามสกุล
+        { wch: 12 }, // ชื่อเล่น
+        { wch: 30 }, // อีเมล
+        { wch: 16 }, // สถานะ
+        { wch: 14 }, // ยอดเงิน
+        { wch: 22 }, // วันเวลา
+        { wch: 20 }, // รหัสอ้างอิง
+        { wch: 40 }  // ลิงก์สลิป
+      ];
+      XLSX.utils.book_append_sheet(wb, wsPayments, "รายชื่อและการชำระเงิน");
+
+      // Sheet 2: Summary Sheet
+      const unpaidCount = studentDatabase.length - paidCount;
+      const summaryData = [
+        { "รายการ": "สาขาวิชา", "รายละเอียด": "คอมพิวเตอร์ศึกษา (รหัส 69) คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น" },
+        { "รายการ": "โครงการ / รายการ", "รายละเอียด": "ค่าทำป้ายสาขาวิชาเอก คนละ ฿190" },
+        { "รายการ": "จำนวนนักศึกษาทั้งหมด", "รายละเอียด": `${studentDatabase.length} คน` },
+        { "รายการ": "ชำระเงินแล้ว", "รายละเอียด": `${paidCount} คน` },
+        { "รายการ": "ยังไม่ชำระเงิน", "รายละเอียด": `${unpaidCount} คน` },
+        { "รายการ": "ยอดเงินที่ได้รับแล้วทั้งหมด", "รายละเอียด": `฿${totalAmount.toLocaleString()} บาท` },
+        { "รายการ": "ยอดเงินค้างรับ", "รายละเอียด": `฿${(unpaidCount * 190).toLocaleString()} บาท` },
+        { "รายการ": "วันที่ส่งออกรายงาน (Export Date)", "รายละเอียด": new Date().toLocaleString('th-TH') }
+      ];
+      const wsSummary = XLSX.utils.json_to_sheet(summaryData);
+      wsSummary['!cols'] = [{ wch: 30 }, { wch: 65 }];
+      XLSX.utils.book_append_sheet(wb, wsSummary, "สรุปภาพรวม");
+
+      // 5. Download File
+      const nowStr = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `ComEd69_Payment_Report_${nowStr}.xlsx`);
+
+      // 6. Dismiss toast and notify success
+      if (loadingToast) loadingToast.remove();
+      if (typeof showToastNotification === 'function') {
+        showToastNotification(`✨ ส่งออกรายงาน Excel สำเร็จ! (ชำระแล้ว ${paidCount}/${studentDatabase.length} คน)`);
+      }
     }
   </script>
 </body>
