@@ -1130,6 +1130,19 @@
         console.warn("Local Backend API unavailable, falling back to localStorage", e);
       }
 
+      // Priority 3: LocalStorage
+      loadFromLocal();
+    }
+
+    function loadFromLocal() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        paymentRecords = stored ? JSON.parse(stored) : {};
+      } catch (e) {
+        paymentRecords = {};
+      }
+    }
+
     async function manualRefreshData() {
       const btn = document.getElementById('btnQuickRefresh');
       const icon = document.getElementById('refreshIcon');
