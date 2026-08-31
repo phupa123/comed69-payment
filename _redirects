@@ -1,6 +1,5 @@
-# Cloudflare Pages Redirects & Custom 404 Routing Rules
+# Cloudflare Pages / Workers Static Assets Redirects
 
-# 1. Clean URL rewrite
 /index           /index.html        200
 /payment         /payment.html      200
 /admin           /admin.html        200
@@ -9,5 +8,6 @@
 /maintenance     /maintenance.html  200
 /404             /404.html          200
 
-# 2. Fallback to 404.html for any undefined paths
-/*               /404.html          404
+# Cloudflare natively serves 404.html when a page is missing.
+# Redirect non-matching routes to 404.html using status 302
+/*               /404.html          302
