@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>404 - หลงทางในอวกาศดิจิทัล | สาขาวิชาคอมพิวเตอร์ศึกษา มข. 69</title>
-  <meta name="description" content="ขออภัย ไม่พบหน้าที่คุณต้องการเข้าถึง (Lost in Digital Space - 404 Interactive)">
+  <meta name="description" content="ขออภัย ไม่พบหน้าที่คุณต้องการเข้าถึง (Lost in Digital Space - 404 Intelligent Smart Navigator)">
   <link rel="icon" type="image/png" href="logo.png">
 
   <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
@@ -56,20 +56,20 @@
 
     .mesh-glow {
       background-image:
-        radial-gradient(circle at 50% 15%, rgba(249, 115, 22, 0.2) 0%, transparent 55%),
-        radial-gradient(circle at 15% 75%, rgba(99, 102, 241, 0.18) 0%, transparent 50%),
-        radial-gradient(circle at 85% 75%, rgba(234, 88, 12, 0.15) 0%, transparent 50%);
+        radial-gradient(circle at 50% 15%, rgba(249, 115, 22, 0.22) 0%, transparent 55%),
+        radial-gradient(circle at 15% 75%, rgba(99, 102, 241, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 85% 75%, rgba(234, 88, 12, 0.16) 0%, transparent 50%);
     }
 
     .glass-card {
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     }
 
-    /* Floating Astronaut Animation */
+    /* Floating Mascot Animation */
     @keyframes floatCosmic {
       0%, 100% {
         transform: translateY(0px) rotate(0deg);
@@ -87,10 +87,9 @@
       background: linear-gradient(135deg, #fb923c 0%, #f97316 40%, #ea580c 70%, #ec4899 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 10px 40px rgba(249, 115, 22, 0.35);
+      text-shadow: 0 10px 40px rgba(249, 115, 22, 0.4);
     }
 
-    /* Interactive Asteroid Mini-Game Button */
     .btn-cosmic {
       background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -100,6 +99,19 @@
       border-color: rgba(249, 115, 22, 0.5);
       transform: translateY(-2px);
       box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.2);
+    }
+
+    /* Custom Suggestion Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(249, 115, 22, 0.5);
+      border-radius: 9999px;
     }
   </style>
 </head>
@@ -166,24 +178,50 @@
         </div>
       </div>
 
+      <!-- Smart Detected URL Hint Banner -->
+      <div id="smartDetectedBanner" class="hidden p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-left flex items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2.5 overflow-hidden">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div class="overflow-hidden">
+            <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">ระบบคาดเดาหน้าที่คุณต้องการ:</span>
+            <span id="detectedTargetName" class="font-black text-white truncate block">หน้าหลัก</span>
+          </div>
+        </div>
+        <a id="detectedTargetLink" href="index.html" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-md transition flex-shrink-0 flex items-center gap-1">
+          <span>ไปที่หน้านี้</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+
       <!-- Text Heading & Subtitle -->
       <div class="space-y-2">
-        <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight">ดูเหมือนว่าคุณกำลังหลงทางในอวกาศ!</h1>
+        <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight">คุณกำลังค้นหาหน้าไหนอยู่หรือเปล่า?</h1>
         <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
-          หน้าที่คุณพยายามเข้าถึงอาจพิมพ์ URL ผิด, ถูกย้าย หรือไม่มีอยู่จริงในระบบ แต่ไม่ต้องกังวล เราเตรียมเครื่องมือพาคุณกลับสู่เส้นทางหลักเรียบร้อยแล้ว
+          พิมพ์คำค้นหาด้านล่างเพื่อเลือกหน้าปลายทางที่คุณต้องการ ระบบจะแนะนำหน้าที่ใกล้เคียงให้อัตโนมัติทันที
         </p>
       </div>
 
-      <!-- Quick Search / Rescue Input -->
-      <div class="p-2 rounded-2xl bg-slate-950/80 border border-slate-800/90 flex items-center gap-2">
-        <div class="pl-3 text-slate-400">
-          <i data-lucide="compass" class="w-4 h-4 text-orange-400"></i>
+      <!-- Intelligent Live Search Box & Autocomplete Suggestions Dropdown -->
+      <div class="relative text-left">
+        <div class="p-2 rounded-2xl bg-slate-950/90 border border-slate-800/90 focus-within:border-orange-500/80 transition-all flex items-center gap-2 shadow-inner">
+          <div class="pl-3 text-slate-400">
+            <i data-lucide="compass" class="w-4 h-4 text-orange-400 animate-spin" style="animation-duration: 25s;"></i>
+          </div>
+          <input type="text" id="quickRescueInput" oninput="handleSearchAutocomplete(this.value)"
+            placeholder="พิมพ์หน้าที่ต้องการ เช่น 'จ่ายเงิน', 'สลิป', 'ทำเนียบ 60 คน', 'แอดมิน'..."
+            class="bg-transparent text-xs sm:text-sm text-white placeholder-slate-500 flex-grow outline-none py-1.5"
+            autocomplete="off">
+          <button onclick="handleQuickSearch()" class="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer">
+            ค้นหา
+          </button>
         </div>
-        <input type="text" id="quickRescueInput" placeholder="พิมพ์หน้าที่ต้องการ เช่น 'จ่ายเงิน', 'ทำเนียบ', 'แอดมิน'..."
-          class="bg-transparent text-xs text-white placeholder-slate-500 flex-grow outline-none py-1.5">
-        <button onclick="handleQuickSearch()" class="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer">
-          ค้นหาทางลัด
-        </button>
+
+        <!-- Real-time Suggestions Dropdown List -->
+        <div id="autocompleteDropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-slate-900/95 backdrop-blur-2xl border border-slate-800 rounded-2xl shadow-2xl p-2 z-30 max-h-56 overflow-y-auto custom-scrollbar space-y-1">
+          <!-- Rendered dynamically by JS -->
+        </div>
       </div>
 
       <!-- Action Navigation Buttons 3-Grid -->
@@ -212,17 +250,35 @@
 
       </div>
 
-      <!-- Mini-Game / Space Interactive Trigger Strip -->
-      <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 flex-wrap gap-2">
-        <button onclick="triggerCosmicSurprise()" class="text-orange-400 hover:text-orange-300 font-bold flex items-center gap-1.5 text-left transition cursor-pointer">
-          <i data-lucide="gamepad-2" class="w-4 h-4 text-amber-400 animate-pulse"></i>
-          <span>กดตรงนี้เพื่อยิงพลุดาวตก ✨</span>
-        </button>
+      <!-- Quick Popular Shortcuts Grid -->
+      <div class="pt-3 border-t border-slate-800/80 space-y-2">
+        <div class="flex items-center justify-between text-[11px] text-slate-400">
+          <span class="font-bold flex items-center gap-1 text-slate-300">
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>ทางลัดยอดนิยมที่คนเข้าบ่อย:</span>
+          </span>
+          <button onclick="triggerCosmicSurprise()" class="text-orange-400 hover:text-orange-300 font-bold cursor-pointer">
+            ✨ จุดพลุดาวตก
+          </button>
+        </div>
 
-        <div class="flex items-center gap-3 text-[11px] text-slate-500">
-          <a href="payment.html" class="hover:text-white transition">ระบบชำระเงิน</a>
-          <span>•</span>
-          <a href="admin.html" class="hover:text-white transition">Admin Portal</a>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <a href="payment.html" class="p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 hover:border-orange-500/40 text-slate-300 hover:text-white transition flex items-center gap-2">
+            <i data-lucide="receipt" class="w-4 h-4 text-orange-400 flex-shrink-0"></i>
+            <span class="truncate">ชำระเงิน ฿190</span>
+          </a>
+          <a href="index.html#students" class="p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 hover:border-sky-500/40 text-slate-300 hover:text-white transition flex items-center gap-2">
+            <i data-lucide="users" class="w-4 h-4 text-sky-400 flex-shrink-0"></i>
+            <span class="truncate">ทำเนียบ 60 คน</span>
+          </a>
+          <a href="admin.html" class="p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 hover:border-amber-500/40 text-slate-300 hover:text-white transition flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
+            <span class="truncate">Admin Hub</span>
+          </a>
+          <a href="index.html#curriculum" class="p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 hover:border-emerald-500/40 text-slate-300 hover:text-white transition flex items-center gap-2">
+            <i data-lucide="book-open" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
+            <span class="truncate">หลักสูตรสาขา</span>
+          </a>
         </div>
       </div>
 
@@ -234,9 +290,196 @@
     <p>© 2026 สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (COMED KKU 69)</p>
   </footer>
 
-  <!-- Starfield Canvas Animation & Interactive Engine -->
+  <!-- Starfield Canvas Animation & Intelligent Navigator Engine -->
   <script>
-    // 1. Starfield Particles Engine
+    // ================= 1. SYSTEM SITE MAP DIRECTORY FOR INTELLIGENT SEARCH =================
+    const SITE_DIRECTORIES = [
+      {
+        title: "ระบบชำระเงินค่าทำป้ายสาขา (฿190)",
+        desc: "สแกน QR พร้อมเพย์, แนบสลิปโอนเงิน และตรวจสอบสถานะ",
+        url: "payment.html",
+        icon: "credit-card",
+        color: "text-orange-400",
+        keywords: ["payment", "pay", "จ่าย", "เงิน", "โอน", "สลิป", "ป้าย", "190", "qr", "ชำระ"]
+      },
+      {
+        title: "หน้าหลักสาขาวิชา (Index Landing Page)",
+        desc: "ข้อมูลภาพรวมสาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น",
+        url: "index.html",
+        icon: "home",
+        color: "text-sky-400",
+        keywords: ["index", "home", "หน้าแรก", "หลัก", "สาขา", "คอม", "ศึกษา", "comed", "kku"]
+      },
+      {
+        title: "ทำเนียบรุ่นนักศึกษา คอมพิวเตอร์ศึกษา 69 (60 คน)",
+        desc: "รายชื่อ รหัสนักศึกษา ชื่อเล่น และสถานะการชำระเงินของเพื่อนในรุ่น",
+        url: "index.html#students",
+        icon: "users",
+        color: "text-indigo-400",
+        keywords: ["student", "roster", "รุ่น", "ทำเนียบ", "เพื่อน", "รายชื่อ", "รหัส", "60", "69"]
+      },
+      {
+        title: "ศูนย์ควบคุมแอดมินกลาง (Central Admin Hub)",
+        desc: "แดชบอร์ดภาพรวมการเงิน, จัดการระบบ และเปิด-ปิดปรับปรุงเว็บ",
+        url: "admin.html",
+        icon: "shield-check",
+        color: "text-amber-400",
+        keywords: ["admin", "hub", "แอดมิน", "หลังบ้าน", "ผู้ดูแล", "จัดการ", "เข้าสู่ระบบ"]
+      },
+      {
+        title: "แอดมินจัดการเนื้อหาหน้าแรก & แคมเปญ (Index CMS)",
+        desc: "แก้ไขแถบประกาศด่วน, สร้างและเปิด/ปิดแคมเปญเก็บเงิน",
+        url: "index-admin.html",
+        icon: "layout",
+        color: "text-emerald-400",
+        keywords: ["index-admin", "cms", "ประกาศ", "แคมเปญ", "แก้ไข", "เปิดปิด"]
+      },
+      {
+        title: "แอดมินการเงิน & ตรวจสอบสลิป (Payment Console)",
+        desc: "ตรวจสลิป, กู้คืนข้อมูลในถังขยะ และส่งออกไฟล์ Excel (.xlsx)",
+        url: "payment-admin.html",
+        icon: "receipt",
+        color: "text-rose-400",
+        keywords: ["payment-admin", "สลิป", "excel", "ถังขยะ", "ตรวจสลิป", "ยอดเงิน"]
+      },
+      {
+        title: "หลักสูตรและการเรียนการสอน",
+        desc: "โครงสร้างหลักสูตรศึกษาศาสตรบัณฑิต (4 ปี) สาขาคอมพิวเตอร์ศึกษา",
+        url: "index.html#curriculum",
+        icon: "book-open",
+        color: "text-teal-400",
+        keywords: ["curriculum", "หลักสูตร", "วิชา", "เรียน", "แผนการเรียน", "หน่วยกิต"]
+      },
+      {
+        title: "เส้นทางอาชีพในอนาคต",
+        desc: "ครูคอมพิวเตอร์, นักพัฒนาซอฟต์แวร์ และนักเทคโนโลยีการศึกษา",
+        url: "index.html#careers",
+        icon: "briefcase",
+        color: "text-purple-400",
+        keywords: ["career", "อาชีพ", "ทำงาน", "จบแล้วทำอะไร", "ครู", "โปรแกรมเมอร์"]
+      },
+      {
+        title: "แจ้งปัญหาการชำระเงิน (Help Desk)",
+        desc: "ส่งคำร้องกรณีข้อมูลผิดพลาด หรือโอนเงินแล้วระบบไม่ขึ้น",
+        url: "payment.html#help",
+        icon: "help-circle",
+        color: "text-amber-400",
+        keywords: ["help", "issue", "ปัญหา", "แจ้งปัญหา", "ติดต่อ", "ผิดพลาด"]
+      }
+    ];
+
+    // ================= 2. SMART AUTO-DETECT CURRENT TYPED PATH =================
+    function detectSmartRedirect() {
+      const currentPath = window.location.pathname.toLowerCase();
+      let bestMatch = null;
+      let highestScore = 0;
+
+      SITE_DIRECTORIES.forEach(dir => {
+        let score = 0;
+        dir.keywords.forEach(kw => {
+          if (currentPath.includes(kw.toLowerCase())) score += 2;
+        });
+        if (currentPath.includes(dir.url.toLowerCase().replace('.html', ''))) score += 5;
+        if (score > highestScore) {
+          highestScore = score;
+          bestMatch = dir;
+        }
+      });
+
+      if (bestMatch && highestScore >= 2) {
+        const banner = document.getElementById('smartDetectedBanner');
+        const nameEl = document.getElementById('detectedTargetName');
+        const linkEl = document.getElementById('detectedTargetLink');
+        if (banner && nameEl && linkEl) {
+          nameEl.textContent = bestMatch.title;
+          linkEl.href = bestMatch.url;
+          banner.classList.remove('hidden');
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+      }
+    }
+
+    // ================= 3. AUTOCOMPLETE & LIVE SEARCH SUGGESTIONS =================
+    function handleSearchAutocomplete(query) {
+      const q = query.toLowerCase().trim();
+      const dropdown = document.getElementById('autocompleteDropdown');
+      if (!dropdown) return;
+
+      if (!q) {
+        dropdown.classList.add('hidden');
+        dropdown.innerHTML = '';
+        return;
+      }
+
+      // Filter matches
+      const matches = SITE_DIRECTORIES.filter(item => {
+        const inTitle = item.title.toLowerCase().includes(q);
+        const inDesc = item.desc.toLowerCase().includes(q);
+        const inKeywords = item.keywords.some(k => k.toLowerCase().includes(q));
+        return inTitle || inDesc || inKeywords;
+      });
+
+      if (matches.length === 0) {
+        dropdown.innerHTML = `
+          <div class="p-3 text-center text-xs text-slate-500">
+            <i data-lucide="search-x" class="w-4 h-4 mx-auto mb-1 text-slate-400"></i>
+            <span>ไม่พบหน้าที่ตรงกับ "${query}" ลองค้นหาด้วยคำอื่น</span>
+          </div>
+        `;
+        dropdown.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      dropdown.innerHTML = matches.map(item => `
+        <a href="${item.url}" class="p-2.5 rounded-xl hover:bg-slate-800 transition flex items-center justify-between group cursor-pointer text-left">
+          <div class="flex items-center gap-3 overflow-hidden">
+            <div class="w-8 h-8 rounded-xl bg-slate-950 border border-slate-800 ${item.color} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition">
+              <i data-lucide="${item.icon}" class="w-4 h-4"></i>
+            </div>
+            <div class="overflow-hidden">
+              <h4 class="text-xs font-bold text-white group-hover:text-orange-400 transition truncate">${item.title}</h4>
+              <p class="text-[10px] text-slate-400 truncate">${item.desc}</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-600 group-hover:text-white transition group-hover:translate-x-0.5"></i>
+        </a>
+      `).join('');
+
+      dropdown.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function handleQuickSearch() {
+      const q = (document.getElementById('quickRescueInput')?.value || '').toLowerCase().trim();
+      if (!q) return;
+
+      const match = SITE_DIRECTORIES.find(item => {
+        return item.title.toLowerCase().includes(q) ||
+               item.keywords.some(k => k.toLowerCase().includes(q));
+      });
+
+      if (match) {
+        window.location.href = match.url;
+      } else {
+        window.location.href = 'index.html';
+      }
+    }
+
+    document.getElementById('quickRescueInput')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleQuickSearch();
+    });
+
+    // Close autocomplete on click outside
+    document.addEventListener('click', (e) => {
+      const searchBox = document.getElementById('quickRescueInput');
+      const dropdown = document.getElementById('autocompleteDropdown');
+      if (dropdown && searchBox && !searchBox.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    // ================= 4. STARFIELD PARTICLES ENGINE =================
     const canvas = document.getElementById('spaceCanvas');
     const ctx = canvas.getContext('2d');
     let stars = [];
@@ -276,7 +519,6 @@
     function animateSpace() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw Twinkling Stars
       for (let s of stars) {
         s.alpha += Math.sin(Date.now() * s.speed) * 0.01;
         s.alpha = Math.max(0.1, Math.min(0.9, s.alpha));
@@ -286,7 +528,6 @@
         ctx.fill();
       }
 
-      // Draw Meteors
       for (let i = meteors.length - 1; i >= 0; i--) {
         const m = meteors[i];
         m.x += m.speed;
@@ -313,9 +554,7 @@
         ctx.stroke();
       }
 
-      // Randomly spawn meteors
       if (Math.random() < 0.02) spawnMeteor();
-
       requestAnimationFrame(animateSpace);
     }
 
@@ -323,7 +562,7 @@
     resizeCanvas();
     animateSpace();
 
-    // 2. Interactive Confetti & Mascot Fun
+    // ================= 5. INTERACTIVE FUN =================
     function triggerCosmicSurprise() {
       if (typeof confetti === 'function') {
         confetti({
@@ -346,29 +585,8 @@
       }
     }
 
-    // 3. Quick Rescue Keyword Search
-    function handleQuickSearch() {
-      const q = (document.getElementById('quickRescueInput')?.value || '').toLowerCase().trim();
-      if (!q) return;
-
-      if (q.includes('จ่าย') || q.includes('เงิน') || q.includes('สลิป') || q.includes('pay')) {
-        window.location.href = 'payment.html';
-      } else if (q.includes('แอดมิน') || q.includes('หลังบ้าน') || q.includes('admin') || q.includes('hub')) {
-        window.location.href = 'admin.html';
-      } else if (q.includes('รุ่น') || q.includes('เพื่อน') || q.includes('เนียบ') || q.includes('student')) {
-        window.location.href = 'index.html#students';
-      } else if (q.includes('หลักสูตร') || q.includes('เรียน') || q.includes('curriculum')) {
-        window.location.href = 'index.html#curriculum';
-      } else {
-        window.location.href = 'index.html';
-      }
-    }
-
-    document.getElementById('quickRescueInput')?.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') handleQuickSearch();
-    });
-
     document.addEventListener('DOMContentLoaded', () => {
+      detectSmartRedirect();
       if (typeof lucide !== 'undefined') lucide.createIcons();
       if (typeof gsap !== 'undefined') {
         gsap.fromTo("#errorCard", 
