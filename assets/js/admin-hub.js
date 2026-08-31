@@ -1,0 +1,293 @@
+/**
+ * =========================================================================
+ * MASTER ADMIN HUB LOGIC - assets/js/admin-hub.js
+ * COMED KKU 69 CENTRAL MANAGEMENT CONSOLE
+ * =========================================================================
+ */
+
+const ADMIN_SESSION_KEY = 'COMED_KKU69_ADMIN_LOGGED_USER';
+const ADMIN_ACCOUNTS_KEY = 'COMED_KKU69_ADMIN_ACCOUNTS_V2';
+const ADMIN_LOGS_KEY = 'COMED_KKU69_ADMIN_LOGS_V2';
+const ISSUES_KEY = 'COMED_KKU69_ISSUES_V2';
+const STORAGE_KEY = 'COMED_KKU69_PAYMENT_DATA_V1';
+
+const GOOGLE_CLIENT_ID = "799199144896-9tft22kns4jjv40lk19oul9dp1mprmb4.apps.googleusercontent.com";
+
+const DEFAULT_ADMINS = [
+  { email: 'thitiwut.a@kkumail.com', name: 'ธิติวุฒิ อารีเอื้อ (ภูผา)', password: 'Phupa#69ComEd', hash: '59de3e916100d7316a353db05617c31de97697ec474e47be6af4168e5ae55e47', role: 'Super Admin' },
+  { email: 'pichamon.sam@kkumail.com', name: 'พิชามญธุ์ สามสี (หมูหวาน)', password: 'MooWan#69ComEd', hash: '41d0b334f78c302fb30d6b73041fec5aeaf78982ce6d90ef30113cde7974399a', role: 'Admin' },
+  { email: 'nattachai.p@kkumail.com', name: 'ณัฏฐชัย โพธิ์ทับไทย (โอ้)', password: 'OhNatta#69ComEd', hash: 'd6dbff479a49739cc1d20ad7704993174f5f9f7fb34f1bc756f4d7afb9017e45', role: 'Admin' }
+];
+
+let adminAccounts = [];
+try {
+  const stored = localStorage.getItem(ADMIN_ACCOUNTS_KEY);
+  adminAccounts = stored ? JSON.parse(stored) : DEFAULT_ADMINS;
+} catch (e) {
+  adminAccounts = DEFAULT_ADMINS;
+}
+
+let currentLoggedInAdmin = null;
+
+// SHA-256 for browser password hashing
+async function sha256(message) {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    return JSON.parse(jsonPayload);
+  } catch(e) {
+    return null;
+  }
+}
+
+function ensureGoogleInitialized() {
+  if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleAdminCredential,
+      auto_select: false,
+      cancel_on_tap_outside: false
+    });
+    return true;
+  }
+  return false;
+}
+
+async function handleGoogleAdminCredential(response) {
+  const data = parseJwt(response.credential);
+  const errBox = document.getElementById('loginErrorMsg');
+  const errText = document.getElementById('loginErrorText');
+
+  if (!data || !data.email) {
+    if (errBox && errText) {
+      errText.textContent = "ไม่สามารถอ่านข้อมูลบัญชี Google ได้";
+      errBox.classList.remove('hidden');
+    }
+    return;
+  }
+
+  const email = data.email.toLowerCase().trim();
+  const admin = adminAccounts.find(a => a.email.toLowerCase() === email);
+
+  if (admin) {
+    currentLoggedInAdmin = admin;
+    sessionStorage.setItem(ADMIN_SESSION_KEY, admin.email);
+    showDashboard();
+  } else {
+    if (errBox && errText) {
+      errText.textContent = `บัญชี "${email}" ไม่มีสิทธิ์ผู้ดูแลระบบในระบบนี้`;
+      errBox.classList.remove('hidden');
+    }
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function switchLoginMode(mode) {
+  const tabGoogle = document.getElementById('tabModeGoogle');
+  const tabPassword = document.getElementById('tabModePassword');
+  const viewGoogle = document.getElementById('viewModeGoogle');
+  const viewPassword = document.getElementById('viewModePassword');
+  const errBox = document.getElementById('loginErrorMsg');
+  if (errBox) errBox.classList.add('hidden');
+
+  if (mode === 'google') {
+    if (tabGoogle) tabGoogle.className = 'py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md cursor-pointer';
+    if (tabPassword) tabPassword.className = 'py-2.5 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer';
+    if (viewGoogle) viewGoogle.classList.remove('hidden');
+    if (viewPassword) viewPassword.classList.add('hidden');
+    if (ensureGoogleInitialized()) {
+      google.accounts.id.prompt();
+    }
+  } else {
+    if (tabGoogle) tabGoogle.className = 'py-2.5 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer';
+    if (tabPassword) tabPassword.className = 'py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md cursor-pointer';
+    if (viewGoogle) viewGoogle.classList.add('hidden');
+    if (viewPassword) viewPassword.classList.remove('hidden');
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+async function handleAdminLogin(e) {
+  e.preventDefault();
+  const errBox = document.getElementById('loginErrorMsg');
+  const errText = document.getElementById('loginErrorText');
+  if (errBox) errBox.classList.add('hidden');
+
+  const emailInput = document.getElementById('adminEmailInput')?.value.trim().toLowerCase() || '';
+  const pwdInput = document.getElementById('adminPasswordInput')?.value.trim() || '';
+
+  let admin = adminAccounts.find(a => a.email.toLowerCase() === emailInput) || DEFAULT_ADMINS.find(a => a.email.toLowerCase() === emailInput);
+  let isValid = false;
+
+  if (admin) {
+    if (admin.password && admin.password === pwdInput) {
+      isValid = true;
+    } else if (admin.hash) {
+      const inputHash = await sha256(emailInput + ':' + pwdInput);
+      if (inputHash === admin.hash) isValid = true;
+    }
+  }
+
+  if (isValid && admin) {
+    currentLoggedInAdmin = admin;
+    sessionStorage.setItem(ADMIN_SESSION_KEY, admin.email);
+    showDashboard();
+  } else {
+    if (errBox && errText) {
+      errBox.classList.remove('hidden');
+      errText.textContent = "อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง";
+    }
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function handleAdminLogout() {
+  if (confirm("ต้องการออกจากระบบแอดมินส่วนกลางหรือไม่?")) {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    location.reload();
+  }
+}
+
+function showDashboard() {
+  const login = document.getElementById('loginScreen');
+  const dash = document.getElementById('adminDashboard');
+  if (login) login.classList.add('hidden');
+  if (dash) dash.classList.remove('hidden');
+
+  const nameEl = document.getElementById('currentAdminName');
+  const roleEl = document.getElementById('currentAdminRole');
+  const emailEl = document.getElementById('currentAdminEmail');
+
+  if (currentLoggedInAdmin) {
+    if (nameEl) nameEl.textContent = currentLoggedInAdmin.name;
+    if (roleEl) roleEl.textContent = currentLoggedInAdmin.role || 'Admin';
+    if (emailEl) emailEl.textContent = currentLoggedInAdmin.email;
+  }
+
+  loadHubOverviewStats();
+
+  if (typeof gsap !== 'undefined') {
+    gsap.fromTo("header", { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" });
+    gsap.fromTo(".hub-card-anim", { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: "power2.out" });
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function loadHubOverviewStats() {
+  // 1. Payment Stats
+  let payments = {};
+  try {
+    const p = localStorage.getItem(STORAGE_KEY);
+    if (p) payments = JSON.parse(p);
+  } catch(e) {}
+
+  const totalStudents = (window.STUDENTS_DATA || []).length || 60;
+  const paidCount = Object.keys(payments).filter(k => payments[k] && payments[k].paid).length;
+  const totalMoney = paidCount * 190;
+  const targetMoney = totalStudents * 190;
+  const percent = Math.round((paidCount / totalStudents) * 100);
+
+  const pCountEl = document.getElementById('hubStatPaidCount');
+  const pMoneyEl = document.getElementById('hubStatTotalMoney');
+  const pPercentEl = document.getElementById('hubStatPercent');
+  const pProgressEl = document.getElementById('hubStatProgress');
+
+  if (pCountEl) pCountEl.textContent = `${paidCount} / ${totalStudents} คน`;
+  if (pMoneyEl) pMoneyEl.textContent = `฿${totalMoney.toLocaleString()}`;
+  if (pPercentEl) pPercentEl.textContent = `${percent}%`;
+  if (pProgressEl) pProgressEl.style.width = `${percent}%`;
+
+  // 2. Issue Desk Stats
+  let issues = [];
+  try {
+    const iss = localStorage.getItem(ISSUES_KEY);
+    if (iss) issues = JSON.parse(iss);
+  } catch(e) {}
+
+  const pendingIssues = issues.filter(i => i.status !== 'แก้ไขแล้ว').length;
+  const issueCountEl = document.getElementById('hubStatPendingIssues');
+  const issueTotalEl = document.getElementById('hubStatTotalIssues');
+
+  if (issueCountEl) issueCountEl.textContent = `${pendingIssues} รายการ`;
+  if (issueTotalEl) issueTotalEl.textContent = `(ทั้งหมด ${issues.length} เรื่อง)`;
+
+  // 3. Admin Accounts
+  const adminCountEl = document.getElementById('hubStatAdminCount');
+  if (adminCountEl) adminCountEl.textContent = `${adminAccounts.length} บัญชี`;
+
+  // 4. Activity Logs
+  let logs = [];
+  try {
+    const l = localStorage.getItem(ADMIN_LOGS_KEY);
+    if (l) logs = JSON.parse(l);
+  } catch(e) {}
+
+  const logCountEl = document.getElementById('hubStatLogCount');
+  if (logCountEl) logCountEl.textContent = `${logs.length} บันทึก`;
+
+  renderRecentLogs(logs.slice(0, 5));
+}
+
+function renderRecentLogs(logs) {
+  const container = document.getElementById('hubRecentLogsContainer');
+  if (!container) return;
+
+  if (logs.length === 0) {
+    container.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs font-bold">ยังไม่มีประวัติกิจกรรมล่าสุด</div>`;
+    return;
+  }
+
+  container.innerHTML = logs.map(l => `
+    <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-center justify-between text-xs hover:border-slate-700 transition">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20 flex items-center justify-center font-black text-xs">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <span class="font-bold text-white block">${l.action || 'Activity'}</span>
+          <span class="text-[11px] text-slate-400 font-mono">${l.adminEmail || '-'} • ${l.detail || ''}</span>
+        </div>
+      </div>
+      <span class="text-[11px] font-mono text-slate-500">${l.timestamp || '-'}</span>
+    </div>
+  `).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function initGoogleButton() {
+  try {
+    if (ensureGoogleInitialized()) {
+      const wrapper = document.getElementById('googleAdminButtonWrapper');
+      if (wrapper) {
+        google.accounts.id.renderButton(
+          wrapper,
+          { theme: "filled_blue", size: "large", width: 280, text: "signin_with", shape: "pill" }
+        );
+      }
+      setTimeout(() => google.accounts.id.prompt(), 400);
+    } else {
+      setTimeout(initGoogleButton, 300);
+    }
+  } catch(e) {
+    console.warn("Google Admin Init Error", e);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const loggedEmail = sessionStorage.getItem(ADMIN_SESSION_KEY);
+  if (loggedEmail) {
+    currentLoggedInAdmin = adminAccounts.find(a => a.email.toLowerCase() === loggedEmail.toLowerCase()) || { email: loggedEmail, name: "Admin", role: "Admin" };
+    showDashboard();
+  } else {
+    initGoogleButton();
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+});

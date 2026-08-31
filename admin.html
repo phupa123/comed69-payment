@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบควบคุมศูนย์กลาง (Central Admin Hub) | สาขาวิชาคอมพิวเตอร์ศึกษา มข. รุ่น 69</title>
+  <meta name="description" content="ศูนย์ควบคุมและจัดการระบบหลัก COMED KKU 69 Master Admin Command Center">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <!-- Custom Master Admin CSS -->
+  <link rel="stylesheet" href="assets/css/master-admin.css">
+</head>
+
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white overflow-x-hidden bg-mesh-dark">
+
+  <!-- ================= 1. ULTRA-SECURE LOGIN OVERLAY ================= -->
+  <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/95 backdrop-blur-2xl">
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative max-w-md w-full bg-slate-900/90 backdrop-blur-2xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black space-y-6 text-center">
+      
+      <!-- Hub Badge & Logo -->
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 p-0.5 shadow-lg shadow-orange-500/30 flex items-center justify-center">
+        <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center text-orange-400">
+          <i data-lucide="shield-alert" class="w-8 h-8"></i>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-orange-500/10 text-orange-400 border border-orange-500/30 inline-block">
+          Master Command Center
+        </span>
+        <h2 class="text-2xl font-black text-white">ระบบควบคุมแอดมินศูนย์กลาง</h2>
+        <p class="text-xs text-slate-400">สาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น (รุ่น 69)</p>
+      </div>
+
+      <!-- Login Mode Switcher Tabs -->
+      <div class="p-1 rounded-2xl bg-slate-950 border border-slate-800 flex gap-1">
+        <button id="tabModeGoogle" onclick="switchLoginMode('google')"
+          class="flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md cursor-pointer">
+          <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+          <span>KKU Google Mail</span>
+        </button>
+        <button id="tabModePassword" onclick="switchLoginMode('password')"
+          class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+          <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
+          <span>รหัสผ่านแอดมิน</span>
+        </button>
+      </div>
+
+      <!-- Mode 1: Google One-Tap Login View -->
+      <div id="viewModeGoogle" class="space-y-4 pt-2">
+        <p class="text-xs text-slate-400 leading-relaxed">
+          เข้าสู่ระบบด่วนด้วยบัญชี <strong class="text-amber-300">@kkumail.com</strong> ที่ได้รับสิทธิ์แอดมิน
+        </p>
+        <div id="googleAdminButtonWrapper" class="flex justify-center min-h-[44px]"></div>
+      </div>
+
+      <!-- Mode 2: Standard Email & Password View -->
+      <div id="viewModePassword" class="hidden space-y-4 pt-2 text-left">
+        <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300">อีเมลแอดมิน</label>
+            <input type="email" id="adminEmailInput" placeholder="name@kkumail.com"
+              class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition font-mono">
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300">รหัสผ่านแอดมิน</label>
+            <input type="password" id="adminPasswordInput" placeholder="••••••••••"
+              class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition font-mono">
+          </div>
+
+          <button type="submit"
+            class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/30 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>เข้าสู่ระบบศูนย์กลาง</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Login Error Alert -->
+      <div id="loginErrorMsg" class="hidden p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-bold flex items-center gap-2 text-left">
+        <i data-lucide="alert-triangle" class="w-4 h-4 flex-shrink-0 text-rose-400"></i>
+        <span id="loginErrorText">อีเมล หรือ รหัสผ่านแอดมินไม่ถูกต้อง</span>
+      </div>
+
+      <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-500">
+        <a href="index.html" class="hover:text-slate-300 flex items-center gap-1">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> กลับหน้าหลัก
+        </a>
+        <span>Security Layer V2.5</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 2. MASTER ADMIN DASHBOARD (HUB CONSOLE) ================= -->
+  <div id="adminDashboard" class="hidden flex-grow flex flex-col min-h-screen">
+    
+    <!-- Top Sticky Header Bar -->
+    <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-2xl border-b border-slate-800/80">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        
+        <!-- Left: Hub Title & Badge -->
+        <div class="flex items-center gap-3.5">
+          <a href="index.html" class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-500/20 to-amber-500/20 border border-orange-500/30 p-2 flex items-center justify-center text-orange-400 hover:scale-105 transition shadow-sm">
+            <i data-lucide="layout-grid" class="w-6 h-6"></i>
+          </a>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-black uppercase tracking-wider text-orange-500">COMED KKU 69</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-live"></span> Master Control
+              </span>
+            </div>
+            <h1 class="text-base sm:text-lg font-black text-white leading-tight">ระบบควบคุมศูนย์กลาง (Central Admin Hub)</h1>
+          </div>
+        </div>
+
+        <!-- Right: Logged In Admin Profile & Switcher -->
+        <div class="flex items-center gap-3">
+          <div class="hidden sm:flex items-center gap-3 p-1.5 pr-3 rounded-2xl bg-slate-900 border border-slate-800">
+            <div class="w-8 h-8 rounded-xl bg-orange-500 text-white flex items-center justify-center font-black text-xs shadow-sm">
+              <i data-lucide="user-check" class="w-4 h-4"></i>
+            </div>
+            <div class="text-left">
+              <span id="currentAdminName" class="text-xs font-black text-white block leading-tight">Admin User</span>
+              <span id="currentAdminEmail" class="text-[10px] text-slate-400 font-mono block leading-tight">admin@kkumail.com</span>
+            </div>
+          </div>
+
+          <a href="index.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            <span class="hidden md:inline">เปิดดูหน้าบ้าน</span>
+          </a>
+
+          <button onclick="handleAdminLogout()" class="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">ออกจากระบบ</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Command Hub Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8">
+      
+      <!-- Welcome Hero Banner -->
+      <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="max-w-2xl space-y-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-bold">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>ยินดีต้อนรับสู่แผงควบคุมระบบหลัก</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-white">เลือกโมดูลการบริหารจัดการ</h2>
+          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+            ท่านสามารถเข้าถึงและควบคุมระบบย่อยทั้งหมดของสาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น ได้จากที่นี่โดยตรง
+          </p>
+        </div>
+      </div>
+
+      <!-- Core Admin Portals Navigation Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- MODULE 1: Index Page Management -->
+        <div class="hub-glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden group">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-sky-500/20 group-hover:scale-110 transition">
+                <i data-lucide="globe" class="w-7 h-7"></i>
+              </div>
+              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30">
+                Landing & Portal
+              </span>
+            </div>
+
+            <div class="space-y-1.5">
+              <h3 class="text-lg font-black text-white group-hover:text-sky-400 transition">หน้าหลัก (Index Portal)</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                จัดการแบนเนอร์, ข้อมูลแนะนำสาขาวิชา, หลักสูตร, ทำเนียบรุ่นนักศึกษา 60 คน และลิงก์สำคัญ
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5 text-xs">
+              <div class="flex justify-between text-slate-400">
+                <span>นักศึกษาในระบบ:</span>
+                <span class="font-mono font-bold text-white">60 คน (ครบทุกสาย)</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>สถานะหน้าเว็บ:</span>
+                <span class="font-bold text-emerald-400 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> พร้อมใช้งานสาธารณะ
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <a href="index.html" target="_blank"
+            class="w-full py-3.5 px-4 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md shadow-sky-600/25 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+            <i data-lucide="layout" class="w-4 h-4"></i>
+            <span>เข้าดูหน้าหลัก & ทำเนียบ</span>
+          </a>
+        </div>
+
+        <!-- MODULE 2: Payment Admin Console -->
+        <div class="hub-glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden group border-orange-500/30">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-110 transition">
+                <i data-lucide="receipt" class="w-7 h-7"></i>
+              </div>
+              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/30">
+                Payment Master
+              </span>
+            </div>
+
+            <div class="space-y-1.5">
+              <h3 class="text-lg font-black text-white group-hover:text-orange-400 transition">ระบบแอดมินการเงิน & สลิป</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                ตรวจสอบหลักฐานสลิป ฿190, ยืนยันยอดชำระ, ย้ายไปถังขยะ, และส่งออกไฟล์ Excel แท้ (.xlsx)
+              </p>
+            </div>
+
+            <!-- Real-time Mini Stats -->
+            <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-2 text-xs">
+              <div class="flex justify-between items-center">
+                <span class="text-slate-400">ยอดชำระแล้ว:</span>
+                <span id="hubStatPaidCount" class="font-mono font-bold text-emerald-400">กำลังดึงข้อมูล...</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                <div id="hubStatProgress" class="h-full bg-gradient-to-r from-orange-500 to-emerald-500 rounded-full transition-all duration-500" style="width: 0%;"></div>
+              </div>
+              <div class="flex justify-between text-[11px] text-slate-400">
+                <span>ยอดเงินรวม: <strong id="hubStatTotalMoney" class="text-white">฿0.00</strong></span>
+                <span id="hubStatPercent" class="font-bold text-orange-400">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <a href="payment-admin.html"
+            class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/30 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+            <span>เข้าสู่ระบบแอดมินการเงิน</span>
+          </a>
+        </div>
+
+        <!-- MODULE 3: Help Desk & Issue Resolution Desk -->
+        <div class="hub-glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden group">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-110 transition">
+                <i data-lucide="life-buoy" class="w-7 h-7"></i>
+              </div>
+              <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                Help Desk
+              </span>
+            </div>
+
+            <div class="space-y-1.5">
+              <h3 class="text-lg font-black text-white group-hover:text-amber-400 transition">ศูนย์รับเรื่องแจ้งปัญหา</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                รายการแจ้งปัญหาจากนักศึกษา เช่น ข้อมูลผิดพลาด, โอนเงินแล้วไม่ขึ้น, หรือต้องการตรวจสอบใหม่
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-1.5 text-xs">
+              <div class="flex justify-between text-slate-400">
+                <span>รอดำเนินการ:</span>
+                <span id="hubStatPendingIssues" class="font-bold text-amber-400">0 รายการ</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>เรื่องทั้งหมด:</span>
+                <span id="hubStatTotalIssues" class="font-mono text-slate-300">(ทั้งหมด 0 เรื่อง)</span>
+              </div>
+            </div>
+          </div>
+
+          <a href="payment-admin.html?tab=issues"
+            class="w-full py-3.5 px-4 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md shadow-amber-600/25 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+            <span>จัดการเรื่องแจ้งปัญหา</span>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Quick Control System & Recent Activity Logs -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left: Master System Configurations -->
+        <div class="hub-glass p-6 sm:p-7 rounded-3xl border border-slate-800 space-y-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold">
+              <i data-lucide="settings" class="w-4 h-4"></i>
+            </div>
+            <h3 class="text-base font-black text-white">ตั้งค่าระบบส่วนกลาง</h3>
+          </div>
+
+          <div class="space-y-3 pt-2 text-xs">
+            <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-white block">ผู้ดูแลระบบ (Admin)</span>
+                <span id="hubStatAdminCount" class="text-slate-400">3 บัญชี</span>
+              </div>
+              <a href="payment-admin.html?tab=admins" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold transition">
+                จัดการ
+              </a>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-white block">ระบบประวัติ (Logs)</span>
+                <span id="hubStatLogCount" class="text-slate-400">0 บันทึก</span>
+              </div>
+              <a href="payment-admin.html?tab=logs" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold transition">
+                ดูทั้งหมด
+              </a>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-white block">Google Apps Script API</span>
+                <span class="text-emerald-400 font-mono text-[11px]">Connected</span>
+              </div>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-live"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Recent Activity Log Monitor -->
+        <div class="lg:col-span-2 hub-glass p-6 sm:p-7 rounded-3xl border border-slate-800 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold">
+                <i data-lucide="history" class="w-4 h-4"></i>
+              </div>
+              <h3 class="text-base font-black text-white">บันทึกกิจกรรมล่าสุด (Recent Audit Logs)</h3>
+            </div>
+            <a href="payment-admin.html?tab=logs" class="text-xs text-orange-400 hover:underline font-bold">
+              ดูประวัติทั้งหมด →
+            </a>
+          </div>
+
+          <div id="hubRecentLogsContainer" class="space-y-2.5 pt-1">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
+      <div class="max-w-7xl mx-auto px-4">
+        <p>© 2026 สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (COMED KKU 69)</p>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Master Hub Application Logic -->
+  <script src="assets/js/admin-hub.js"></script>
+</body>
+
+</html>

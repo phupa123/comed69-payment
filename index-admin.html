@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จัดการหน้าหลัก (Index CMS Admin) | COMED KKU 69</title>
+  <meta name="description" content="ระบบจัดการเนื้อหา ข้อมูลแนะนำสาขาวิชา และทำเนียบรุ่น 60 คน หน้าหลัก">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <!-- Master Admin CSS -->
+  <link rel="stylesheet" href="assets/css/master-admin.css">
+</head>
+
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white overflow-x-hidden bg-mesh-dark">
+
+  <!-- Navigation Header -->
+  <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-2xl border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <div class="flex items-center gap-3.5">
+        <a href="admin.html" class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition shadow-sm" title="กลับสู่ Central Admin Hub">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-black uppercase tracking-wider text-sky-400">PAGE CMS</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+              หน้าแรก (Index.html)
+            </span>
+          </div>
+          <h1 class="text-base sm:text-lg font-black text-white leading-tight">จัดการเนื้อหาและทำเนียบนักศึกษา</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="index.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">ดูหน้าจริง (Live Preview)</span>
+        </a>
+        <a href="admin.html" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+          <span>Admin Hub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Body -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8">
+    
+    <!-- Section 1: Page Configurations Form -->
+    <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold">
+            <i data-lucide="sliders" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-black text-white">ตั้งค่าข้อความและแบนเนอร์หน้าแรก</h2>
+            <p class="text-xs text-slate-400">ปรับเปลี่ยนข้อมูลประชาสัมพันธ์ที่จะแสดงแก่ผู้เยี่ยมชม</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="resetDefaultConfig()" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition border border-slate-800">
+            รีเซ็ตค่าเริ่มต้น
+          </button>
+          <button onclick="document.getElementById('formIndexConfig').requestSubmit()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 active:scale-95">
+            <i data-lucide="save" class="w-3.5 h-3.5"></i>
+            <span>บันทึกการตั้งค่า</span>
+          </button>
+        </div>
+      </div>
+
+      <form id="formIndexConfig" onsubmit="saveIndexConfig(event)" class="space-y-6">
+        
+        <!-- Announcement Bar -->
+        <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+              <i data-lucide="megaphone" class="w-4 h-4"></i>
+              <span>แถบข้อความประกาศด่วน (Top Announcement Bar)</span>
+            </label>
+            <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
+              <input type="checkbox" id="cfgAnnouncementActive" class="rounded accent-orange-500">
+              <span>เปิดใช้งาน</span>
+            </label>
+          </div>
+          <input type="text" id="cfgAnnouncementText" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition">
+        </div>
+
+        <!-- Hero Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300">ป้ายกำกับหัวเรื่อง (Hero Tag)</label>
+            <input type="text" id="cfgHeroTag" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition">
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300">หัวข้อหลักของระบบ (Hero Title)</label>
+            <input type="text" id="cfgHeroTitle" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition">
+          </div>
+          <div class="md:col-span-2 space-y-1.5">
+            <label class="text-xs font-bold text-slate-300">คำอธิบายย่อย (Hero Subtitle)</label>
+            <input type="text" id="cfgHeroSubtitle" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition">
+          </div>
+        </div>
+
+        <!-- About & Curriculum -->
+        <div class="space-y-4 pt-2">
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-300">ข้อมูลเกี่ยวกับสาขาวิชา (About COMED KKU)</label>
+            <textarea id="cfgAboutBranch" rows="3" class="w-full p-4 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition custom-scrollbar"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">จำนวนหน่วยกิต</label>
+              <input type="text" id="cfgCurriculumCredits" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition">
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">ระยะเวลาหลักสูตร</label>
+              <input type="text" id="cfgCurriculumYears" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition">
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">ลิงก์ Instagram สาขา</label>
+              <input type="text" id="cfgInstagramUrl" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition font-mono">
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">ชื่อผู้ติดต่อ IG</label>
+              <input type="text" id="cfgInstagramHandle" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition">
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Section 2: Students Roster Management -->
+    <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold">
+            <i data-lucide="users" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg font-black text-white">ทำเนียบนักศึกษาชั้นปีที่ 1 (รุ่น 69)</h2>
+              <span id="studentsTotalCountBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                60 คน
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">ตรวจสอบและแก้ไขรายชื่อ, ชื่อเล่น และอีเมล KKU ของเพื่อนๆ ในรุ่น</p>
+          </div>
+        </div>
+
+        <div class="w-full sm:w-72">
+          <input type="text" id="searchStudentInput" oninput="renderStudentsTable()" placeholder="ค้นหาชื่อ, รหัส หรือชื่อเล่น..."
+            class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition">
+        </div>
+      </div>
+
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-800">
+              <th class="p-3.5 text-center w-14">#</th>
+              <th class="p-3.5">รหัสนักศึกษา</th>
+              <th class="p-3.5">ชื่อ - นามสกุล</th>
+              <th class="p-3.5">ชื่อเล่น</th>
+              <th class="p-3.5">อีเมล KKU Mail</th>
+              <th class="p-3.5 text-center w-24">แก้ไข</th>
+            </tr>
+          </thead>
+          <tbody id="indexStudentsTableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Edit Student Modal Popup -->
+  <div id="modalEditStudent" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i data-lucide="user-edit" class="w-5 h-5 text-orange-400"></i>
+          <span>แก้ไขข้อมูลนักศึกษา</span>
+        </h3>
+        <button onclick="closeEditStudentModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form onsubmit="saveStudentChanges(event)" class="space-y-4">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-400">รหัสนักศึกษา</label>
+          <input type="text" id="editStudentId" disabled class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 text-xs font-mono">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-300">ชื่อ - นามสกุล</label>
+          <input type="text" id="editStudentName" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-300">ชื่อเล่น</label>
+          <input type="text" id="editStudentNickname" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-300">อีเมล KKU Mail</label>
+          <input type="email" id="editStudentEmail" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none font-mono">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeEditStudentModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition">
+            ยกเลิก
+          </button>
+          <button type="submit" class="px-5 py-2 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold rounded-xl shadow-md transition">
+            บันทึกการแก้ไข
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Students Data Script -->
+  <script src="students_data.js"></script>
+  <!-- Index Admin JS Logic -->
+  <script src="assets/js/index-admin.js"></script>
+</body>
+
+</html>
