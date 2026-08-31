@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>จัดการหน้าหลัก (Index CMS Admin) | COMED KKU 69</title>
-  <meta name="description" content="ระบบจัดการเนื้อหา ข้อมูลแนะนำสาขาวิชา และทำเนียบรุ่น 60 คน หน้าหลัก">
+  <title>ระบบจัดการหน้าแรก & รายการชำระเงิน (Index & Campaigns Admin) | COMED KKU 69</title>
+  <meta name="description" content="ระบบจัดการประกาศหน้าเว็บ ควบคุมเปิด-ปิดรายการชำระเงิน และทำเนียบนักศึกษา 60 คน">
 
   <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,12 +48,12 @@
         </a>
         <div>
           <div class="flex items-center gap-2">
-            <span class="text-[11px] font-black uppercase tracking-wider text-sky-400">PAGE CMS</span>
+            <span class="text-[11px] font-black uppercase tracking-wider text-sky-400">PAGE CMS & CONTROL</span>
             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
               หน้าแรก (Index.html)
             </span>
           </div>
-          <h1 class="text-base sm:text-lg font-black text-white leading-tight">จัดการเนื้อหาและทำเนียบนักศึกษา</h1>
+          <h1 class="text-base sm:text-lg font-black text-white leading-tight">จัดการหน้าแรกและควบคุมระบบรับชำระเงิน</h1>
         </div>
       </div>
 
@@ -73,16 +73,41 @@
   <!-- Main Content Body -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8">
     
-    <!-- Section 1: Page Configurations Form -->
+    <!-- ================= SECTION 1: PAYMENT CAMPAIGNS CONTROLLER ================= -->
+    <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-orange-500/30 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold">
+            <i data-lucide="toggle-right" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-black text-white">จัดการและควบคุมรายการชำระเงิน (Payment Campaigns)</h2>
+            <p class="text-xs text-slate-400">เพิ่มรายการเก็บเงินใหม่ หรือเปิด-ปิดรับชำระเงิน (เปิดปกติ / ปิดชั่วคราว / ปิดถาวร) และกำหนดเวลาได้</p>
+          </div>
+        </div>
+
+        <button onclick="openAddCampaignModal()" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/25 transition flex items-center gap-2 cursor-pointer active:scale-95">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>+ เพิ่มรายการชำระเงินใหม่</span>
+        </button>
+      </div>
+
+      <!-- Active Campaigns Grid -->
+      <div id="campaignsListContainer" class="space-y-4">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- ================= SECTION 2: ANNOUNCEMENT & CMS CONFIG ================= -->
     <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-2xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold">
-            <i data-lucide="sliders" class="w-5 h-5"></i>
+            <i data-lucide="megaphone" class="w-5 h-5"></i>
           </div>
           <div>
-            <h2 class="text-lg font-black text-white">ตั้งค่าข้อความและแบนเนอร์หน้าแรก</h2>
-            <p class="text-xs text-slate-400">ปรับเปลี่ยนข้อมูลประชาสัมพันธ์ที่จะแสดงแก่ผู้เยี่ยมชม</p>
+            <h2 class="text-lg font-black text-white">การประกาศ ชี้แจง และตั้งค่าข้อความหน้าแรก</h2>
+            <p class="text-xs text-slate-400">แถบข้อความประกาศด่วนด้านบน (Announcement Bar) และข้อมูลประชาสัมพันธ์สาขา</p>
           </div>
         </div>
 
@@ -90,9 +115,9 @@
           <button onclick="resetDefaultConfig()" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-bold transition border border-slate-800">
             รีเซ็ตค่าเริ่มต้น
           </button>
-          <button onclick="document.getElementById('formIndexConfig').requestSubmit()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 active:scale-95">
+          <button onclick="document.getElementById('formIndexConfig').requestSubmit()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 active:scale-95 cursor-pointer">
             <i data-lucide="save" class="w-3.5 h-3.5"></i>
-            <span>บันทึกการตั้งค่า</span>
+            <span>บันทึกการประกาศ</span>
           </button>
         </div>
       </div>
@@ -103,15 +128,15 @@
         <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
           <div class="flex items-center justify-between">
             <label class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-              <i data-lucide="megaphone" class="w-4 h-4"></i>
-              <span>แถบข้อความประกาศด่วน (Top Announcement Bar)</span>
+              <i data-lucide="bell" class="w-4 h-4"></i>
+              <span>ข้อความแถบประกาศด่วนบนสุดของเว็บ (Top Urgent Announcement Banner)</span>
             </label>
             <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
-              <input type="checkbox" id="cfgAnnouncementActive" class="rounded accent-orange-500">
-              <span>เปิดใช้งาน</span>
+              <input type="checkbox" id="cfgAnnouncementActive" class="rounded accent-orange-500 w-4 h-4">
+              <span>แสดงประกาศบนเว็บ</span>
             </label>
           </div>
-          <input type="text" id="cfgAnnouncementText" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition">
+          <input type="text" id="cfgAnnouncementText" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition" placeholder="เช่น 📢 ขอความร่วมมือเพื่อนๆ ชำระค่าทำป้ายสาขาวิชาเอก ฿190 ภายในวันที่ 4 ก.ย. 69">
         </div>
 
         <!-- Hero Section -->
@@ -159,7 +184,7 @@
       </form>
     </div>
 
-    <!-- Section 2: Students Roster Management -->
+    <!-- ================= SECTION 3: STUDENTS ROSTER ================= -->
     <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
         <div class="flex items-center gap-3">
@@ -204,7 +229,76 @@
 
   </main>
 
-  <!-- Edit Student Modal Popup -->
+  <!-- ================= MODAL: ADD / EDIT PAYMENT CAMPAIGN ================= -->
+  <div id="modalEditCampaign" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 id="modalCampaignTitle" class="text-base font-black text-white flex items-center gap-2">
+          <i data-lucide="receipt" class="w-5 h-5 text-orange-400"></i>
+          <span>เพิ่ม / แก้ไขรายการเก็บเงิน</span>
+        </h3>
+        <button onclick="closeCampaignModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form onsubmit="saveCampaignSubmit(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="campEditId">
+
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300">ชื่อรายการชำระเงิน <span class="text-rose-400">*</span></label>
+          <input type="text" id="campTitle" required placeholder="เช่น ค่าทำป้ายสาขาวิชาเอก, ค่าเสื้อรุ่น" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300">หมวดหมู่</label>
+            <input type="text" id="campCategory" placeholder="กิจกรรมชั้นปีที่ 1" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white outline-none">
+          </div>
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300">ยอดเงินที่ต้องชำระ (บาท) <span class="text-rose-400">*</span></label>
+            <input type="number" step="0.01" id="campAmount" required placeholder="190.00" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-orange-400 font-bold outline-none">
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300">คำอธิบายเพิ่มเติม</label>
+          <input type="text" id="campSubtitle" placeholder="สำหรับนักศึกษาชั้นปีที่ 1 ทั้งหมด 60 คน" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white outline-none">
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300">กำหนดวันและเวลาปิดรับชำระ</label>
+          <input type="datetime-local" id="campDeadline" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white outline-none">
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800">
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300">ธนาคาร</label>
+            <input type="text" id="campBankName" placeholder="กสิกรไทย" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white outline-none">
+          </div>
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300">เลขบัญชี</label>
+            <input type="text" id="campAccountNumber" placeholder="236-2-47817-3" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white outline-none font-mono">
+          </div>
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300">ชื่อบัญชี</label>
+            <input type="text" id="campAccountName" placeholder="น.ส. พิชามญธุ์ สามสี" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white outline-none">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3">
+          <button type="button" onclick="closeCampaignModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition">
+            ยกเลิก
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl shadow-md transition">
+            บันทึกข้อมูล
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: EDIT STUDENT ================= -->
   <div id="modalEditStudent" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
     <div class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">

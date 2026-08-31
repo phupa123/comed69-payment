@@ -1,3 +1,29 @@
+
+// ================= APPLY DYNAMIC CMS & CAMPAIGN CONFIGS =================
+function applyDynamicCMS() {
+  try {
+    const storedCfg = localStorage.getItem("COMED_KKU69_INDEX_CONFIG_V1");
+    if (storedCfg) {
+      const cfg = JSON.parse(storedCfg);
+      // Top Announcement
+      const annWrap = document.getElementById("topAnnouncementWrap");
+      const annText = document.getElementById("topAnnouncementText");
+      if (annWrap && annText) {
+        if (cfg.announcementActive && cfg.announcementText) {
+          annText.textContent = cfg.announcementText;
+          annWrap.classList.remove("hidden");
+        } else {
+          annWrap.classList.add("hidden");
+        }
+      }
+    }
+  } catch(e) {}
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  applyDynamicCMS();
+});
+
 /**
  * =========================================================================
  * INDEX PAGE LOGIC - assets/js/index.js

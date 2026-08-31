@@ -1,26 +1,47 @@
 /**
  * =========================================================================
  * INDEX PORTAL ADMIN LOGIC - assets/js/index-admin.js
- * COMED KKU 69 INDEX CMS & CONTENT CONTROLLER
+ * COMED KKU 69 INDEX CMS, ANNOUNCEMENTS & PAYMENT CAMPAIGNS CONTROLLER
  * =========================================================================
  */
 
 const ADMIN_SESSION_KEY = 'COMED_KKU69_ADMIN_LOGGED_USER';
 const INDEX_CONFIG_KEY = 'COMED_KKU69_INDEX_CONFIG_V1';
+const CAMPAIGNS_KEY = 'COMED_PAYMENT_CAMPAIGNS_V1';
 
+// Default Announcement & Page CMS
 const DEFAULT_INDEX_CONFIG = {
   announcementText: "📢 ขอความร่วมมือเพื่อนๆ นักศึกษาชั้นปีที่ 1 ชำระค่าทำป้ายสาขาวิชาเอก คนละ ฿190.00 ภายในวันที่ 4 ก.ย. 69",
   announcementActive: true,
   heroTag: "สาขาวิชาคอมพิวเตอร์ศึกษา รุ่นที่ 69",
   heroTitle: "ระบบสารสนเทศ & จัดการข้อมูลรุ่น",
   heroSubtitle: "คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (Computer Education KKU)",
-  bannerImage: "logo.png",
   aboutBranch: "สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น มุ่งเน้นผลิตบัณฑิตครูและนักเทคโนโลยีการศึกษาที่มีความรู้ความเชี่ยวชาญด้านวิทยาการคอมพิวเตอร์ นวัตกรรมดิจิทัล และศาสตร์การสอนสมัยใหม่ เพื่อพัฒนาการศึกษาของประเทศอย่างยั่งยืน",
   curriculumCredits: "128 หน่วยกิต",
   curriculumYears: "หลักสูตร 4 ปี (วท.บ. / ค.บ.)",
   instagramUrl: "https://www.instagram.com/thitiphaua/",
   instagramHandle: "thitiphaua"
 };
+
+// Default Payment Campaigns
+const DEFAULT_CAMPAIGNS = [
+  {
+    id: "camp_paimai69",
+    title: "ค่าทำป้ายสาขาวิชาเอก",
+    subtitle: "สำหรับนักศึกษาชั้นปีที่ 1 ทั้งหมด 60 คน",
+    category: "กิจกรรมชั้นปีที่ 1 (COMED 69)",
+    amount: 190.00,
+    deadline: "2026-09-04T23:59",
+    deadlineDisplay: "4 ก.ย. 2569 (23:59 น.)",
+    bankName: "กสิกรไทย",
+    accountNumber: "236-2-47817-3",
+    accountName: "น.ส. พิชามญธุ์ สามสี",
+    status: "open", // open, temp_closed, permanently_closed
+    closedReason: "",
+    isDefault: true,
+    createdAt: new Date().toISOString()
+  }
+];
 
 let indexConfig = DEFAULT_INDEX_CONFIG;
 try {
@@ -30,9 +51,22 @@ try {
   indexConfig = DEFAULT_INDEX_CONFIG;
 }
 
+let campaignsList = [];
+try {
+  const storedCamp = localStorage.getItem(CAMPAIGNS_KEY);
+  campaignsList = storedCamp ? JSON.parse(storedCamp) : DEFAULT_CAMPAIGNS;
+} catch (e) {
+  campaignsList = DEFAULT_CAMPAIGNS;
+}
+
 let studentsList = [];
 try {
-  studentsList = (window.STUDENTS_DATA && window.STUDENTS_DATA.length > 0) ? [...window.STUDENTS_DATA] : [];
+  const customSt = localStorage.getItem('COMED_CUSTOM_STUDENTS_DATA');
+  if (customSt) {
+    studentsList = JSON.parse(customSt);
+  } else if (window.STUDENTS_DATA && window.STUDENTS_DATA.length > 0) {
+    studentsList = [...window.STUDENTS_DATA];
+  }
 } catch (e) {
   studentsList = [];
 }
@@ -50,10 +84,12 @@ function checkAdminAuth() {
 document.addEventListener('DOMContentLoaded', () => {
   if (!checkAdminAuth()) return;
   loadFormValues();
+  renderCampaignsList();
   renderStudentsTable();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 });
 
+// ================= 1. PAGE CMS & ANNOUNCEMENTS =================
 function loadFormValues() {
   document.getElementById('cfgAnnouncementText').value = indexConfig.announcementText || '';
   document.getElementById('cfgAnnouncementActive').checked = indexConfig.announcementActive !== false;
@@ -95,7 +131,224 @@ function resetDefaultConfig() {
   }
 }
 
-// Students Roster Management
+// ================= 2. PAYMENT CAMPAIGN MANAGEMENT =================
+function renderCampaignsList() {
+  const container = document.getElementById('campaignsListContainer');
+  if (!container) return;
+
+  if (campaignsList.length === 0) {
+    container.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs font-bold">ไม่มีรายการเก็บเงินในขณะนี้ กดปุ่ม "+ เพิ่มรายการชำระเงินใหม่" เพื่อสร้าง</div>`;
+    return;
+  }
+
+  container.innerHTML = campaignsList.map((camp, idx) => {
+    let statusBadge = '';
+    let statusText = '';
+    let borderClass = '';
+
+    if (camp.status === 'open') {
+      statusBadge = '<span class="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> เปิดรับชำระปกติ</span>';
+      borderClass = 'border-emerald-500/30';
+    } else if (camp.status === 'temp_closed') {
+      statusBadge = '<span class="px-2.5 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดรับชำระชั่วคราว</span>';
+      borderClass = 'border-amber-500/30';
+    } else {
+      statusBadge = '<span class="px-2.5 py-1 rounded-full text-xs font-black bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> ปิดรับชำระถาวร / สิ้นสุด</span>';
+      borderClass = 'border-rose-500/30';
+    }
+
+    return `
+      <div class="p-5 rounded-3xl bg-slate-900/80 border ${borderClass} shadow-md space-y-4 hover:border-orange-500/50 transition">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold text-orange-400 uppercase tracking-wider">${camp.category || 'กิจกรรม'}</span>
+              ${camp.isDefault ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-orange-500/20 text-orange-300">หลัก</span>' : ''}
+            </div>
+            <h3 class="text-base font-black text-white leading-tight mt-0.5">${camp.title}</h3>
+          </div>
+          <div>${statusBadge}</div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
+            <span class="text-slate-500 text-[10px] block">ยอดที่ต้องชำระ:</span>
+            <span class="font-black text-orange-400 text-sm">฿${Number(camp.amount).toFixed(2)}</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
+            <span class="text-slate-500 text-[10px] block">กำหนดปิดรับ:</span>
+            <span class="font-bold text-white">${camp.deadlineDisplay || camp.deadline || '-'}</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
+            <span class="text-slate-500 text-[10px] block">บัญชีรับเงิน:</span>
+            <span class="font-semibold text-slate-300 truncate block">${camp.bankName} ${camp.accountNumber}</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
+            <span class="text-slate-500 text-[10px] block">ชื่อบัญชี:</span>
+            <span class="font-semibold text-slate-300 truncate block">${camp.accountName}</span>
+          </div>
+        </div>
+
+        ${camp.closedReason ? `<div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs"><strong>เหตุผลที่ปิด:</strong> ${camp.closedReason}</div>` : ''}
+
+        <div class="flex items-center justify-between pt-1 border-t border-slate-800/80">
+          <div class="flex items-center gap-1.5">
+            <button onclick="setCampaignStatus('${camp.id}', 'open')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${camp.status === 'open' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-800 hover:bg-slate-700 text-slate-400'}">
+              เปิดรับชำระ
+            </button>
+            <button onclick="promptTempClose('${camp.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${camp.status === 'temp_closed' ? 'bg-amber-600 text-white shadow-sm' : 'bg-slate-800 hover:bg-slate-700 text-slate-400'}">
+              ปิดชั่วคราว
+            </button>
+            <button onclick="promptPermClose('${camp.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${camp.status === 'permanently_closed' ? 'bg-rose-600 text-white shadow-sm' : 'bg-slate-800 hover:bg-slate-700 text-slate-400'}">
+              ปิดถาวร
+            </button>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button onclick="openEditCampaignModal('${camp.id}')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold text-xs rounded-xl transition flex items-center gap-1">
+              <i data-lucide="edit-2" class="w-3.5 h-3.5"></i> แก้ไข
+            </button>
+            ${!camp.isDefault ? `
+              <button onclick="deleteCampaign('${camp.id}')" class="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold text-xs rounded-xl transition border border-rose-500/20">
+                ลบ
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function setCampaignStatus(id, newStatus, reason = "") {
+  const camp = campaignsList.find(c => c.id === id);
+  if (!camp) return;
+
+  camp.status = newStatus;
+  camp.closedReason = reason;
+  localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify(campaignsList));
+  renderCampaignsList();
+  showToastNotification(`✨ อัปเดตสถานะของ "${camp.title}" เป็น ${newStatus} สำเร็จ!`);
+}
+
+function promptTempClose(id) {
+  const reason = prompt("ระบุเหตุผลในการปิดรับชำระชั่วคราว (เช่น ปรับปรุงระบบ, รอสรุปยอด):", "ปิดปรับปรุงระบบชั่วคราว");
+  if (reason !== null) {
+    setCampaignStatus(id, "temp_closed", reason.trim());
+  }
+}
+
+function promptPermClose(id) {
+  if (confirm("ยืนยันที่จะปิดรับชำระรายการนี้อย่างถาวร/สิ้นสุดกำหนดการใช่หรือไม่?")) {
+    setCampaignStatus(id, "permanently_closed", "สิ้นสุดระยะเวลาการชำระเงินตามกำหนด");
+  }
+}
+
+function openAddCampaignModal() {
+  document.getElementById('modalCampaignTitle').textContent = "เพิ่มรายการเก็บเงินใหม่";
+  document.getElementById('campEditId').value = "";
+  document.getElementById('campTitle').value = "";
+  document.getElementById('campSubtitle').value = "";
+  document.getElementById('campCategory').value = "กิจกรรมชั้นปีที่ 1 (COMED 69)";
+  document.getElementById('campAmount').value = "190.00";
+  document.getElementById('campDeadline').value = "";
+  document.getElementById('campBankName').value = "กสิกรไทย (KPlus)";
+  document.getElementById('campAccountNumber').value = "236-2-47817-3";
+  document.getElementById('campAccountName').value = "น.ส. พิชามญธุ์ สามสี";
+
+  const modal = document.getElementById('modalEditCampaign');
+  if (modal) modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function openEditCampaignModal(id) {
+  const camp = campaignsList.find(c => c.id === id);
+  if (!camp) return;
+
+  document.getElementById('modalCampaignTitle').textContent = "แก้ไขรายการเก็บเงิน";
+  document.getElementById('campEditId').value = camp.id;
+  document.getElementById('campTitle').value = camp.title;
+  document.getElementById('campSubtitle').value = camp.subtitle || '';
+  document.getElementById('campCategory').value = camp.category || '';
+  document.getElementById('campAmount').value = camp.amount;
+  document.getElementById('campDeadline').value = camp.deadline || '';
+  document.getElementById('campBankName').value = camp.bankName;
+  document.getElementById('campAccountNumber').value = camp.accountNumber;
+  document.getElementById('campAccountName').value = camp.accountName;
+
+  const modal = document.getElementById('modalEditCampaign');
+  if (modal) modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeCampaignModal() {
+  const modal = document.getElementById('modalEditCampaign');
+  if (modal) modal.classList.add('hidden');
+}
+
+function saveCampaignSubmit(e) {
+  e.preventDefault();
+  const editId = document.getElementById('campEditId').value;
+  const title = document.getElementById('campTitle').value.trim();
+  const subtitle = document.getElementById('campSubtitle').value.trim();
+  const category = document.getElementById('campCategory').value.trim();
+  const amount = parseFloat(document.getElementById('campAmount').value) || 0;
+  const deadline = document.getElementById('campDeadline').value;
+  const bankName = document.getElementById('campBankName').value.trim();
+  const accountNumber = document.getElementById('campAccountNumber').value.trim();
+  const accountName = document.getElementById('campAccountName').value.trim();
+
+  if (editId) {
+    const camp = campaignsList.find(c => c.id === editId);
+    if (camp) {
+      camp.title = title;
+      camp.subtitle = subtitle;
+      camp.category = category;
+      camp.amount = amount;
+      camp.deadline = deadline;
+      camp.deadlineDisplay = deadline ? new Date(deadline).toLocaleString('th-TH') : '-';
+      camp.bankName = bankName;
+      camp.accountNumber = accountNumber;
+      camp.accountName = accountName;
+    }
+  } else {
+    const newCamp = {
+      id: "camp_" + Date.now(),
+      title,
+      subtitle,
+      category,
+      amount,
+      deadline,
+      deadlineDisplay: deadline ? new Date(deadline).toLocaleString('th-TH') : '-',
+      bankName,
+      accountNumber,
+      accountName,
+      status: "open",
+      closedReason: "",
+      isDefault: false,
+      createdAt: new Date().toISOString()
+    };
+    campaignsList.push(newCamp);
+  }
+
+  localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify(campaignsList));
+  closeCampaignModal();
+  renderCampaignsList();
+  showToastNotification(`✅ บันทึกรายการชำระเงิน "${title}" สำเร็จเรียบร้อย!`);
+}
+
+function deleteCampaign(id) {
+  if (confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการชำระเงินนี้?")) {
+    campaignsList = campaignsList.filter(c => c.id !== id);
+    localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify(campaignsList));
+    renderCampaignsList();
+    showToastNotification("ลบรายการชำระเงินเรียบร้อยแล้ว");
+  }
+}
+
+// ================= 3. STUDENTS ROSTER MANAGEMENT =================
 function renderStudentsTable() {
   const tbody = document.getElementById('indexStudentsTableBody');
   if (!tbody) return;
@@ -172,7 +425,6 @@ function saveStudentChanges(e) {
     st.nickname = document.getElementById('editStudentNickname').value.trim();
     st.email = document.getElementById('editStudentEmail').value.trim();
     
-    // Save to custom session cache
     localStorage.setItem('COMED_CUSTOM_STUDENTS_DATA', JSON.stringify(studentsList));
     closeEditStudentModal();
     renderStudentsTable();
