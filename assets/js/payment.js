@@ -5,16 +5,24 @@
  * =========================================================================
  */
 
-// --- APP CONFIG & STATE ---
-const TARGET_PAYMENT_PER_PERSON = 190;
-const STORAGE_KEY = 'COMED_KKU69_PAYMENT_DATA_V1';
-const CLOUD_URL_KEY = 'COMED_KKU69_CLOUD_WEBAPP_URL';
+// ================= DYNAMIC MULTI-CAMPAIGN CONTEXT =================
+const urlParams = new URLSearchParams(window.location.search);
+const currentCampaignId = urlParams.get("camp") || urlParams.get("id") || "paimai69";
+const currentCampaign = (window.ComedCampaignManager ? window.ComedCampaignManager.getCampaignById(currentCampaignId) : null) || {
+  id: "paimai69",
+  title: "ค่าทำป้ายสาขาวิชาเอก",
+  amount: 190,
+  deadline: "2026-09-04T23:59:00+07:00",
+  gasApiUrl: "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec"
+};
 
-// Default Google Apps Script Web App URL
-let googleAppsScriptUrl = localStorage.getItem(CLOUD_URL_KEY) || "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
+const TARGET_PAYMENT_PER_PERSON = currentCampaign.amount || 190;
+const STORAGE_KEY = `COMED_PAYMENT_DATA_${currentCampaign.id.toUpperCase()}`;
+const CLOUD_URL_KEY = `COMED_CLOUD_URL_${currentCampaign.id.toUpperCase()}`;
+let googleAppsScriptUrl = currentCampaign.gasApiUrl || localStorage.getItem(CLOUD_URL_KEY) || "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
 
-// Deadline: 4 September 2026 at 23:59 (Bangkok Time UTC+7)
-const DEADLINE_DATE = new Date('2026-09-04T23:59:00+07:00').getTime();
+// Deadline: Dynamic from campaign
+const DEADLINE_DATE = new Date(currentCampaign.deadline || '2026-09-04T23:59:00+07:00').getTime();
 
 let studentDatabase = [];
 let paymentRecords = {}; // { studentId: { paid: true, timestamp: "...", slipUrl: "...", refCode: "..." } }
