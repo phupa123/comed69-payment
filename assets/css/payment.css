@@ -1,0 +1,149 @@
+/* =========================================================================
+   PAYMENT PAGE STYLES - assets/css/payment.css
+   สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (COMED KKU 69)
+   ========================================================================= */
+
+html, body {
+  font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Dynamic Mesh Background */
+.bg-mesh-canvas {
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(249, 115, 22, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 85% 20%, rgba(2, 132, 199, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(245, 158, 11, 0.06) 0%, transparent 50%);
+}
+
+/* Premium Glassmorphism */
+.premium-glass {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 0 1px 1px rgba(226, 232, 240, 0.6);
+}
+
+.premium-glass-dark {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Shimmer Effect for Progress & Cards */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 3s infinite;
+}
+
+/* Floating Animation */
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+
+.animate-float {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+/* Dedicated Native Mobile App Styles */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+    -webkit-tap-highlight-color: transparent;
+    padding-bottom: calc(75px + env(safe-area-inset-bottom, 12px));
+    /* Space for mobile sticky bottom navigation with iOS Home Bar Safe Area */
+  }
+
+  .mobile-card {
+    border-radius: 1.25rem !important;
+    padding: 1rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .mobile-header {
+    height: 64px !important;
+    padding: 0 12px !important;
+  }
+
+  .mobile-btn {
+    min-height: 46px;
+    font-size: 14px;
+  }
+
+  .mobile-stat-box {
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  .mobile-cd-box {
+    padding: 8px 2px !important;
+    border-radius: 12px !important;
+  }
+
+  .mobile-cd-num {
+    font-size: 20px !important;
+  }
+
+  .mobile-hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #f97316;
+}

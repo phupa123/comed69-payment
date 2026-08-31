@@ -1,0 +1,105 @@
+/* =========================================================================
+   INDEX PAGE STYLES - assets/css/index.css
+   สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (COMED KKU 69)
+   ========================================================================= */
+
+html, body {
+  font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.glass-dark {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gradient-text-orange {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+/* Modern Navbar Slide Underline Effect */
+.nav-link-modern {
+  position: relative;
+  color: #334155;
+  font-weight: 700;
+  padding: 0.5rem 0.85rem;
+  transition: color 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-link-modern::after {
+  content: '';
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  width: 0%;
+  height: 2.5px;
+  background: linear-gradient(90deg, #ea580c, #f59e0b);
+  border-radius: 9999px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-link-modern:hover {
+  color: #ea580c;
+}
+
+.nav-link-modern:hover::after,
+.nav-link-modern.active::after {
+  width: 80%;
+  left: 10%;
+}
+
+/* Navbar Transparent to Solid Dynamic Transition */
+#mainNavbar {
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#mainNavbar.scrolled {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+#mainNavbar.transparent-top {
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
+  box-shadow: none;
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+}
+
+.grid-pattern {
+  background-size: 30px 30px;
+  background-image: 
+    linear-gradient(to right, rgba(249, 115, 22, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(249, 115, 22, 0.05) 1px, transparent 1px);
+}
