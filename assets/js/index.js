@@ -58,23 +58,26 @@ function openGoogleLoginModal() {
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
-  // Render Official Google Sign-in Button
+  // Render Official Google Sign-in Button & Reset Prompt
   try {
     if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCredentialResponse,
         auto_select: false,
-        cancel_on_tap_outside: true
+        cancel_on_tap_outside: false
       });
+
       const btnWrapper = document.getElementById('googleButtonWrapper');
       if (btnWrapper) {
+        btnWrapper.innerHTML = ''; // Clear old instance
         google.accounts.id.renderButton(
           btnWrapper,
-          { theme: "outline", size: "large", width: 280, text: "signin_with", shape: "pill" }
+          { theme: "outline", size: "large", width: 280, text: "signin_with", shape: "pill", logo_alignment: "left" }
         );
       }
-      // Trigger Google Account Floating Popup (Top Right)
+
+      // Prompt account selection
       google.accounts.id.prompt();
     }
   } catch (e) {
@@ -132,7 +135,8 @@ function validateAndSetUser(email, name, avatarUrl) {
 
   // CRITICAL CHECK: MUST BE @kkumail.com
   if (!emailLower.endsWith('@kkumail.com')) {
-    showAuthError(`⚠️ บัญชี "${email}" ไม่ใช่บัญชี @kkumail.com ของมหาวิทยาลัยขอนแก่น จึงไม่อนุญาตให้เข้าสู่ระบบ`);
+    closeGoogleLoginModal();
+    showAuthErrorPopup(emailLower);
     return;
   }
 
@@ -218,6 +222,53 @@ function showAuthError(msg) {
   if (errText) errText.textContent = msg;
   if (errBox) errBox.classList.remove('hidden');
   if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function showAuthErrorPopup(invalidEmail) {
+  const modal = document.getElementById('modalAuthErrorPopup');
+  const card = document.getElementById('authErrorCard');
+  const emailEl = document.getElementById('authErrorPopupEmail');
+
+  if (!modal || !card) return;
+
+  if (emailEl) emailEl.textContent = invalidEmail;
+  modal.classList.remove('hidden');
+
+  if (typeof gsap !== 'undefined') {
+    gsap.fromTo(card, 
+      { opacity: 0, scale: 0.6, y: 50 }, 
+      { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: "back.out(1.8)" }
+    );
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeAuthErrorPopup() {
+  const modal = document.getElementById('modalAuthErrorPopup');
+  const card = document.getElementById('authErrorCard');
+  if (!modal || !card) return;
+
+  if (typeof gsap !== 'undefined') {
+    gsap.to(card, {
+      opacity: 0,
+      scale: 0.8,
+      y: 20,
+      duration: 0.25,
+      ease: "power2.in",
+      onComplete: () => {
+        modal.classList.add('hidden');
+      }
+    });
+  } else {
+    modal.classList.add('hidden');
+  }
+}
+
+function retryGoogleLoginWithKku() {
+  closeAuthErrorPopup();
+  setTimeout(() => {
+    openGoogleLoginModal();
+  }, 300);
 }
 
 function updateUserUI(user) {

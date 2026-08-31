@@ -115,6 +115,46 @@
     </div>
   </div>
 
+  
+  <!-- ================= LUXURY ERROR POPUP: NOT KKUMAIL ================= -->
+  <div id="modalAuthErrorPopup" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-2xl flex items-center justify-center p-4">
+    <div id="authErrorCard" class="relative bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-rose-200 text-center space-y-6 overflow-hidden">
+      
+      <!-- Top Glow Line -->
+      <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-rose-500 via-amber-500 to-red-600 animate-pulse"></div>
+
+      <!-- Error Icon Badge -->
+      <div class="relative w-20 h-20 mx-auto mt-2 flex items-center justify-center">
+        <div class="absolute inset-0 rounded-full bg-rose-500/20 blur-xl animate-pulse"></div>
+        <div class="relative w-16 h-16 rounded-3xl bg-rose-50 border-2 border-rose-200 text-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/10">
+          <i data-lucide="shield-alert" class="w-8 h-8"></i>
+        </div>
+      </div>
+
+      <!-- Text Details -->
+      <div class="space-y-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-black uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+          <span>สิทธิ์การเข้าถึงถูกปฏิเสธ</span>
+        </span>
+        <h3 class="text-2xl font-black text-slate-900 tracking-tight">ไม่ใช่เมล @kkumail.com</h3>
+        <p id="authErrorPopupEmail" class="text-xs text-rose-600 font-mono font-bold break-all px-2">user@gmail.com</p>
+        <p class="text-xs text-slate-500 pt-1 leading-relaxed">
+          ระบบนี้สงวนสิทธิ์เฉพาะนักศึกษาสาขาวิชาคอมพิวเตอร์ศึกษา มหาวิทยาลัยขอนแก่น ที่ใช้อีเมลสถาบัน <strong class="text-slate-800 font-bold">@kkumail.com</strong> เท่านั้น
+        </p>
+      </div>
+
+      <!-- Action Button to Try Again -->
+      <div class="pt-2">
+        <button onclick="retryGoogleLoginWithKku()" class="w-full py-3.5 bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-rose-500/30 transition transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          <span>ลองใหม่อีกครั้งด้วยเมล KKU</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ================= LUXURY LOGOUT CONFIRMATION POPUP MODAL ================= -->
   <div id="modalLogoutConfirm" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4">
     <div id="logoutConfirmCard" class="relative bg-white rounded-[2.5rem] max-w-sm w-full p-8 shadow-[0_25px_80px_rgba(0,0,0,0.5)] border-2 border-rose-100 text-center space-y-6 overflow-hidden">
