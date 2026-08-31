@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - ไม่พบหน้าที่คุณต้องการ | สาขาวิชาคอมพิวเตอร์ศึกษา มข. 69</title>
+  <meta name="description" content="ขออภัย ไม่พบหน้าที่คุณต้องการเข้าถึง (Page Not Found)">
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+      background-color: #030712;
+      color: #f9fafb;
+    }
+    .mesh-glow {
+      background-image:
+        radial-gradient(circle at 50% 20%, rgba(249, 115, 22, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(234, 88, 12, 0.1) 0%, transparent 40%);
+    }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col justify-between items-center p-4 sm:p-6 mesh-glow selection:bg-orange-500 selection:text-white">
+
+  <!-- Header Branding -->
+  <header class="w-full max-w-5xl flex items-center justify-between py-4">
+    <a href="index.html" class="flex items-center gap-3 group">
+      <div class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 p-1.5 flex items-center justify-center group-hover:scale-105 transition shadow-md">
+        <img src="logo.png" alt="Logo" class="w-full h-full object-contain">
+      </div>
+      <div>
+        <span class="text-[10px] font-black text-orange-500 uppercase tracking-wider block">COMED KKU 69</span>
+        <span class="text-xs font-bold text-white">สาขาวิชาคอมพิวเตอร์ศึกษา</span>
+      </div>
+    </a>
+
+    <a href="admin.html" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-bold border border-slate-800 transition flex items-center gap-1.5">
+      <i data-lucide="shield" class="w-3.5 h-3.5 text-orange-400"></i>
+      <span>Admin Hub</span>
+    </a>
+  </header>
+
+  <!-- Main Error Card -->
+  <main class="w-full max-w-lg my-auto py-8">
+    <div id="errorCard" class="glass-card rounded-[2.5rem] p-8 sm:p-10 text-center space-y-6 relative overflow-hidden">
+      
+      <!-- Top Glow Accent -->
+      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-500 via-amber-400 to-rose-500"></div>
+
+      <!-- Animated 404 Illustration & Badge -->
+      <div class="space-y-3">
+        <div class="relative w-28 h-28 mx-auto flex items-center justify-center">
+          <div class="absolute inset-0 rounded-full bg-orange-500/20 blur-2xl animate-pulse"></div>
+          <div class="relative w-24 h-24 rounded-3xl bg-slate-900/90 border border-orange-500/30 flex items-center justify-center text-orange-400 shadow-xl">
+            <i data-lucide="compass" class="w-12 h-12 stroke-[1.5] animate-spin" style="animation-duration: 20s;"></i>
+          </div>
+        </div>
+
+        <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-black uppercase tracking-wider">
+          <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+          <span>ERROR 404 • PAGE NOT FOUND</span>
+        </div>
+      </div>
+
+      <!-- Text Heading -->
+      <div class="space-y-2">
+        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">ไม่พบหน้าที่คุณต้องการ</h1>
+        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm mx-auto">
+          หน้าที่คุณพยายามเข้าถึงอาจถูกลบ ย้ายที่อยู่ หรือไม่มีอยู่จริงในระบบ กรุณาตรวจสอบ URL หรือเลือกดำเนินการด้านล่าง
+        </p>
+      </div>
+
+      <!-- Action Navigation Buttons Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
+        
+        <!-- 1. Refresh Button -->
+        <button onclick="location.reload()"
+          class="py-3 px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer shadow-sm">
+          <i data-lucide="rotate-cw" class="w-4 h-4 text-sky-400"></i>
+          <span>รีเฟรชหน้า</span>
+        </button>
+
+        <!-- 2. Back Button -->
+        <button onclick="window.history.length > 1 ? window.history.back() : window.location.href='index.html'"
+          class="py-3 px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer shadow-sm">
+          <i data-lucide="arrow-left" class="w-4 h-4 text-amber-400"></i>
+          <span>ย้อนกลับ</span>
+        </button>
+
+        <!-- 3. Home Button -->
+        <a href="index.html"
+          class="py-3 px-3 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/30 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
+          <i data-lucide="home" class="w-4 h-4"></i>
+          <span>หน้าหลัก</span>
+        </a>
+
+      </div>
+
+      <!-- Quick Helpful Links -->
+      <div class="pt-4 border-t border-slate-800/80 text-xs text-slate-500 flex flex-wrap items-center justify-center gap-3">
+        <span class="text-[11px]">ทางลัด:</span>
+        <a href="payment.html" class="text-orange-400 hover:underline font-bold">ระบบชำระเงิน</a>
+        <span>•</span>
+        <a href="admin.html" class="text-sky-400 hover:underline font-bold">เข้าสู่ระบบแอดมิน</a>
+        <span>•</span>
+        <a href="index.html#students" class="text-slate-400 hover:text-white font-semibold">ทำเนียบรุ่น 69</a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full max-w-5xl py-4 text-center text-xs text-slate-600">
+    <p>© 2026 สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo("#errorCard", 
+          { opacity: 0, scale: 0.85, y: 30 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.5)" }
+        );
+      }
+    });
+  </script>
+</body>
+
+</html>

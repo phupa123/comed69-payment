@@ -337,7 +337,18 @@
           <div class="space-y-3 pt-2 text-xs">
             <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
               <div>
-                <span class="font-bold text-white block">ผู้ดูแลระบบ (Admin)</span>
+                
+            <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-white block">เปิด-ปิดปรับปรุงระบบ (Maintenance)</span>
+                <span id="hubStatMaintenanceStatus" class="text-emerald-400 text-[11px]">เปิดให้บริการปกติ</span>
+              </div>
+              <button onclick="openMaintenanceModal()" class="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-bold border border-amber-500/20 transition cursor-pointer">
+                ตั้งค่า
+              </button>
+            </div>
+
+            <span class="font-bold text-white block">ผู้ดูแลระบบ (Admin)</span>
                 <span id="hubStatAdminCount" class="text-slate-400">3 บัญชี</span>
               </div>
               <a href="payment-admin.html?tab=admins" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-orange-400 font-bold transition">
@@ -384,6 +395,82 @@
           </div>
         </div>
 
+      </div>
+
+    
+      <!-- ================= SITE MAINTENANCE & ACCESS CONTROL MODAL ================= -->
+      <div id="modalMaintenanceSettings" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
+        <div class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl space-y-6">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold">
+                <i data-lucide="wrench" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-black text-white">ควบคุมการเปิด-ปิดปรับปรุงเว็บไซต์</h3>
+                <p class="text-xs text-slate-400">กำหนดเปิด/ปิดแต่ละหน้า หรือทั้งเว็บ พร้อมระบบนับถอยหลังอัตโนมัติ</p>
+              </div>
+            </div>
+            <button onclick="closeMaintenanceModal()" class="text-slate-400 hover:text-white p-1">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+
+          <form onsubmit="saveMaintenanceSettings(event)" class="space-y-4 text-xs">
+            <!-- 1. Scope selector -->
+            <div class="space-y-1.5">
+              <label class="font-bold text-slate-300">เลือกหน้าที่ต้องการควบคุม</label>
+              <select id="maintTargetScope" onchange="loadMaintenanceFormByScope()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white font-bold outline-none">
+                <option value="all">🌐 ปิดปรับปรุงทั้งเว็บไซต์ (All Public Pages)</option>
+                <option value="index">🏠 เฉพาะหน้าแรก (index.html)</option>
+                <option value="payment">💳 เฉพาะหน้ารับชำระเงิน (payment.html)</option>
+              </select>
+            </div>
+
+            <!-- 2. Status Switch -->
+            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-white block">สถานะการปิดปรับปรุง (Maintenance Mode)</span>
+                <span class="text-slate-400 text-[11px]">เมื่อเปิดใช้งาน ผู้ใช้ทั่วไปจะถูกเปลี่ยนเส้นทางไปหน้า maintenance.html (Admin ไม่ถูกบล็อก)</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="maintActiveCheckbox" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+              </label>
+            </div>
+
+            <!-- 3. Custom Title & Reason -->
+            <div class="space-y-1.5">
+              <label class="font-bold text-slate-300">หัวข้อข้อความแจ้งเตือน</label>
+              <input type="text" id="maintTitleInput" placeholder="กำลังปิดปรับปรุงระบบชั่วคราว" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white outline-none">
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="font-bold text-slate-300">เหตุผล / รายละเอียดการปิดปรับปรุง</label>
+              <textarea id="maintReasonInput" rows="2" placeholder="ระบบกำลังอยู่ระหว่างการปรับปรุงและอัปเกรดฐานข้อมูลเพื่อเพิ่มความเสถียร..." class="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white outline-none custom-scrollbar"></textarea>
+            </div>
+
+            <!-- 4. Scheduled End Time / Countdown -->
+            <div class="space-y-1.5">
+              <label class="font-bold text-amber-300 flex items-center gap-1.5">
+                <i data-lucide="timer" class="w-4 h-4"></i>
+                <span>กำหนดเวลาสิ้นสุดการปิดปรับปรุง (Countdown Auto-Open)</span>
+              </label>
+              <input type="datetime-local" id="maintEndTimeInput" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white outline-none">
+              <p class="text-[10px] text-slate-500 mt-0.5">เมื่อถึงเวลาที่กำหนด ระบบจะเปิดให้บริการต่ออัตโนมัติทันที</p>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+              <button type="button" onclick="closeMaintenanceModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition">
+                ยกเลิก
+              </button>
+              <button type="submit" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-md transition flex items-center gap-1.5">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>บันทึกการตั้งค่า</span>
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
     </main>

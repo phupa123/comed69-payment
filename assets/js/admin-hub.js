@@ -173,6 +173,7 @@ function showDashboard() {
   }
 
   loadHubOverviewStats();
+  updateMaintenanceStatusBadge();
 
   if (typeof gsap !== 'undefined') {
     gsap.fromTo("header", { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" });
@@ -291,3 +292,85 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (typeof lucide !== 'undefined') lucide.createIcons();
 });
+
+
+
+// ================= SITE MAINTENANCE & ACCESS CONTROLLER =================
+const MAINT_CONFIG_KEY = "COMED_MAINTENANCE_CONFIG_V1";
+
+const DEFAULT_MAINT_CONFIG = {
+  all: { active: false, title: "กำลังปิดปรับปรุงระบบชั่วคราว", reason: "ระบบกำลังอยู่ระหว่างการปรับปรุงและอัปเกรดฐานข้อมูลเพื่อเพิ่มความเสถียรและความปลอดภัย", endTime: "" },
+  index: { active: false, title: "หน้าหลักกำลังปรับปรุงชั่วคราว", reason: "กำลังอัปเดตข้อมูลและระบบสารสนเทศของสาขาวิชา", endTime: "" },
+  payment: { active: false, title: "ระบบรับชำระเงินปิดปรับปรุงชั่วคราว", reason: "ระบบการเงินกำลังอยู่ระหว่างการสรุปยอดและบำรุงรักษาระบบ", endTime: "" }
+};
+
+function getMaintenanceConfig() {
+  try {
+    const s = localStorage.getItem(MAINT_CONFIG_KEY);
+    return s ? { ...DEFAULT_MAINT_CONFIG, ...JSON.parse(s) } : DEFAULT_MAINT_CONFIG;
+  } catch(e) {
+    return DEFAULT_MAINT_CONFIG;
+  }
+}
+
+function openMaintenanceModal() {
+  loadMaintenanceFormByScope();
+  const modal = document.getElementById("modalMaintenanceSettings");
+  if (modal) modal.classList.remove("hidden");
+  if (typeof lucide !== "undefined") lucide.createIcons();
+}
+
+function closeMaintenanceModal() {
+  const modal = document.getElementById("modalMaintenanceSettings");
+  if (modal) modal.classList.add("hidden");
+}
+
+function loadMaintenanceFormByScope() {
+  const scope = document.getElementById("maintTargetScope")?.value || "all";
+  const cfg = getMaintenanceConfig();
+  const item = cfg[scope] || cfg["all"];
+
+  const activeChk = document.getElementById("maintActiveCheckbox");
+  const titleIn = document.getElementById("maintTitleInput");
+  const reasonIn = document.getElementById("maintReasonInput");
+  const endIn = document.getElementById("maintEndTimeInput");
+
+  if (activeChk) activeChk.checked = !!item.active;
+  if (titleIn) titleIn.value = item.title || "";
+  if (reasonIn) reasonIn.value = item.reason || "";
+  if (endIn) endIn.value = item.endTime || "";
+}
+
+function saveMaintenanceSettings(e) {
+  e.preventDefault();
+  const scope = document.getElementById("maintTargetScope")?.value || "all";
+  const cfg = getMaintenanceConfig();
+
+  cfg[scope] = {
+    active: document.getElementById("maintActiveCheckbox")?.checked || false,
+    title: document.getElementById("maintTitleInput")?.value.trim(),
+    reason: document.getElementById("maintReasonInput")?.value.trim(),
+    endTime: document.getElementById("maintEndTimeInput")?.value || ""
+  };
+
+  localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
+  closeMaintenanceModal();
+  updateMaintenanceStatusBadge();
+  alert("✨ บันทึกการตั้งค่าเปิด-ปิดปรับปรุงระบบสำเร็จเรียบร้อย!");
+}
+
+function updateMaintenanceStatusBadge() {
+  const badge = document.getElementById("hubStatMaintenanceStatus");
+  if (!badge) return;
+
+  const cfg = getMaintenanceConfig();
+  const isAnyActive = cfg.all?.active || cfg.index?.active || cfg.payment?.active;
+
+  if (isAnyActive) {
+    badge.textContent = "⚠️ อยู่ในโหมดปิดปรับปรุง";
+    badge.className = "text-amber-400 font-bold text-[11px] animate-pulse";
+  } else {
+    badge.textContent = "เปิดให้บริการปกติ (Online)";
+    badge.className = "text-emerald-400 text-[11px]";
+  }
+}

@@ -11,6 +11,75 @@ const GOOGLE_DRIVE_FOLDER_ID = "1KaE-6GyKd0mafFBYTp-fAlAG4YAJWrFa6xxUov59JvktlP5
 const LINE_CHANNEL_ACCESS_TOKEN = "xW18yEAjS6kjxO6SdQQtyEbatDIlzE4YW0+OKBNspb1Nw9oDSP94vNknZ2cJd139Ldc1nkEMeOJ8oWKC0AoK/MqKmSTpSSGwqMYr00FsG1yhLOw1GhsnyN+mrBBnMrzwl9rg1eHlk82KqzRYFdAqGQdB04t89/1O/w1cDnyilFU=";
 const LINE_TARGET_USER_ID = "U39c507609d6f5e67d64c35a4a7708ea6";
 
+// ================= AUTOMATED EMAIL RECEIPT ENGINE =================
+function sendEmailReceiptNotification(toEmail, studentName, studentNickname, studentId, amount, refCode, timestamp, slipDriveUrl) {
+  if (!toEmail || !toEmail.includes("@")) return;
+
+  const subject = `[COMED KKU 69] ใบรับการส่งหลักฐานชำระเงิน - ${studentName} (${studentId})`;
+  
+  const htmlBody = `
+    <div style="font-family: 'Prompt', Arial, sans-serif; background-color: #0f172a; padding: 30px; color: #f8fafc; border-radius: 20px; max-width: 600px; margin: 0 auto;">
+      <div style="text-align: center; margin-bottom: 25px;">
+        <h2 style="color: #f97316; margin: 0; font-size: 22px;">สาขาวิชาคอมพิวเตอร์ศึกษา (COMED KKU 69)</h2>
+        <p style="color: #94a3b8; font-size: 13px; margin-top: 5px;">คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</p>
+      </div>
+
+      <div style="background-color: #1e293b; border-radius: 16px; padding: 24px; border: 1px solid #334155;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <span style="background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; padding: 6px 14px; border-radius: 9999px; font-weight: bold; font-size: 13px;">
+            ✔ บันทึกข้อมูลและสลิปเรียบร้อยแล้ว
+          </span>
+          <h3 style="color: #ffffff; margin-top: 15px; margin-bottom: 5px;">ใบรับการส่งหลักฐานชำระเงิน</h3>
+          <p style="color: #38bdf8; font-family: monospace; font-size: 12px; margin: 0;">รหัสอ้างอิง: ${refCode}</p>
+        </div>
+
+        <table style="width: 100%; font-size: 13px; color: #cbd5e1; border-collapse: collapse; margin-top: 15px;">
+          <tr style="border-bottom: 1px solid #334155;">
+            <td style="padding: 10px 0; color: #94a3b8;">ชื่อ-นามสกุล:</td>
+            <td style="padding: 10px 0; text-align: right; font-weight: bold; color: #ffffff;">${studentName} (น้อง${studentNickname || "-"})</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #334155;">
+            <td style="padding: 10px 0; color: #94a3b8;">รหัสนักศึกษา:</td>
+            <td style="padding: 10px 0; text-align: right; font-weight: bold; color: #f97316; font-family: monospace;">${studentId}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #334155;">
+            <td style="padding: 10px 0; color: #94a3b8;">ยอดเงินที่ชำระ:</td>
+            <td style="padding: 10px 0; text-align: right; font-weight: bold; color: #4ade80; font-size: 15px;">฿${amount || "190.00"} บาท</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #334155;">
+            <td style="padding: 10px 0; color: #94a3b8;">วัน-เวลาที่ส่งข้อมูล:</td>
+            <td style="padding: 10px 0; text-align: right; color: #e2e8f0; font-family: monospace;">${timestamp}</td>
+          </tr>
+        </table>
+
+        ${slipDriveUrl ? `
+          <div style="margin-top: 20px; text-align: center;">
+            <a href="${slipDriveUrl}" target="_blank" style="background-color: #ea580c; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; font-size: 12px; display: inline-block;">
+              ดูภาพสลิปหลักฐานบน Google Drive
+            </a>
+          </div>
+        ` : ""}
+      </div>
+
+      <div style="text-align: center; margin-top: 25px; font-size: 11px; color: #64748b;">
+        <p>อีเมลนี้เป็นการแจ้งเตือนอัตโนมัติจากระบบรับชำระเงิน COMED KKU 69</p>
+        <p>หากมีข้อสงสัยหรือข้อมูลไม่ถูกต้อง สามารถติดต่อแอดมินหรือรายงานปัญหาผ่านหน้าเว็บได้ตลอด 24 ชม.</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    MailApp.sendEmail({
+      to: toEmail,
+      subject: subject,
+      htmlBody: htmlBody
+    });
+    Logger.log("Email Receipt successfully sent to: " + toEmail);
+  } catch (err) {
+    Logger.log("Email Send Error: " + err.toString());
+  }
+}
+
 // ฟังก์ชันส่งการแจ้งเตือนสลิปเข้า LINE
 function sendLineSlipNotification(name, nickname, studentId, slipUrl, timestamp, refCode) {
   if (!LINE_CHANNEL_ACCESS_TOKEN || !LINE_TARGET_USER_ID) return;
@@ -607,6 +676,24 @@ function doPost(e) {
     }
 
     SpreadsheetApp.flush();
+
+    // ส่งอีเมลใบเสร็จแจ้งเตือนอัตโนมัติไปยังนักศึกษา (Automated Email Receipt)
+    try {
+      if (data.email) {
+        sendEmailReceiptNotification(
+          data.email,
+          data.name || "",
+          data.nickname || "",
+          data.studentId || "",
+          190,
+          refCode,
+          timestamp,
+          driveFileUrl || ""
+        );
+      }
+    } catch (mailErr) {
+      Logger.log("Email receipt send error: " + mailErr.toString());
+    }
 
     // ส่งการแจ้งเตือนสลิปเข้า LINE ทันที
     try {

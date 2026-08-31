@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบอยู่ระหว่างการปรับปรุง (System Maintenance) | สาขาคอมพิวเตอร์ศึกษา มข.</title>
+  <meta name="description" content="ขออภัย เว็บไซต์หรือระบบนี้กำลังอยู่ระหว่างการปิดปรับปรุงเพื่อเพิ่มประสิทธิภาพ">
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+      background-color: #030712;
+      color: #f9fafb;
+    }
+    .mesh-maintenance {
+      background-image:
+        radial-gradient(circle at 50% 25%, rgba(245, 158, 11, 0.18) 0%, transparent 50%),
+        radial-gradient(circle at 15% 75%, rgba(234, 88, 12, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(59, 130, 246, 0.12) 0%, transparent 45%);
+    }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.8);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+    }
+    .countdown-box {
+      background: rgba(11, 15, 25, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col justify-between items-center p-4 sm:p-6 mesh-maintenance selection:bg-amber-500 selection:text-white">
+
+  <!-- Header Branding -->
+  <header class="w-full max-w-5xl flex items-center justify-between py-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 p-1.5 flex items-center justify-center shadow-md">
+        <img src="logo.png" alt="Logo" class="w-full h-full object-contain">
+      </div>
+      <div>
+        <span class="text-[10px] font-black text-amber-500 uppercase tracking-wider block">COMED KKU 69</span>
+        <span class="text-xs font-bold text-white">สาขาวิชาคอมพิวเตอร์ศึกษา</span>
+      </div>
+    </div>
+
+    <!-- Admin Portal Shortcut (Admin Never Blocked) -->
+    <a href="admin.html" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 hover:text-amber-300 text-xs font-bold border border-amber-500/30 transition flex items-center gap-1.5 shadow-sm">
+      <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+      <span>เข้าสู่ระบบ Admin</span>
+    </a>
+  </header>
+
+  <!-- Main Maintenance Card -->
+  <main class="w-full max-w-lg my-auto py-8">
+    <div id="maintCard" class="glass-card rounded-[2.5rem] p-8 sm:p-10 text-center space-y-6 relative overflow-hidden border border-amber-500/30">
+      
+      <!-- Top Amber Glow Accent -->
+      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-400"></div>
+
+      <!-- Icon & Status Badge -->
+      <div class="space-y-3">
+        <div class="relative w-24 h-24 mx-auto flex items-center justify-center">
+          <div class="absolute inset-0 rounded-full bg-amber-500/20 blur-2xl animate-pulse"></div>
+          <div class="relative w-20 h-20 rounded-3xl bg-slate-900/90 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-xl">
+            <i data-lucide="wrench" class="w-10 h-10 animate-bounce" style="animation-duration: 2.5s;"></i>
+          </div>
+        </div>
+
+        <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-black uppercase tracking-wider">
+          <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+          <span>SYSTEM UNDER MAINTENANCE</span>
+        </div>
+      </div>
+
+      <!-- Title & Reason Message -->
+      <div class="space-y-2">
+        <h1 id="maintTitle" class="text-2xl sm:text-3xl font-black text-white tracking-tight">กำลังปิดปรับปรุงระบบชั่วคราว</h1>
+        <p id="maintReason" class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-sm mx-auto">
+          ระบบกำลังอยู่ระหว่างการปรับปรุงและอัปเกรดฐานข้อมูลเพื่อเพิ่มความเสถียรและความปลอดภัย กรุณากลับมาใหม่อีกครั้งในภายหลัง
+        </p>
+      </div>
+
+      <!-- Live Countdown Clock -->
+      <div id="countdownContainer" class="p-4 rounded-3xl bg-slate-950/80 border border-slate-800/80 space-y-2">
+        <span class="text-[11px] font-bold text-slate-400 flex items-center justify-center gap-1.5">
+          <i data-lucide="timer" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span id="countdownLabel">คาดว่าจะเปิดให้บริการอีกใน:</span>
+        </span>
+
+        <div class="grid grid-cols-4 gap-2 text-center pt-1 font-mono">
+          <div class="countdown-box p-2.5 rounded-2xl">
+            <span id="cdDays" class="text-xl font-black text-white block">00</span>
+            <span class="text-[9px] text-slate-500 font-sans">วัน</span>
+          </div>
+          <div class="countdown-box p-2.5 rounded-2xl">
+            <span id="cdHours" class="text-xl font-black text-white block">00</span>
+            <span class="text-[9px] text-slate-500 font-sans">ชั่วโมง</span>
+          </div>
+          <div class="countdown-box p-2.5 rounded-2xl">
+            <span id="cdMinutes" class="text-xl font-black text-amber-400 block">00</span>
+            <span class="text-[9px] text-slate-500 font-sans">นาที</span>
+          </div>
+          <div class="countdown-box p-2.5 rounded-2xl">
+            <span id="cdSeconds" class="text-xl font-black text-orange-500 block">00</span>
+            <span class="text-[9px] text-slate-500 font-sans">วินาที</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Navigation Buttons Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+        <button onclick="location.reload()"
+          class="py-3 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer shadow-sm">
+          <i data-lucide="rotate-cw" class="w-4 h-4 text-sky-400"></i>
+          <span>ลองเชื่อมต่อใหม่ (Refresh)</span>
+        </button>
+
+        <a href="https://www.instagram.com/thitiphaua/" target="_blank"
+          class="py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black text-xs shadow-lg shadow-amber-600/30 transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
+          <i data-lucide="message-circle" class="w-4 h-4"></i>
+          <span>ติดต่อแอดมินสาขา</span>
+        </a>
+      </div>
+
+      <div class="pt-2 text-[11px] text-slate-500">
+        ต้องการจัดการเปิดระบบ? <a href="admin.html" class="text-amber-400 hover:underline font-bold">เข้าสู่หน้า Admin Hub</a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full max-w-5xl py-4 text-center text-xs text-slate-600">
+    <p>© 2026 สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (COMED KKU 69)</p>
+  </footer>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetPage = urlParams.get('page') || 'all';
+    
+    // Read dynamic maintenance settings from LocalStorage
+    try {
+      const storedMaint = localStorage.getItem('COMED_MAINTENANCE_CONFIG_V1');
+      if (storedMaint) {
+        const config = JSON.parse(storedMaint);
+        const pageCfg = config[targetPage] || config['all'];
+        
+        if (pageCfg) {
+          if (pageCfg.title) document.getElementById('maintTitle').textContent = pageCfg.title;
+          if (pageCfg.reason) document.getElementById('maintReason').textContent = pageCfg.reason;
+          
+          if (pageCfg.endTime) {
+            initCountdown(new Date(pageCfg.endTime).getTime());
+          } else {
+            document.getElementById('countdownContainer').classList.add('hidden');
+          }
+        }
+      } else {
+        // Default 2 hours countdown
+        initCountdown(Date.now() + 2 * 60 * 60 * 1000);
+      }
+    } catch(e) {
+      initCountdown(Date.now() + 2 * 60 * 60 * 1000);
+    }
+
+    function initCountdown(targetTime) {
+      function update() {
+        const now = Date.now();
+        const diff = targetTime - now;
+
+        if (diff <= 0) {
+          document.getElementById('cdDays').textContent = '00';
+          document.getElementById('cdHours').textContent = '00';
+          document.getElementById('cdMinutes').textContent = '00';
+          document.getElementById('cdSeconds').textContent = '00';
+          document.getElementById('countdownLabel').textContent = "🎉 ถึงเวลาเปิดให้บริการแล้ว กรุณากดรีเฟรชหน้าเว็บ";
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('cdDays').textContent = String(days).padStart(2, '0');
+        document.getElementById('cdHours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('cdMinutes').textContent = String(mins).padStart(2, '0');
+        document.getElementById('cdSeconds').textContent = String(secs).padStart(2, '0');
+      }
+
+      update();
+      setInterval(update, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo("#maintCard", 
+          { opacity: 0, scale: 0.85, y: 30 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.5)" }
+        );
+      }
+    });
+  </script>
+</body>
+
+</html>
