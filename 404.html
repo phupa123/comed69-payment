@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>404 - ไม่พบหน้าที่คุณต้องการ | สาขาวิชาคอมพิวเตอร์ศึกษา มข. 69</title>
-  <meta name="description" content="ขออภัย ไม่พบหน้าที่คุณต้องการเข้าถึง (Page Not Found)">
+  <title>404 - หลงทางในอวกาศดิจิทัล | สาขาวิชาคอมพิวเตอร์ศึกษา มข. 69</title>
+  <meta name="description" content="ขออภัย ไม่พบหน้าที่คุณต้องการเข้าถึง (Lost in Digital Space - 404 Interactive)">
   <link rel="icon" type="image/png" href="logo.png">
 
   <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
@@ -32,129 +32,348 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
     body {
       font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
       background-color: #030712;
       color: #f9fafb;
+      overflow-x: hidden;
     }
+
+    /* Cosmic Space Canvas Background */
+    #spaceCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .mesh-glow {
       background-image:
-        radial-gradient(circle at 50% 20%, rgba(249, 115, 22, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 80% 80%, rgba(234, 88, 12, 0.1) 0%, transparent 40%);
+        radial-gradient(circle at 50% 15%, rgba(249, 115, 22, 0.2) 0%, transparent 55%),
+        radial-gradient(circle at 15% 75%, rgba(99, 102, 241, 0.18) 0%, transparent 50%),
+        radial-gradient(circle at 85% 75%, rgba(234, 88, 12, 0.15) 0%, transparent 50%);
     }
+
     .glass-card {
-      background: rgba(17, 24, 39, 0.75);
-      backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    /* Floating Astronaut Animation */
+    @keyframes floatCosmic {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-14px) rotate(3deg);
+      }
+    }
+    .floating-anim {
+      animation: floatCosmic 4.5s ease-in-out infinite;
+    }
+
+    /* Glowing 404 Numbers */
+    .glow-text-404 {
+      background: linear-gradient(135deg, #fb923c 0%, #f97316 40%, #ea580c 70%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 10px 40px rgba(249, 115, 22, 0.35);
+    }
+
+    /* Interactive Asteroid Mini-Game Button */
+    .btn-cosmic {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-cosmic:hover {
+      border-color: rgba(249, 115, 22, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.2);
     }
   </style>
 </head>
 
-<body class="min-h-screen flex flex-col justify-between items-center p-4 sm:p-6 mesh-glow selection:bg-orange-500 selection:text-white">
+<body class="min-h-screen flex flex-col justify-between items-center p-4 sm:p-6 mesh-glow selection:bg-orange-500 selection:text-white relative">
 
-  <!-- Header Branding -->
-  <header class="w-full max-w-5xl flex items-center justify-between py-4">
+  <!-- Interactive Starfield & Meteor Canvas -->
+  <canvas id="spaceCanvas"></canvas>
+
+  <!-- Top Navigation Header -->
+  <header class="w-full max-w-5xl flex items-center justify-between py-4 relative z-10">
     <a href="index.html" class="flex items-center gap-3 group">
-      <div class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 p-1.5 flex items-center justify-center group-hover:scale-105 transition shadow-md">
+      <div class="w-11 h-11 rounded-2xl bg-slate-900/90 border border-slate-700/80 p-1.5 flex items-center justify-center group-hover:scale-110 transition shadow-lg">
         <img src="logo.png" alt="Logo" class="w-full h-full object-contain">
       </div>
       <div>
-        <span class="text-[10px] font-black text-orange-500 uppercase tracking-wider block">COMED KKU 69</span>
-        <span class="text-xs font-bold text-white">สาขาวิชาคอมพิวเตอร์ศึกษา</span>
+        <span class="text-[10px] font-black text-orange-400 uppercase tracking-wider block">COMED KKU 69</span>
+        <span class="text-xs sm:text-sm font-black text-white">สาขาวิชาคอมพิวเตอร์ศึกษา</span>
       </div>
     </a>
 
-    <a href="admin.html" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-bold border border-slate-800 transition flex items-center gap-1.5">
-      <i data-lucide="shield" class="w-3.5 h-3.5 text-orange-400"></i>
-      <span>Admin Hub</span>
-    </a>
+    <div class="flex items-center gap-2">
+      <a href="payment.html" class="hidden sm:flex px-3.5 py-2 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-800 transition items-center gap-1.5">
+        <i data-lucide="credit-card" class="w-3.5 h-3.5 text-orange-400"></i>
+        <span>ระบบชำระเงิน</span>
+      </a>
+      <a href="admin.html" class="px-3.5 py-2 rounded-2xl bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-300 hover:text-white text-xs font-black border border-orange-500/30 transition flex items-center gap-1.5 shadow-sm">
+        <i data-lucide="shield-check" class="w-4 h-4 text-orange-400"></i>
+        <span>Admin Hub</span>
+      </a>
+    </div>
   </header>
 
-  <!-- Main Error Card -->
-  <main class="w-full max-w-lg my-auto py-8">
-    <div id="errorCard" class="glass-card rounded-[2.5rem] p-8 sm:p-10 text-center space-y-6 relative overflow-hidden">
+  <!-- Main Interactive Error Card -->
+  <main class="w-full max-w-xl my-auto py-6 relative z-10">
+    <div id="errorCard" class="glass-card rounded-[2.5rem] p-7 sm:p-10 text-center space-y-6 relative overflow-hidden">
       
-      <!-- Top Glow Accent -->
-      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-500 via-amber-400 to-rose-500"></div>
+      <!-- Top Cyber Neon Gradient -->
+      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-500 via-amber-400 to-rose-500 animate-pulse"></div>
 
-      <!-- Animated 404 Illustration & Badge -->
-      <div class="space-y-3">
-        <div class="relative w-28 h-28 mx-auto flex items-center justify-center">
-          <div class="absolute inset-0 rounded-full bg-orange-500/20 blur-2xl animate-pulse"></div>
-          <div class="relative w-24 h-24 rounded-3xl bg-slate-900/90 border border-orange-500/30 flex items-center justify-center text-orange-400 shadow-xl">
-            <i data-lucide="compass" class="w-12 h-12 stroke-[1.5] animate-spin" style="animation-duration: 20s;"></i>
+      <!-- Floating Astronaut & Animated 404 Hero Area -->
+      <div class="space-y-2">
+        <div class="relative w-36 h-36 mx-auto flex items-center justify-center">
+          <div class="absolute inset-0 rounded-full bg-orange-500/20 blur-3xl animate-pulse"></div>
+          
+          <!-- Animated Radar Rings -->
+          <div class="absolute inset-0 rounded-full border border-orange-500/20 animate-ping" style="animation-duration: 3s;"></div>
+          <div class="absolute inset-3 rounded-full border border-amber-500/20 animate-spin" style="animation-duration: 12s;"></div>
+
+          <!-- Cute Floating Mascot Center -->
+          <div class="relative w-24 h-24 rounded-3xl bg-gradient-to-tr from-slate-900 to-slate-800 border-2 border-orange-500/40 flex items-center justify-center text-orange-400 shadow-2xl floating-anim cursor-pointer hover:scale-110 transition"
+               onclick="triggerMascotClick()" title="คลิกเพื่อส่งสัญญาณปล่อยพลุ!">
+            <i data-lucide="sparkles" id="mascotIcon" class="w-12 h-12 text-orange-400"></i>
           </div>
         </div>
 
-        <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-black uppercase tracking-wider">
-          <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
-          <span>ERROR 404 • PAGE NOT FOUND</span>
+        <!-- Big 404 Gradient Number -->
+        <div class="pt-1">
+          <div class="text-6xl sm:text-7xl font-black font-mono tracking-tighter glow-text-404">404</div>
+          <div class="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-black uppercase tracking-wider mt-1">
+            <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
+            <span>LOST IN DIGITAL SPACE • ไม่พบหน้านี้</span>
+          </div>
         </div>
       </div>
 
-      <!-- Text Heading -->
+      <!-- Text Heading & Subtitle -->
       <div class="space-y-2">
-        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">ไม่พบหน้าที่คุณต้องการ</h1>
-        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm mx-auto">
-          หน้าที่คุณพยายามเข้าถึงอาจถูกลบ ย้ายที่อยู่ หรือไม่มีอยู่จริงในระบบ กรุณาตรวจสอบ URL หรือเลือกดำเนินการด้านล่าง
+        <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight">ดูเหมือนว่าคุณกำลังหลงทางในอวกาศ!</h1>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
+          หน้าที่คุณพยายามเข้าถึงอาจพิมพ์ URL ผิด, ถูกย้าย หรือไม่มีอยู่จริงในระบบ แต่ไม่ต้องกังวล เราเตรียมเครื่องมือพาคุณกลับสู่เส้นทางหลักเรียบร้อยแล้ว
         </p>
       </div>
 
-      <!-- Action Navigation Buttons Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
+      <!-- Quick Search / Rescue Input -->
+      <div class="p-2 rounded-2xl bg-slate-950/80 border border-slate-800/90 flex items-center gap-2">
+        <div class="pl-3 text-slate-400">
+          <i data-lucide="compass" class="w-4 h-4 text-orange-400"></i>
+        </div>
+        <input type="text" id="quickRescueInput" placeholder="พิมพ์หน้าที่ต้องการ เช่น 'จ่ายเงิน', 'ทำเนียบ', 'แอดมิน'..."
+          class="bg-transparent text-xs text-white placeholder-slate-500 flex-grow outline-none py-1.5">
+        <button onclick="handleQuickSearch()" class="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer">
+          ค้นหาทางลัด
+        </button>
+      </div>
+
+      <!-- Action Navigation Buttons 3-Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
         
         <!-- 1. Refresh Button -->
         <button onclick="location.reload()"
-          class="py-3 px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer shadow-sm">
+          class="btn-cosmic py-3.5 px-3 rounded-2xl text-slate-200 hover:text-white font-bold text-xs transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer shadow-md">
           <i data-lucide="rotate-cw" class="w-4 h-4 text-sky-400"></i>
           <span>รีเฟรชหน้า</span>
         </button>
 
         <!-- 2. Back Button -->
         <button onclick="window.history.length > 1 ? window.history.back() : window.location.href='index.html'"
-          class="py-3 px-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer shadow-sm">
+          class="btn-cosmic py-3.5 px-3 rounded-2xl text-slate-200 hover:text-white font-bold text-xs transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer shadow-md">
           <i data-lucide="arrow-left" class="w-4 h-4 text-amber-400"></i>
           <span>ย้อนกลับ</span>
         </button>
 
         <!-- 3. Home Button -->
         <a href="index.html"
-          class="py-3 px-3 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs shadow-lg shadow-orange-600/30 transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
+          class="py-3.5 px-3 rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs shadow-lg shadow-orange-500/30 transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
           <i data-lucide="home" class="w-4 h-4"></i>
-          <span>หน้าหลัก</span>
+          <span>กลับหน้าหลัก</span>
         </a>
 
       </div>
 
-      <!-- Quick Helpful Links -->
-      <div class="pt-4 border-t border-slate-800/80 text-xs text-slate-500 flex flex-wrap items-center justify-center gap-3">
-        <span class="text-[11px]">ทางลัด:</span>
-        <a href="payment.html" class="text-orange-400 hover:underline font-bold">ระบบชำระเงิน</a>
-        <span>•</span>
-        <a href="admin.html" class="text-sky-400 hover:underline font-bold">เข้าสู่ระบบแอดมิน</a>
-        <span>•</span>
-        <a href="index.html#students" class="text-slate-400 hover:text-white font-semibold">ทำเนียบรุ่น 69</a>
+      <!-- Mini-Game / Space Interactive Trigger Strip -->
+      <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 flex-wrap gap-2">
+        <button onclick="triggerCosmicSurprise()" class="text-orange-400 hover:text-orange-300 font-bold flex items-center gap-1.5 text-left transition cursor-pointer">
+          <i data-lucide="gamepad-2" class="w-4 h-4 text-amber-400 animate-pulse"></i>
+          <span>กดตรงนี้เพื่อยิงพลุดาวตก ✨</span>
+        </button>
+
+        <div class="flex items-center gap-3 text-[11px] text-slate-500">
+          <a href="payment.html" class="hover:text-white transition">ระบบชำระเงิน</a>
+          <span>•</span>
+          <a href="admin.html" class="hover:text-white transition">Admin Portal</a>
+        </div>
       </div>
 
     </div>
   </main>
 
   <!-- Footer -->
-  <footer class="w-full max-w-5xl py-4 text-center text-xs text-slate-600">
-    <p>© 2026 สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</p>
+  <footer class="w-full max-w-5xl py-4 text-center text-xs text-slate-600 relative z-10">
+    <p>© 2026 สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (COMED KKU 69)</p>
   </footer>
 
+  <!-- Starfield Canvas Animation & Interactive Engine -->
   <script>
+    // 1. Starfield Particles Engine
+    const canvas = document.getElementById('spaceCanvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let meteors = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initStars();
+    }
+
+    function initStars() {
+      stars = [];
+      const numStars = Math.floor((canvas.width * canvas.height) / 8000);
+      for (let i = 0; i < numStars; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.5 + 0.5,
+          alpha: Math.random() * 0.8 + 0.2,
+          speed: Math.random() * 0.02 + 0.005
+        });
+      }
+    }
+
+    function spawnMeteor() {
+      meteors.push({
+        x: Math.random() * canvas.width,
+        y: 0,
+        length: Math.random() * 80 + 40,
+        speed: Math.random() * 8 + 6,
+        alpha: 1,
+        angle: Math.PI / 4
+      });
+    }
+
+    function animateSpace() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw Twinkling Stars
+      for (let s of stars) {
+        s.alpha += Math.sin(Date.now() * s.speed) * 0.01;
+        s.alpha = Math.max(0.1, Math.min(0.9, s.alpha));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
+        ctx.fill();
+      }
+
+      // Draw Meteors
+      for (let i = meteors.length - 1; i >= 0; i--) {
+        const m = meteors[i];
+        m.x += m.speed;
+        m.y += m.speed;
+        m.alpha -= 0.015;
+
+        if (m.alpha <= 0 || m.y > canvas.height || m.x > canvas.width) {
+          meteors.splice(i, 1);
+          continue;
+        }
+
+        const tailX = m.x - Math.cos(m.angle) * m.length;
+        const tailY = m.y - Math.sin(m.angle) * m.length;
+
+        const grad = ctx.createLinearGradient(tailX, tailY, m.x, m.y);
+        grad.addColorStop(0, 'rgba(249, 115, 22, 0)');
+        grad.addColorStop(1, `rgba(255, 200, 100, ${m.alpha})`);
+
+        ctx.beginPath();
+        ctx.moveTo(tailX, tailY);
+        ctx.lineTo(m.x, m.y);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // Randomly spawn meteors
+      if (Math.random() < 0.02) spawnMeteor();
+
+      requestAnimationFrame(animateSpace);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animateSpace();
+
+    // 2. Interactive Confetti & Mascot Fun
+    function triggerCosmicSurprise() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 100,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#f97316', '#fbbf24', '#38bdf8', '#a855f7']
+        });
+      }
+      for (let i = 0; i < 5; i++) {
+        setTimeout(spawnMeteor, i * 150);
+      }
+    }
+
+    function triggerMascotClick() {
+      triggerCosmicSurprise();
+      const icon = document.getElementById('mascotIcon');
+      if (icon && typeof gsap !== 'undefined') {
+        gsap.fromTo(icon, { rotate: 0, scale: 1 }, { rotate: 360, scale: 1.3, duration: 0.5, ease: "back.out(2)" });
+      }
+    }
+
+    // 3. Quick Rescue Keyword Search
+    function handleQuickSearch() {
+      const q = (document.getElementById('quickRescueInput')?.value || '').toLowerCase().trim();
+      if (!q) return;
+
+      if (q.includes('จ่าย') || q.includes('เงิน') || q.includes('สลิป') || q.includes('pay')) {
+        window.location.href = 'payment.html';
+      } else if (q.includes('แอดมิน') || q.includes('หลังบ้าน') || q.includes('admin') || q.includes('hub')) {
+        window.location.href = 'admin.html';
+      } else if (q.includes('รุ่น') || q.includes('เพื่อน') || q.includes('เนียบ') || q.includes('student')) {
+        window.location.href = 'index.html#students';
+      } else if (q.includes('หลักสูตร') || q.includes('เรียน') || q.includes('curriculum')) {
+        window.location.href = 'index.html#curriculum';
+      } else {
+        window.location.href = 'index.html';
+      }
+    }
+
+    document.getElementById('quickRescueInput')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleQuickSearch();
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof lucide !== 'undefined') lucide.createIcons();
       if (typeof gsap !== 'undefined') {
         gsap.fromTo("#errorCard", 
-          { opacity: 0, scale: 0.85, y: 30 },
-          { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "back.out(1.5)" }
+          { opacity: 0, scale: 0.85, y: 35 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.5)" }
         );
       }
     });
