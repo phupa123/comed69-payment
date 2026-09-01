@@ -223,7 +223,7 @@ async function initApp() {
 
 // --- REAL API & CLOUD SYNC ---
 async function loadPaymentRecords() {
-  // Priority 1: Google Apps Script Web App (if configured)
+  // Priority 1: Google Apps Script Web App (Production Cloud Database)
   if (googleAppsScriptUrl) {
     try {
       const res = await fetch(googleAppsScriptUrl);
@@ -233,23 +233,23 @@ async function loadPaymentRecords() {
         return;
       }
     } catch (e) {
-      console.warn("Cloud Google Apps Script fetch failed, trying local server", e);
+      console.warn("Cloud Google Apps Script fetch failed", e);
     }
   }
 
-  // Priority 2: Local Python/Node Backend Server
-  try {
-    const res = await fetch('/api/payments');
-    if (res.ok) {
-      paymentRecords = await res.json();
-      saveLocalBackup();
-      return;
-    }
-  } catch (e) {
-    console.warn("Local Backend API unavailable, falling back to localStorage", e);
+  // Priority 2: Localhost Development Server only (skip on cloud workers.dev / pages.dev)
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    try {
+      const res = await fetch('/api/payments');
+      if (res.ok) {
+        paymentRecords = await res.json();
+        saveLocalBackup();
+        return;
+      }
+    } catch (e) {}
   }
 
-  // Priority 3: LocalStorage
+  // Priority 3: LocalStorage Backup
   loadFromLocal();
 }
 
