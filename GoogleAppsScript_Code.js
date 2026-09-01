@@ -183,6 +183,18 @@ function getOrCreateFolder(name) {
 
 // 1. GET: อ่านข้อมูลทั้งหมด (Active Payments, Trash, Issues, Logs)
 function doGet(e) {
+    // Case: ดึงการตั้งค่า Maintenance Config
+    if (e && e.parameter && e.parameter.action === "get_maintenance_config") {
+      const configSheet = ss.getSheetByName("System_Config");
+      if (configSheet && configSheet.getLastRow() >= 2) {
+        const val = configSheet.getRange(2, 1).getValue();
+        if (val) {
+          return ContentService.createTextOutput(String(val)).setMimeType(ContentService.MimeType.JSON);
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({})).setMimeType(ContentService.MimeType.JSON);
+    }
+
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheets = ss.getSheets();
@@ -332,6 +344,24 @@ function doGet(e) {
 
 // 2. POST: จัดการส่งสลิป, ย้ายไปถังขยะ, กู้คืน, ลบถาวร, แจ้งปัญหาผู้ใช้, บันทึก Logs
 function doPost(e) {
+    // ----------------------------------------------------
+    // CASE: บันทึกการตั้งค่า Maintenance Config ขึ้นคลาวด์
+    // ----------------------------------------------------
+    if (action === "save_maintenance_config") {
+      let configSheet = ss.getSheetByName("System_Config");
+      if (!configSheet) {
+        configSheet = ss.insertSheet("System_Config");
+        configSheet.appendRow(["Maintenance_JSON", "วัน-เวลาอัปเดต", "แอดมิน"]);
+        configSheet.setFrozenRows(1);
+      }
+      const timeStr = Utilities.formatDate(new Date(), "Asia/Bangkok", "dd/MM/yyyy HH:mm:ss");
+      configSheet.getRange(2, 1).setValue(JSON.stringify(data.config || {}));
+      configSheet.getRange(2, 2).setValue(timeStr);
+      configSheet.getRange(2, 3).setValue(data.adminEmail || "Admin");
+      SpreadsheetApp.flush();
+      return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
+    }
+
   const lock = LockService.getScriptLock();
   lock.tryLock(30000);
 

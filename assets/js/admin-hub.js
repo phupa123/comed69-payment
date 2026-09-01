@@ -444,6 +444,7 @@ function toggleSinglePageLive(scope) {
   localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
   updateMaintenanceStatusBadge();
   updateLivePageBadges();
+  syncMaintenanceConfigToCloud(cfg);
   updateLivePageBadges();
 }
 
@@ -460,5 +461,21 @@ function toggleAllPagesQuick(shouldLock) {
   localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
   updateMaintenanceStatusBadge();
   updateLivePageBadges();
+  syncMaintenanceConfigToCloud(cfg);
   updateLivePageBadges();
+}
+
+
+function syncMaintenanceConfigToCloud(cfg) {
+  const gasUrl = "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
+  if (!gasUrl) return;
+  fetch(gasUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: JSON.stringify({
+      action: "save_maintenance_config",
+      config: cfg,
+      adminEmail: (currentLoggedInAdmin && currentLoggedInAdmin.email) || "Admin"
+    })
+  }).catch(() => {});
 }
