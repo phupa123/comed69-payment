@@ -183,6 +183,9 @@ function getOrCreateFolder(name) {
 
 // 1. GET: อ่านข้อมูลทั้งหมด (Active Payments, Trash, Issues, Logs)
 function doGet(e) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+
     // Case: ดึงการตั้งค่า Maintenance Config
     if (e && e.parameter && e.parameter.action === "get_maintenance_config") {
       const configSheet = ss.getSheetByName("System_Config");
@@ -194,9 +197,6 @@ function doGet(e) {
       }
       return ContentService.createTextOutput(JSON.stringify({})).setMimeType(ContentService.MimeType.JSON);
     }
-
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheets = ss.getSheets();
     const result = {
       active: {},
@@ -344,6 +344,21 @@ function doGet(e) {
 
 // 2. POST: จัดการส่งสลิป, ย้ายไปถังขยะ, กู้คืน, ลบถาวร, แจ้งปัญหาผู้ใช้, บันทึก Logs
 function doPost(e) {
+  const lock = LockService.getScriptLock();
+  lock.tryLock(30000);
+
+  try {
+    let data;
+    if (e.postData && e.postData.contents) {
+      data = JSON.parse(e.postData.contents);
+    } else {
+      data = e.parameter || {};
+    }
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const action = data.action || "pay";
+    const targetDigits = String(data.studentId || "").replace(/\D/g, '');
+
     // ----------------------------------------------------
     // CASE: บันทึกการตั้งค่า Maintenance Config ขึ้นคลาวด์
     // ----------------------------------------------------
@@ -361,21 +376,6 @@ function doPost(e) {
       SpreadsheetApp.flush();
       return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
     }
-
-  const lock = LockService.getScriptLock();
-  lock.tryLock(30000);
-
-  try {
-    let data;
-    if (e.postData && e.postData.contents) {
-      data = JSON.parse(e.postData.contents);
-    } else {
-      data = e.parameter || {};
-    }
-
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const action = data.action || "pay";
-    const targetDigits = String(data.studentId || "").replace(/\D/g, '');
 
     // ----------------------------------------------------
     // CASE: แจ้งปัญหาผู้ใช้ (Report Issue)
