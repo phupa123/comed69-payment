@@ -197,6 +197,135 @@
         </div>
       </div>
 
+      
+      <!-- ================= LIVE WEBSITE STATUS & DIRECT TOGGLE CONTROLLER ================= -->
+      <div class="hub-glass p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
+              <i data-lucide="radio" class="w-5 h-5 animate-pulse"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-black text-white flex items-center gap-2">
+                <span>สถานะหน้าเว็บไซต์ที่กำลังออนไลน์ (Live Page Status)</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              </h3>
+              <p class="text-xs text-slate-400">ตรวจสอบและสั่งเปิด หรือ ปิดปรับปรุงแต่ละหน้าได้ทันทีจากที่นี่</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="toggleAllPagesQuick(false)" class="px-3.5 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+              <span>เปิดทุกหน้า (All Online)</span>
+            </button>
+            <button onclick="toggleAllPagesQuick(true)" class="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="power" class="w-3.5 h-3.5"></i>
+              <span>ปิดปรับปรุงทั้งเว็บ</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pages Matrix Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <!-- PAGE 1: Index.html -->
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 relative overflow-hidden">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
+                  <i data-lucide="home" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-white">หน้าหลัก (index.html)</h4>
+                  <span class="text-[11px] text-slate-500 font-mono">/index.html</span>
+                </div>
+              </div>
+              <span id="pageBadgeIndex" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-400 leading-relaxed">
+              หน้าแรก แนะนำสาขาวิชา หลักสูตร และทำเนียบรุ่นนักศึกษา 60 คน
+            </p>
+
+            <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
+              <a href="index-admin.html" class="text-xs text-sky-400 hover:underline font-bold flex items-center gap-1">
+                <i data-lucide="settings-2" class="w-3.5 h-3.5"></i> จัดการเนื้อหา
+              </a>
+              <button id="btnToggleIndex" onclick="toggleSinglePageLive('index')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
+                สั่งปิดปรับปรุงหน้านี้
+              </button>
+            </div>
+          </div>
+
+          <!-- PAGE 2: Payment.html -->
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 relative overflow-hidden">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+                  <i data-lucide="credit-card" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-white">ระบบชำระเงิน (payment.html)</h4>
+                  <span class="text-[11px] text-slate-500 font-mono">/payment.html</span>
+                </div>
+              </div>
+              <span id="pageBadgePayment" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-400 leading-relaxed">
+              ระบบรับชำระเงินค่ากิจกรรม แนบสลิป และตรวจสอบประวัติการโอน
+            </p>
+
+            <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
+              <a href="payment-admin.html" class="text-xs text-orange-400 hover:underline font-bold flex items-center gap-1">
+                <i data-lucide="sliders" class="w-3.5 h-3.5"></i> ตรวจสอบสลิป
+              </a>
+              <button id="btnTogglePayment" onclick="toggleSinglePageLive('payment')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
+                สั่งปิดปรับปรุงหน้านี้
+              </button>
+            </div>
+          </div>
+
+          <!-- PAGE 3: Entire Public Site (Global All) -->
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 relative overflow-hidden">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                  <i data-lucide="globe-2" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-white">ทั้งเว็บไซต์ (Global Lock)</h4>
+                  <span class="text-[11px] text-slate-500 font-mono">ทุกหน้าสาธารณะ</span>
+                </div>
+              </div>
+              <span id="pageBadgeAll" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-400 leading-relaxed">
+              สวิตช์หลักสำหรับปิดปรับปรุงทั้งระบบพร้อมกันทุกหน้าในคลิกเดียว
+            </p>
+
+            <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
+              <button onclick="openMaintenanceModal()" class="text-xs text-amber-400 hover:underline font-bold flex items-center gap-1 cursor-pointer">
+                <i data-lucide="timer" class="w-3.5 h-3.5"></i> ตั้งเวลานับถอยหลัง
+              </button>
+              <button id="btnToggleAll" onclick="toggleSinglePageLive('all')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
+                สั่งปิดทั้งเว็บ
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
       <!-- Core Admin Portals Navigation Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
@@ -233,11 +362,18 @@
             </div>
           </div>
 
-          <a href="index.html" target="_blank"
-            class="w-full py-3.5 px-4 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md shadow-sky-600/25 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
-            <i data-lucide="layout" class="w-4 h-4"></i>
-            <span>เข้าดูหน้าหลัก & ทำเนียบ</span>
-          </a>
+          <div class="grid grid-cols-2 gap-2">
+            <a href="index-admin.html"
+              class="py-3 px-3 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md shadow-sky-600/25 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>จัดการหน้าหลัก</span>
+            </a>
+            <a href="index.html" target="_blank"
+              class="py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span>ดูหน้าเว็บ</span>
+            </a>
+          </div>
         </div>
 
         <!-- MODULE 2: Payment Admin Console -->

@@ -174,6 +174,7 @@ function showDashboard() {
 
   loadHubOverviewStats();
   updateMaintenanceStatusBadge();
+  updateLivePageBadges();
 
   if (typeof gsap !== 'undefined') {
     gsap.fromTo("header", { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" });
@@ -356,6 +357,7 @@ function saveMaintenanceSettings(e) {
   localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
   closeMaintenanceModal();
   updateMaintenanceStatusBadge();
+  updateLivePageBadges();
   alert("✨ บันทึกการตั้งค่าเปิด-ปิดปรับปรุงระบบสำเร็จเรียบร้อย!");
 }
 
@@ -373,4 +375,90 @@ function updateMaintenanceStatusBadge() {
     badge.textContent = "เปิดให้บริการปกติ (Online)";
     badge.className = "text-emerald-400 text-[11px]";
   }
+}
+
+
+
+// ================= LIVE PAGE STATUS CONTROLLERS =================
+function updateLivePageBadges() {
+  const cfg = getMaintenanceConfig();
+
+  // 1. Index Page
+  const isIndexOff = (cfg.all && cfg.all.active) || (cfg.index && cfg.index.active);
+  const badgeIndex = document.getElementById("pageBadgeIndex");
+  const btnIndex = document.getElementById("btnToggleIndex");
+  if (badgeIndex) {
+    badgeIndex.className = isIndexOff 
+      ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
+      : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
+    badgeIndex.innerHTML = isIndexOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
+  }
+  if (btnIndex) {
+    btnIndex.className = isIndexOff
+      ? "px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
+      : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
+    btnIndex.textContent = isIndexOff ? "เปิดให้บริการ" : "สั่งปิดปรับปรุงหน้านี้";
+  }
+
+  // 2. Payment Page
+  const isPaymentOff = (cfg.all && cfg.all.active) || (cfg.payment && cfg.payment.active);
+  const badgePayment = document.getElementById("pageBadgePayment");
+  const btnPayment = document.getElementById("btnTogglePayment");
+  if (badgePayment) {
+    badgePayment.className = isPaymentOff
+      ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
+      : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
+    badgePayment.innerHTML = isPaymentOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
+  }
+  if (btnPayment) {
+    btnPayment.className = isPaymentOff
+      ? "px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
+      : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
+    btnPayment.textContent = isPaymentOff ? "เปิดให้บริการ" : "สั่งปิดปรับปรุงหน้านี้";
+  }
+
+  // 3. Global All
+  const isAllOff = !!(cfg.all && cfg.all.active);
+  const badgeAll = document.getElementById("pageBadgeAll");
+  const btnAll = document.getElementById("btnToggleAll");
+  if (badgeAll) {
+    badgeAll.className = isAllOff
+      ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
+      : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
+    badgeAll.innerHTML = isAllOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
+  }
+  if (btnAll) {
+    btnAll.className = isAllOff
+      ? "px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
+      : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
+    btnAll.textContent = isAllOff ? "เปิดทุกหน้า" : "สั่งปิดทั้งเว็บ";
+  }
+}
+
+function toggleSinglePageLive(scope) {
+  const cfg = getMaintenanceConfig();
+  if (!cfg[scope]) {
+    cfg[scope] = { active: false, title: "กำลังปรับปรุงระบบชั่วคราว", reason: "กำลังอัปเดตระบบเพื่อเพิ่มประสิทธิภาพ", endTime: "" };
+  }
+  cfg[scope].active = !cfg[scope].active;
+  localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
+  updateMaintenanceStatusBadge();
+  updateLivePageBadges();
+  updateLivePageBadges();
+}
+
+function toggleAllPagesQuick(shouldLock) {
+  const cfg = getMaintenanceConfig();
+  if (!cfg.all) cfg.all = {};
+  if (!cfg.index) cfg.index = {};
+  if (!cfg.payment) cfg.payment = {};
+
+  cfg.all.active = shouldLock;
+  cfg.index.active = shouldLock;
+  cfg.payment.active = shouldLock;
+
+  localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
+  updateMaintenanceStatusBadge();
+  updateLivePageBadges();
+  updateLivePageBadges();
 }
