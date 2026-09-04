@@ -42,7 +42,9 @@ window.ComedCampaignManager = {
       const stored = localStorage.getItem(COMED_CAMPAIGNS_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.filter(c => !String(c.id).startsWith("system_"));
+        }
       }
     } catch(e) {}
     return DEFAULT_COMED_CAMPAIGNS;
@@ -61,8 +63,9 @@ window.ComedCampaignManager = {
   },
 
   saveCampaigns: function(campaigns) {
-    localStorage.setItem(COMED_CAMPAIGNS_STORAGE_KEY, JSON.stringify(campaigns));
-    this.syncToSupabase(campaigns);
+    const filtered = (Array.isArray(campaigns) ? campaigns : []).filter(c => !String(c.id).startsWith("system_"));
+    localStorage.setItem(COMED_CAMPAIGNS_STORAGE_KEY, JSON.stringify(filtered));
+    this.syncToSupabase(filtered);
   },
 
   updateCampaign: function(updatedCampaign) {
@@ -89,25 +92,27 @@ window.ComedCampaignManager = {
       if (sb) {
         const { data, error } = await sb.from('campaigns').select('*').order('created_at', { ascending: false });
         if (!error && Array.isArray(data) && data.length > 0) {
-          const mapped = data.map(item => ({
-            id: item.id,
-            code: item.code,
-            title: item.title,
-            subtitle: item.subtitle || '',
-            category: item.category || 'กิจกรรมสาขา',
-            amount: parseFloat(item.amount) || 0,
-            currency: item.currency || 'THB',
-            deadline: item.deadline,
-            deadlineDisplay: item.deadline_display || '',
-            bankName: item.bank_name || '',
-            accountNumber: item.account_number || '',
-            accountName: item.account_name || '',
-            qrImage: item.qr_image || 'qr_payment.png',
-            status: item.status || 'open',
-            closedReason: item.closed_reason || '',
-            isDefault: item.is_default || false,
-            createdAt: item.created_at
-          }));
+          const mapped = data
+            .filter(item => !String(item.id).startsWith("system_"))
+            .map(item => ({
+              id: item.id,
+              code: item.code,
+              title: item.title,
+              subtitle: item.subtitle || '',
+              category: item.category || 'กิจกรรมสาขา',
+              amount: parseFloat(item.amount) || 0,
+              currency: item.currency || 'THB',
+              deadline: item.deadline,
+              deadlineDisplay: item.deadline_display || '',
+              bankName: item.bank_name || '',
+              accountNumber: item.account_number || '',
+              accountName: item.account_name || '',
+              qrImage: item.qr_image || 'qr_payment.png',
+              status: item.status || 'open',
+              closedReason: item.closed_reason || '',
+              isDefault: item.is_default || false,
+              createdAt: item.created_at
+            }));
           localStorage.setItem(COMED_CAMPAIGNS_STORAGE_KEY, JSON.stringify(mapped));
           return mapped;
         }

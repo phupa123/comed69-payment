@@ -8,6 +8,10 @@
 const MAINT_CONFIG_KEY = 'COMED_MAINTENANCE_CONFIG_V1';
 const GAS_CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
 
+// Supabase REST endpoint for global cross-device synchronization
+const SUPABASE_URL = "https://drqrliajxigxyrfaypfg.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRycXJsaWFqeGlneHlyZmF5cGZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1MTQ1ODYsImV4cCI6MjEwNDA5MDU4Nn0.9IEsTHlUiVZEzNsqIaKeH5g1SzXw91SRALGeKFct0Nw";
+
 (function() {
   function checkAndRedirect(config) {
     if (!config) return;
@@ -38,7 +42,7 @@ const GAS_CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxEaT4wLt0Oh
       const activeLock = globalLock ? config['all'] : config[pageKey];
 
       // Check Countdown Expiration
-      if (activeLock.endTime) {
+      if (activeLock && activeLock.endTime) {
         const endTimestamp = new Date(activeLock.endTime).getTime();
         const now = Date.now();
         if (now >= endTimestamp) {
@@ -68,11 +72,34 @@ const GAS_CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxEaT4wLt0Oh
     // Step 1: Immediate Synchronous Check from LocalStorage
     const stored = localStorage.getItem(MAINT_CONFIG_KEY);
     if (stored) {
-      const config = JSON.parse(stored);
-      checkAndRedirect(config);
+      try {
+        const config = JSON.parse(stored);
+        checkAndRedirect(config);
+      } catch(e) {}
     }
 
-    // Step 2: Background Cloud Sync Check (Ensures users on other devices get locked instantly)
+    // Step 2: High-speed Cloud Sync Check via Supabase (Guarantees all other devices/users lock instantly)
+    fetch(`${SUPABASE_URL}/rest/v1/campaigns?id=eq.system_maintenance_config&select=id,closed_reason`, {
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (Array.isArray(data) && data.length > 0 && data[0].closed_reason) {
+        try {
+          const cloudConfig = JSON.parse(data[0].closed_reason);
+          if (cloudConfig && typeof cloudConfig === 'object' && cloudConfig.all) {
+            localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cloudConfig));
+            checkAndRedirect(cloudConfig);
+          }
+        } catch(e) {}
+      }
+    })
+    .catch(() => {});
+
+    // Step 3: Fallback Background Sync Check via GAS
     if (GAS_CONFIG_API_URL) {
       fetch(GAS_CONFIG_API_URL + "?action=get_maintenance_config")
         .then(res => res.json())

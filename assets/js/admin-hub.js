@@ -467,6 +467,25 @@ function toggleAllPagesQuick(shouldLock) {
 
 
 function syncMaintenanceConfigToCloud(cfg) {
+  // 1. Instant Realtime Push to Supabase Cloud
+  try {
+    const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+    if (sb) {
+      sb.from('campaigns').upsert({
+        id: 'system_maintenance_config',
+        code: 'SYS_MAINT',
+        title: 'SYSTEM_MAINTENANCE_RECORD',
+        amount: 0,
+        status: 'open',
+        closed_reason: JSON.stringify(cfg),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' }).then(() => {});
+    }
+  } catch(e) {
+    console.warn("Supabase Maintenance Sync Error:", e);
+  }
+
+  // 2. Background Sync to Google Apps Script
   const gasUrl = "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
   if (!gasUrl) return;
   fetch(gasUrl, {

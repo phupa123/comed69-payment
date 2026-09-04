@@ -81,6 +81,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!checkAdminAuth()) return;
   loadFormValues();
   updateLivePageBadges();
+
+  // Load latest cloud maintenance state from Supabase
+  try {
+    const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+    if (sb) {
+      const { data } = await sb.from('campaigns').select('closed_reason').eq('id', 'system_maintenance_config').maybeSingle();
+      if (data && data.closed_reason) {
+        const cloudConfig = JSON.parse(data.closed_reason);
+        if (cloudConfig && typeof cloudConfig === 'object' && cloudConfig.all) {
+          localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cloudConfig));
+          updateLivePageBadges();
+        }
+      }
+    }
+  } catch(e) {}
   
   if (window.ComedCampaignManager && typeof window.ComedCampaignManager.fetchFromCloud === 'function') {
     try {
@@ -178,16 +193,36 @@ function toggleAllPagesQuick(shouldLock) {
 }
 
 function syncMaintenanceConfigToCloud(cfg) {
-  if (!GAS_CONFIG_API_URL) return;
-  fetch(GAS_CONFIG_API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: JSON.stringify({
-      action: "save_maintenance_config",
-      config: cfg,
-      adminEmail: sessionStorage.getItem(ADMIN_SESSION_KEY) || "Admin"
-    })
-  }).catch(() => {});
+  // 1. Instant Realtime Push to Supabase Cloud
+  try {
+    const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+    if (sb) {
+      sb.from('campaigns').upsert({
+        id: 'system_maintenance_config',
+        code: 'SYS_MAINT',
+        title: 'SYSTEM_MAINTENANCE_RECORD',
+        amount: 0,
+        status: 'open',
+        closed_reason: JSON.stringify(cfg),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' }).then(() => {});
+    }
+  } catch(e) {
+    console.warn("Supabase Maintenance Sync Error:", e);
+  }
+
+  // 2. Background Sync to Google Apps Script
+  if (GAS_CONFIG_API_URL) {
+    fetch(GAS_CONFIG_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: JSON.stringify({
+        action: "save_maintenance_config",
+        config: cfg,
+        adminEmail: sessionStorage.getItem(ADMIN_SESSION_KEY) || "Admin"
+      })
+    }).catch(() => {});
+  }
 }
 
 // ================= QR CODE HANDLERS =================
