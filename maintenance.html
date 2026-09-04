@@ -167,17 +167,40 @@
     const urlParams = new URLSearchParams(window.location.search);
     const targetPage = urlParams.get('page') || 'all';
     
-    // Read dynamic maintenance settings from LocalStorage
+    // Cloud Supabase configuration for realtime un-lock check
+    const SUPABASE_URL = "https://drqrliajxigxyrfaypfg.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRycXJsaWFqeGlneHlyZmF5cGZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1MTQ1ODYsImV4cCI6MjEwNDA5MDU4Nn0.9IEsTHlUiVZEzNsqIaKeH5g1SzXw91SRALGeKFct0Nw";
+    const MAINT_CONFIG_KEY = 'COMED_MAINTENANCE_CONFIG_V1';
+
+    function returnToTargetPage() {
+      if (targetPage === 'payment') {
+        window.location.replace('payment.html');
+      } else {
+        window.location.replace('index.html');
+      }
+    }
+
+    function checkSiteOpened(config) {
+      if (!config) return;
+      const isGlobalOff = config.all && config.all.active;
+      const isTargetOff = config[targetPage] && config[targetPage].active;
+      // If neither global nor specific page is active, site is now ONLINE!
+      if (!isGlobalOff && !isTargetOff) {
+        returnToTargetPage();
+      }
+    }
+
+    // 1. Check LocalStorage
     try {
-      const storedMaint = localStorage.getItem('COMED_MAINTENANCE_CONFIG_V1');
+      const storedMaint = localStorage.getItem(MAINT_CONFIG_KEY);
       if (storedMaint) {
         const config = JSON.parse(storedMaint);
+        checkSiteOpened(config);
+
         const pageCfg = config[targetPage] || config['all'];
-        
         if (pageCfg) {
           if (pageCfg.title) document.getElementById('maintTitle').textContent = pageCfg.title;
           if (pageCfg.reason) document.getElementById('maintReason').textContent = pageCfg.reason;
-          
           if (pageCfg.endTime) {
             initCountdown(new Date(pageCfg.endTime).getTime());
           } else {
@@ -185,12 +208,35 @@
           }
         }
       } else {
-        // Default 2 hours countdown
         initCountdown(Date.now() + 2 * 60 * 60 * 1000);
       }
     } catch(e) {
       initCountdown(Date.now() + 2 * 60 * 60 * 1000);
     }
+
+    // 2. Realtime Cloud Check (If Admin turned site ON, redirect instantly!)
+    async function checkCloudStatus() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/campaigns?id=eq.system_maintenance_config&select=id,closed_reason`, {
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0 && data[0].closed_reason) {
+          const cloudConfig = JSON.parse(data[0].closed_reason);
+          if (cloudConfig && typeof cloudConfig === 'object') {
+            localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cloudConfig));
+            checkSiteOpened(cloudConfig);
+          }
+        }
+      } catch(e) {}
+    }
+
+    checkCloudStatus();
+    // Periodically poll cloud status every 6 seconds so user doesn't even have to refresh
+    setInterval(checkCloudStatus, 6000);
 
     function initCountdown(targetTime) {
       function update() {
@@ -202,7 +248,8 @@
           document.getElementById('cdHours').textContent = '00';
           document.getElementById('cdMinutes').textContent = '00';
           document.getElementById('cdSeconds').textContent = '00';
-          document.getElementById('countdownLabel').textContent = "🎉 ถึงเวลาเปิดให้บริการแล้ว กรุณากดรีเฟรชหน้าเว็บ";
+          document.getElementById('countdownLabel').textContent = "🎉 ถึงเวลาเปิดให้บริการแล้ว กำลังพาท่านกลับสู่เว็บไซต์...";
+          setTimeout(returnToTargetPage, 1200);
           return;
         }
 
