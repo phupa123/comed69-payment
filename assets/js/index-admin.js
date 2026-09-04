@@ -7,7 +7,8 @@
 
 const ADMIN_SESSION_KEY = 'COMED_KKU69_ADMIN_LOGGED_USER';
 const INDEX_CONFIG_KEY = 'COMED_KKU69_INDEX_CONFIG_V1';
-const CAMPAIGNS_KEY = 'COMED_PAYMENT_CAMPAIGNS_V1';
+const MAINT_CONFIG_KEY = 'COMED_MAINTENANCE_CONFIG_V1';
+const GAS_CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec";
 
 // Default Announcement & Page CMS
 const DEFAULT_INDEX_CONFIG = {
@@ -23,25 +24,12 @@ const DEFAULT_INDEX_CONFIG = {
   instagramHandle: "thitiphaua"
 };
 
-// Default Payment Campaigns
-const DEFAULT_CAMPAIGNS = [
-  {
-    id: "camp_paimai69",
-    title: "ค่าทำป้ายสาขาวิชาเอก",
-    subtitle: "สำหรับนักศึกษาชั้นปีที่ 1 ทั้งหมด 60 คน",
-    category: "กิจกรรมชั้นปีที่ 1 (COMED 69)",
-    amount: 190.00,
-    deadline: "2026-09-04T23:59",
-    deadlineDisplay: "4 ก.ย. 2569 (23:59 น.)",
-    bankName: "กสิกรไทย",
-    accountNumber: "236-2-47817-3",
-    accountName: "น.ส. พิชามญธุ์ สามสี",
-    status: "open", // open, temp_closed, permanently_closed
-    closedReason: "",
-    isDefault: true,
-    createdAt: new Date().toISOString()
-  }
-];
+// Default Site Maintenance Config
+const DEFAULT_MAINT_CONFIG = {
+  all: { active: false, title: "กำลังปิดปรับปรุงระบบชั่วคราว", reason: "ระบบกำลังอยู่ระหว่างการปรับปรุงและอัปเกรดเพื่อเพิ่มความเสถียรและความปลอดภัย", endTime: "" },
+  index: { active: false, title: "หน้าหลักกำลังปรับปรุงชั่วคราว", reason: "กำลังอัปเดตข้อมูลและระบบสารสนเทศของสาขาวิชา", endTime: "" },
+  payment: { active: false, title: "ระบบรับชำระเงินปิดปรับปรุงชั่วคราว", reason: "ระบบการเงินกำลังอยู่ระหว่างการสรุปยอดและบำรุงรักษาระบบ", endTime: "" }
+};
 
 let indexConfig = DEFAULT_INDEX_CONFIG;
 try {
@@ -51,12 +39,20 @@ try {
   indexConfig = DEFAULT_INDEX_CONFIG;
 }
 
-let campaignsList = [];
-try {
-  const storedCamp = localStorage.getItem(CAMPAIGNS_KEY);
-  campaignsList = storedCamp ? JSON.parse(storedCamp) : DEFAULT_CAMPAIGNS;
-} catch (e) {
-  campaignsList = DEFAULT_CAMPAIGNS;
+function getMaintenanceConfig() {
+  try {
+    const s = localStorage.getItem(MAINT_CONFIG_KEY);
+    return s ? { ...DEFAULT_MAINT_CONFIG, ...JSON.parse(s) } : DEFAULT_MAINT_CONFIG;
+  } catch(e) {
+    return DEFAULT_MAINT_CONFIG;
+  }
+}
+
+function getCampaignsList() {
+  if (window.ComedCampaignManager) {
+    return window.ComedCampaignManager.getAllCampaigns();
+  }
+  return [];
 }
 
 let studentsList = [];
@@ -81,13 +77,151 @@ function checkAdminAuth() {
   return true;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   if (!checkAdminAuth()) return;
   loadFormValues();
+  updateLivePageBadges();
+  
+  if (window.ComedCampaignManager && typeof window.ComedCampaignManager.fetchFromCloud === 'function') {
+    try {
+      await window.ComedCampaignManager.fetchFromCloud();
+    } catch(e) {}
+  }
+  
   renderCampaignsList();
   renderStudentsTable();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 });
+
+// ================= 0. LIVE WEBSITE STATUS & DIRECT SWITCHER =================
+function updateLivePageBadges() {
+  const cfg = getMaintenanceConfig();
+
+  // 1. Index Page
+  const isIndexOff = (cfg.all && cfg.all.active) || (cfg.index && cfg.index.active);
+  const badgeIndex = document.getElementById("pageBadgeIndex");
+  const btnIndex = document.getElementById("btnToggleIndex");
+  if (badgeIndex) {
+    badgeIndex.className = isIndexOff 
+      ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
+      : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
+    badgeIndex.innerHTML = isIndexOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
+  }
+  if (btnIndex) {
+    btnIndex.className = isIndexOff
+      ? "px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
+      : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
+    btnIndex.textContent = isIndexOff ? "เปิดให้บริการ" : "สั่งปิดปรับปรุงหน้านี้";
+  }
+
+  // 2. Payment Page
+  const isPaymentOff = (cfg.all && cfg.all.active) || (cfg.payment && cfg.payment.active);
+  const badgePayment = document.getElementById("pageBadgePayment");
+  const btnPayment = document.getElementById("btnTogglePayment");
+  if (badgePayment) {
+    badgePayment.className = isPaymentOff
+      ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
+      : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
+    badgePayment.innerHTML = isPaymentOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
+  }
+  if (btnPayment) {
+    btnPayment.className = isPaymentOff
+      ? "px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
+      : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
+    btnPayment.textContent = isPaymentOff ? "เปิดให้บริการ" : "สั่งปิดปรับปรุงหน้านี้";
+  }
+
+  // 3. Global All
+  const isAllOff = !!(cfg.all && cfg.all.active);
+  const badgeAll = document.getElementById("pageBadgeAll");
+  const btnAll = document.getElementById("btnToggleAll");
+  if (badgeAll) {
+    badgeAll.className = isAllOff
+      ? "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1"
+      : "px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
+    badgeAll.innerHTML = isAllOff ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดปรับปรุง' : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE';
+  }
+  if (btnAll) {
+    btnAll.className = isAllOff
+      ? "px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition cursor-pointer"
+      : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
+    btnAll.textContent = isAllOff ? "เปิดทุกหน้า" : "สั่งปิดทั้งเว็บ";
+  }
+}
+
+function toggleSinglePageLive(scope) {
+  const cfg = getMaintenanceConfig();
+  if (!cfg[scope]) {
+    cfg[scope] = { active: false, title: "กำลังปรับปรุงระบบชั่วคราว", reason: "กำลังอัปเดตระบบเพื่อเพิ่มประสิทธิภาพ", endTime: "" };
+  }
+  cfg[scope].active = !cfg[scope].active;
+  localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
+  updateLivePageBadges();
+  syncMaintenanceConfigToCloud(cfg);
+  showToastNotification(`✨ เปลี่ยนสถานะหน้า ${scope} เป็น ${cfg[scope].active ? 'ปิดปรับปรุง' : 'เปิดให้บริการ'} สำเร็จ!`);
+}
+
+function toggleAllPagesQuick(shouldLock) {
+  const cfg = getMaintenanceConfig();
+  if (!cfg.all) cfg.all = {};
+  if (!cfg.index) cfg.index = {};
+  if (!cfg.payment) cfg.payment = {};
+
+  cfg.all.active = shouldLock;
+  cfg.index.active = shouldLock;
+  cfg.payment.active = shouldLock;
+
+  localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
+  updateLivePageBadges();
+  syncMaintenanceConfigToCloud(cfg);
+  showToastNotification(`✨ ${shouldLock ? 'สั่งปิดปรับปรุงทุกหน้าเรียบร้อย' : 'เปิดให้บริการทุกหน้าออนไลน์แล้ว'}`);
+}
+
+function syncMaintenanceConfigToCloud(cfg) {
+  if (!GAS_CONFIG_API_URL) return;
+  fetch(GAS_CONFIG_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: JSON.stringify({
+      action: "save_maintenance_config",
+      config: cfg,
+      adminEmail: sessionStorage.getItem(ADMIN_SESSION_KEY) || "Admin"
+    })
+  }).catch(() => {});
+}
+
+// ================= QR CODE HANDLERS =================
+function handleQrFileUpload(event, previewImgId, inputId) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert("⚠️ ขนาดไฟล์ภาพใหญ่เกินไป กรุณาเลือกภาพขนาดไม่เกิน 5MB");
+    event.target.value = "";
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    const preview = document.getElementById(previewImgId);
+    if (preview) preview.src = dataUrl;
+    const input = document.getElementById(inputId);
+    if (input) input.value = dataUrl;
+    showToastNotification("📸 โหลดรูปภาพ QR Code พร้อมใช้งานแล้ว!");
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateQrPreviewFromUrl(url, previewImgId) {
+  const preview = document.getElementById(previewImgId);
+  if (!preview) return;
+  if (!url || !url.trim()) {
+    preview.src = "qr_payment.png";
+    return;
+  }
+  preview.src = url.trim();
+}
 
 // ================= 1. PAGE CMS & ANNOUNCEMENTS =================
 function loadFormValues() {
@@ -136,6 +270,8 @@ function renderCampaignsList() {
   const container = document.getElementById('campaignsListContainer');
   if (!container) return;
 
+  const campaignsList = getCampaignsList();
+
   if (campaignsList.length === 0) {
     container.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs font-bold">ไม่มีรายการเก็บเงินในขณะนี้ กดปุ่ม "+ เพิ่มรายการชำระเงินใหม่" เพื่อสร้าง</div>`;
     return;
@@ -143,12 +279,14 @@ function renderCampaignsList() {
 
   container.innerHTML = campaignsList.map((camp, idx) => {
     let statusBadge = '';
-    let statusText = '';
     let borderClass = '';
 
     if (camp.status === 'open') {
       statusBadge = '<span class="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> เปิดรับชำระปกติ</span>';
       borderClass = 'border-emerald-500/30';
+    } else if (camp.status === 'completed') {
+      statusBadge = '<span class="px-2.5 py-1 rounded-full text-xs font-black bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> ชำระครบแล้ว</span>';
+      borderClass = 'border-sky-500/30';
     } else if (camp.status === 'temp_closed') {
       statusBadge = '<span class="px-2.5 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ปิดรับชำระชั่วคราว</span>';
       borderClass = 'border-amber-500/30';
@@ -157,15 +295,22 @@ function renderCampaignsList() {
       borderClass = 'border-rose-500/30';
     }
 
+    const qrSrc = camp.qrImage || 'qr_payment.png';
+
     return `
       <div class="p-5 rounded-3xl bg-slate-900/80 border ${borderClass} shadow-md space-y-4 hover:border-orange-500/50 transition">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] font-bold text-orange-400 uppercase tracking-wider">${camp.category || 'กิจกรรม'}</span>
-              ${camp.isDefault ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-orange-500/20 text-orange-300">หลัก</span>' : ''}
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-white p-1 border border-slate-700 flex items-center justify-center flex-shrink-0">
+              <img src="${qrSrc}" alt="QR" class="w-full h-full object-contain">
             </div>
-            <h3 class="text-base font-black text-white leading-tight mt-0.5">${camp.title}</h3>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold text-orange-400 uppercase tracking-wider">${camp.category || 'กิจกรรม'}</span>
+                ${camp.isDefault ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-orange-500/20 text-orange-300">หลัก</span>' : ''}
+              </div>
+              <h3 class="text-base font-black text-white leading-tight mt-0.5">${camp.title}</h3>
+            </div>
           </div>
           <div>${statusBadge}</div>
         </div>
@@ -181,18 +326,18 @@ function renderCampaignsList() {
           </div>
           <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
             <span class="text-slate-500 text-[10px] block">บัญชีรับเงิน:</span>
-            <span class="font-semibold text-slate-300 truncate block">${camp.bankName} ${camp.accountNumber}</span>
+            <span class="font-semibold text-slate-300 truncate block">${camp.bankName || '-'} ${camp.accountNumber || ''}</span>
           </div>
           <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
             <span class="text-slate-500 text-[10px] block">ชื่อบัญชี:</span>
-            <span class="font-semibold text-slate-300 truncate block">${camp.accountName}</span>
+            <span class="font-semibold text-slate-300 truncate block">${camp.accountName || '-'}</span>
           </div>
         </div>
 
         ${camp.closedReason ? `<div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs"><strong>เหตุผลที่ปิด:</strong> ${camp.closedReason}</div>` : ''}
 
-        <div class="flex items-center justify-between pt-1 border-t border-slate-800/80">
-          <div class="flex items-center gap-1.5">
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-800/80">
+          <div class="flex items-center gap-1.5 flex-wrap">
             <button onclick="setCampaignStatus('${camp.id}', 'open')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${camp.status === 'open' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-800 hover:bg-slate-700 text-slate-400'}">
               เปิดรับชำระ
             </button>
@@ -205,6 +350,9 @@ function renderCampaignsList() {
           </div>
 
           <div class="flex items-center gap-1.5">
+            <a href="payment.html?camp=${camp.id}" target="_blank" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i> ดูหน้าจ่ายเงิน
+            </a>
             <button onclick="openEditCampaignModal('${camp.id}')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold text-xs rounded-xl transition flex items-center gap-1">
               <i data-lucide="edit-2" class="w-3.5 h-3.5"></i> แก้ไข
             </button>
@@ -223,12 +371,13 @@ function renderCampaignsList() {
 }
 
 function setCampaignStatus(id, newStatus, reason = "") {
-  const camp = campaignsList.find(c => c.id === id);
+  if (!window.ComedCampaignManager) return;
+  const camp = window.ComedCampaignManager.getCampaignById(id);
   if (!camp) return;
 
   camp.status = newStatus;
   camp.closedReason = reason;
-  localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify(campaignsList));
+  window.ComedCampaignManager.updateCampaign(camp);
   renderCampaignsList();
   showToastNotification(`✨ อัปเดตสถานะของ "${camp.title}" เป็น ${newStatus} สำเร็จ!`);
 }
@@ -258,13 +407,22 @@ function openAddCampaignModal() {
   document.getElementById('campAccountNumber').value = "236-2-47817-3";
   document.getElementById('campAccountName').value = "น.ส. พิชามญธุ์ สามสี";
 
+  // Reset QR
+  const qrInput = document.getElementById('campQrImage');
+  if (qrInput) qrInput.value = "qr_payment.png";
+  const qrPreview = document.getElementById('campQrPreview');
+  if (qrPreview) qrPreview.src = "qr_payment.png";
+  const fileInput = document.getElementById('campQrFileInput');
+  if (fileInput) fileInput.value = "";
+
   const modal = document.getElementById('modalEditCampaign');
   if (modal) modal.classList.remove('hidden');
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function openEditCampaignModal(id) {
-  const camp = campaignsList.find(c => c.id === id);
+  if (!window.ComedCampaignManager) return;
+  const camp = window.ComedCampaignManager.getCampaignById(id);
   if (!camp) return;
 
   document.getElementById('modalCampaignTitle').textContent = "แก้ไขรายการเก็บเงิน";
@@ -273,10 +431,18 @@ function openEditCampaignModal(id) {
   document.getElementById('campSubtitle').value = camp.subtitle || '';
   document.getElementById('campCategory').value = camp.category || '';
   document.getElementById('campAmount').value = camp.amount;
-  document.getElementById('campDeadline').value = camp.deadline || '';
-  document.getElementById('campBankName').value = camp.bankName;
-  document.getElementById('campAccountNumber').value = camp.accountNumber;
-  document.getElementById('campAccountName').value = camp.accountName;
+  document.getElementById('campDeadline').value = camp.deadline ? camp.deadline.slice(0, 16) : '';
+  document.getElementById('campBankName').value = camp.bankName || '';
+  document.getElementById('campAccountNumber').value = camp.accountNumber || '';
+  document.getElementById('campAccountName').value = camp.accountName || '';
+
+  const qrSrc = camp.qrImage || 'qr_payment.png';
+  const qrInput = document.getElementById('campQrImage');
+  if (qrInput) qrInput.value = qrSrc.startsWith('data:') ? '' : qrSrc;
+  const qrPreview = document.getElementById('campQrPreview');
+  if (qrPreview) qrPreview.src = qrSrc;
+  const fileInput = document.getElementById('campQrFileInput');
+  if (fileInput) fileInput.value = "";
 
   const modal = document.getElementById('modalEditCampaign');
   if (modal) modal.classList.remove('hidden');
@@ -290,6 +456,8 @@ function closeCampaignModal() {
 
 function saveCampaignSubmit(e) {
   e.preventDefault();
+  if (!window.ComedCampaignManager) return;
+
   const editId = document.getElementById('campEditId').value;
   const title = document.getElementById('campTitle').value.trim();
   const subtitle = document.getElementById('campSubtitle').value.trim();
@@ -300,8 +468,13 @@ function saveCampaignSubmit(e) {
   const accountNumber = document.getElementById('campAccountNumber').value.trim();
   const accountName = document.getElementById('campAccountName').value.trim();
 
+  // QR image from input or preview (could be dataUrl from file upload or URL)
+  const qrInput = document.getElementById('campQrImage').value.trim();
+  const qrPreview = document.getElementById('campQrPreview')?.src || 'qr_payment.png';
+  const finalQr = qrInput || qrPreview;
+
   if (editId) {
-    const camp = campaignsList.find(c => c.id === editId);
+    const camp = window.ComedCampaignManager.getCampaignById(editId);
     if (camp) {
       camp.title = title;
       camp.subtitle = subtitle;
@@ -312,37 +485,42 @@ function saveCampaignSubmit(e) {
       camp.bankName = bankName;
       camp.accountNumber = accountNumber;
       camp.accountName = accountName;
+      camp.qrImage = finalQr;
+      window.ComedCampaignManager.updateCampaign(camp);
     }
   } else {
+    const newId = "camp_" + Date.now();
     const newCamp = {
-      id: "camp_" + Date.now(),
+      id: newId,
+      code: "CAMP_" + Date.now().toString().slice(-4),
       title,
       subtitle,
       category,
       amount,
+      currency: "THB",
       deadline,
       deadlineDisplay: deadline ? new Date(deadline).toLocaleString('th-TH') : '-',
       bankName,
       accountNumber,
       accountName,
+      qrImage: finalQr,
       status: "open",
       closedReason: "",
       isDefault: false,
       createdAt: new Date().toISOString()
     };
-    campaignsList.push(newCamp);
+    window.ComedCampaignManager.updateCampaign(newCamp);
   }
 
-  localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify(campaignsList));
   closeCampaignModal();
   renderCampaignsList();
   showToastNotification(`✅ บันทึกรายการชำระเงิน "${title}" สำเร็จเรียบร้อย!`);
 }
 
 function deleteCampaign(id) {
+  if (!window.ComedCampaignManager) return;
   if (confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการชำระเงินนี้?")) {
-    campaignsList = campaignsList.filter(c => c.id !== id);
-    localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify(campaignsList));
+    window.ComedCampaignManager.deleteCampaign(id);
     renderCampaignsList();
     showToastNotification("ลบรายการชำระเงินเรียบร้อยแล้ว");
   }

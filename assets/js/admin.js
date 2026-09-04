@@ -531,7 +531,48 @@ function renderAdminCampaignsNav() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
+function handleQrFileUpload(event, previewImgId, inputId) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert("⚠️ ขนาดไฟล์ภาพใหญ่เกินไป กรุณาเลือกภาพขนาดไม่เกิน 5MB");
+    event.target.value = "";
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    const preview = document.getElementById(previewImgId);
+    if (preview) preview.src = dataUrl;
+    const input = document.getElementById(inputId);
+    if (input) input.value = dataUrl;
+    if (typeof showToastNotification === 'function') {
+      showToastNotification("📸 โหลดรูปภาพ QR Code พร้อมใช้งานแล้ว!");
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateQrPreviewFromUrl(url, previewImgId) {
+  const preview = document.getElementById(previewImgId);
+  if (!preview) return;
+  if (!url || !url.trim()) {
+    preview.src = "qr_payment.png";
+    return;
+  }
+  preview.src = url.trim();
+}
+
 function openCreateCampaignModal() {
+  const form = document.getElementById('createCampaignForm');
+  if (form) form.reset();
+  const qrPreview = document.getElementById('campQrPreviewImg');
+  if (qrPreview) qrPreview.src = 'qr_payment.png';
+  const qrInput = document.getElementById('campQrImageInput');
+  if (qrInput) qrInput.value = 'qr_payment.png';
+
   const modal = document.getElementById('modalCreateCampaign');
   if (modal) modal.classList.remove('hidden');
   if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -553,7 +594,10 @@ async function handleSaveCampaignSubmit(e) {
   const bankName = document.getElementById('campBankNameInput')?.value.trim() || 'ธนาคารกสิกรไทย';
   const accountNumber = document.getElementById('campAccountNumInput')?.value.trim() || '236-2-47817-3';
   const accountName = document.getElementById('campAccountNameInput')?.value.trim() || 'น.ส. พิชามญธุ์ สามสี';
-  const qrImage = document.getElementById('campQrImageInput')?.value.trim() || 'qr_payment.png';
+  
+  const qrInputVal = document.getElementById('campQrImageInput')?.value.trim();
+  const qrPreviewSrc = document.getElementById('campQrPreviewImg')?.src || 'qr_payment.png';
+  const qrImage = qrInputVal || qrPreviewSrc;
   const isOpen = document.getElementById('campStatusOpenInput')?.checked;
 
   if (!title || !code || amount <= 0) {

@@ -781,8 +781,33 @@
           </div>
           <input type="text" id="campAccountNameInput" placeholder="ชื่อบัญชี (เช่น น.ส. พิชามญธุ์ สามสี)"
             class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
-          <input type="text" id="campQrImageInput" placeholder="ไฟล์รูปภาพ QR Code (เช่น qr_payment.png หรือ URL)"
-            class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
+          
+          <!-- Dual QR Code Option: Upload or URL Link -->
+          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-700/80 space-y-2">
+            <label class="block font-bold text-slate-300 text-[11px] flex items-center justify-between">
+              <span class="flex items-center gap-1.5"><i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i> รูปภาพ QR Code</span>
+              <span class="text-[10px] text-slate-400 font-normal">อัปโหลดไฟล์ หรือใส่ลิงก์รูป</span>
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
+              <div>
+                <span class="text-[10px] text-slate-400 block mb-0.5">1. เลือกรูปภาพจากเครื่อง:</span>
+                <input type="file" id="campQrFileInput" accept="image/*" onchange="handleQrFileUpload(event, 'campQrPreviewImg', 'campQrImageInput')"
+                  class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-orange-500/20 file:text-orange-300 hover:file:bg-orange-500/30 cursor-pointer">
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block mb-0.5">2. หรือ วางลิงก์รูป (URL):</span>
+                <input type="text" id="campQrImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campQrPreviewImg')" placeholder="qr_payment.png หรือ https://..."
+                  class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
+              </div>
+            </div>
+            <!-- Live QR Preview -->
+            <div class="flex items-center gap-2.5 pt-1.5 border-t border-slate-800">
+              <div class="w-12 h-12 rounded-lg bg-white p-1 border border-slate-700 flex items-center justify-center flex-shrink-0">
+                <img id="campQrPreviewImg" src="qr_payment.png" alt="QR Preview" class="w-full h-full object-contain">
+              </div>
+              <span class="text-[11px] text-slate-400">ตัวอย่าง QR Code ที่จะแสดงให้ นศ. สแกน</span>
+            </div>
+          </div>
         </div>
 
         <div class="flex items-center justify-between pt-1">
