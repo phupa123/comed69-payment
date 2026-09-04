@@ -89,11 +89,15 @@
               <h2 class="text-lg font-black text-white">สถานะเปิด-ปิดหน้าเว็บไซต์ (Live Website Guard)</h2>
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
             </div>
-            <p class="text-xs text-slate-400">ควบคุมเปิด-ปิดหน้าเว็บใช้งานได้จริง ซิงค์ทันทีทั้ง Cloudflare และเครื่องของนักศึกษาทุกคน</p>
+            <p class="text-xs text-slate-400">ควบคุมเปิด-ปิดหน้าเว็บใช้งานได้จริง กำหนดหัวข้อ เหตุผล และตั้งเวลานับถอยหลังเปิดเว็บอัตโนมัติ</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="openMaintenanceModal('all')" class="px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-bold border border-amber-500/30 transition flex items-center gap-1.5 cursor-pointer shadow-sm">
+            <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+            <span>⚙️ ตั้งเวลา & ข้อความแจ้งเตือน</span>
+          </button>
           <button onclick="toggleAllPagesQuick(false)" class="px-3.5 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
             <span>เปิดทุกหน้า (All Online)</span>
@@ -123,11 +127,11 @@
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
             </span>
           </div>
-          <p class="text-xs text-slate-400">หน้าแรก แนะนำสาขาวิชา และทำเนียบรุ่น 60 คน</p>
+          <p id="pageDescIndex" class="text-xs text-slate-400">หน้าแรก แนะนำสาขาวิชา และทำเนียบรุ่น 60 คน</p>
           <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
-            <a href="index.html" target="_blank" class="text-xs text-sky-400 hover:underline font-bold flex items-center gap-1">
-              <i data-lucide="external-link" class="w-3.5 h-3.5"></i> ดูหน้าจริง
-            </a>
+            <button onclick="openMaintenanceModal('index')" class="text-xs text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer">
+              <i data-lucide="sliders" class="w-3.5 h-3.5"></i> ตั้งค่าข้อความ/เวลา
+            </button>
             <button id="btnToggleIndex" onclick="toggleSinglePageLive('index')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
               สั่งปิดปรับปรุงหน้านี้
             </button>
@@ -150,11 +154,11 @@
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
             </span>
           </div>
-          <p class="text-xs text-slate-400">ระบบแนบสลิป ตรวจสอบสถานะการจ่ายเงินของ นศ.</p>
+          <p id="pageDescPayment" class="text-xs text-slate-400">ระบบแนบสลิป ตรวจสอบสถานะการจ่ายเงินของ นศ.</p>
           <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
-            <a href="payment.html" target="_blank" class="text-xs text-orange-400 hover:underline font-bold flex items-center gap-1">
-              <i data-lucide="external-link" class="w-3.5 h-3.5"></i> ดูหน้าจริง
-            </a>
+            <button onclick="openMaintenanceModal('payment')" class="text-xs text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer">
+              <i data-lucide="sliders" class="w-3.5 h-3.5"></i> ตั้งค่าข้อความ/เวลา
+            </button>
             <button id="btnTogglePayment" onclick="toggleSinglePageLive('payment')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
               สั่งปิดปรับปรุงหน้านี้
             </button>
@@ -177,9 +181,11 @@
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ปกติ
             </span>
           </div>
-          <p class="text-xs text-slate-400">เปลี่ยนเส้นทางผู้ใช้ทั่วไปเข้า maintenance.html</p>
+          <p id="pageDescAll" class="text-xs text-slate-400">เปลี่ยนเส้นทางผู้ใช้ทั่วไปเข้า maintenance.html</p>
           <div class="pt-2 flex items-center justify-between border-t border-slate-800/80">
-            <span class="text-[11px] text-slate-500">แอดมินยังเข้าได้</span>
+            <button onclick="openMaintenanceModal('all')" class="text-xs text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer">
+              <i data-lucide="sliders" class="w-3.5 h-3.5"></i> ตั้งค่าข้อความ/เวลา
+            </button>
             <button id="btnToggleAll" onclick="toggleSinglePageLive('all')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer">
               สั่งปิดทั้งเว็บ
             </button>
@@ -445,6 +451,81 @@
           </button>
           <button type="submit" class="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl shadow-md transition">
             บันทึกข้อมูล
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: MAINTENANCE SETTINGS & SCHEDULE ================= -->
+  <div id="modalMaintenanceSettings" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl space-y-6">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold">
+            <i data-lucide="wrench" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">ตั้งค่าการปิดปรับปรุง & ตัวนับเวลาถอยหลัง</h3>
+            <p class="text-xs text-slate-400">ใส่หัวข้อ เหตุผล และตั้งเวลาเปิดระบบอัตโนมัติพร้อม Countdown</p>
+          </div>
+        </div>
+        <button onclick="closeMaintenanceModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="saveMaintenanceSettings(event)" class="space-y-4 text-xs">
+        <!-- 1. Scope selector -->
+        <div class="space-y-1.5">
+          <label class="font-bold text-slate-300">เลือกหน้าที่ต้องการตั้งค่า</label>
+          <select id="maintTargetScope" onchange="loadMaintenanceFormByScope()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white font-bold outline-none">
+            <option value="all">🌐 ปิดปรับปรุงทั้งเว็บไซต์ (All Public Pages)</option>
+            <option value="index">🏠 เฉพาะหน้าแรก (index.html)</option>
+            <option value="payment">💳 เฉพาะหน้ารับชำระเงิน (payment.html)</option>
+          </select>
+        </div>
+
+        <!-- 2. Status Switch -->
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+          <div>
+            <span class="font-bold text-white block">สถานะการปิดปรับปรุง (Maintenance Mode)</span>
+            <span class="text-slate-400 text-[11px]">ติ๊กเพื่อสั่งปิดปรับปรุงหน้านี้ (Admin ยังเข้าหลังบ้านได้ปกติ)</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="maintActiveCheckbox" class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+          </label>
+        </div>
+
+        <!-- 3. Custom Title & Reason -->
+        <div class="space-y-1.5">
+          <label class="font-bold text-slate-300">หัวข้อข้อความแจ้งเตือน</label>
+          <input type="text" id="maintTitleInput" placeholder="กำลังปิดปรับปรุงระบบชั่วคราว" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white outline-none">
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="font-bold text-slate-300">เหตุผล / คำอธิบายการปิดปรับปรุง</label>
+          <textarea id="maintReasonInput" rows="2" placeholder="ระบบกำลังอยู่ระหว่างการปรับปรุงและอัปเกรดฐานข้อมูลเพื่อเพิ่มความเสถียร..." class="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white outline-none custom-scrollbar"></textarea>
+        </div>
+
+        <!-- 4. Scheduled End Time / Countdown -->
+        <div class="space-y-1.5">
+          <label class="font-bold text-amber-300 flex items-center gap-1.5">
+            <i data-lucide="timer" class="w-4 h-4"></i>
+            <span>กำหนดวันและเวลาที่จะเปิดเว็บอัตโนมัติ (Countdown Auto-Open)</span>
+          </label>
+          <input type="datetime-local" id="maintEndTimeInput" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white font-mono outline-none">
+          <p class="text-[10px] text-slate-400">เมื่อถึงวัน-เวลาที่ระบุ หน้า maintenance จะนับถอยหลังถึง 00:00:00 แล้วสลับเปิดเว็บให้อัตโนมัติทันที</p>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeMaintenanceModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition cursor-pointer">
+            ยกเลิก
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>บันทึกและซิงค์ Cloud ทันที</span>
           </button>
         </div>
       </form>

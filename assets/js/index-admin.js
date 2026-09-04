@@ -162,6 +162,98 @@ function updateLivePageBadges() {
       : "px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer";
     btnAll.textContent = isAllOff ? "เปิดทุกหน้า" : "สั่งปิดทั้งเว็บ";
   }
+
+  // Update text descriptions with countdown / titles
+  const descIndex = document.getElementById("pageDescIndex");
+  if (descIndex) {
+    if (isIndexOff) {
+      const itm = (cfg.index && cfg.index.active) ? cfg.index : cfg.all;
+      descIndex.innerHTML = `<span class="text-amber-400 font-bold">⚠️ ${itm.title || 'กำลังปิดปรับปรุง'}</span> ${itm.endTime ? `(เปิดอัตโนมัติ: ${new Date(itm.endTime).toLocaleString('th-TH')})` : ''}`;
+    } else {
+      descIndex.textContent = "หน้าแรก แนะนำสาขาวิชา และทำเนียบรุ่น 60 คน";
+    }
+  }
+
+  const descPayment = document.getElementById("pageDescPayment");
+  if (descPayment) {
+    if (isPaymentOff) {
+      const itm = (cfg.payment && cfg.payment.active) ? cfg.payment : cfg.all;
+      descPayment.innerHTML = `<span class="text-amber-400 font-bold">⚠️ ${itm.title || 'กำลังปิดปรับปรุง'}</span> ${itm.endTime ? `(เปิดอัตโนมัติ: ${new Date(itm.endTime).toLocaleString('th-TH')})` : ''}`;
+    } else {
+      descPayment.textContent = "ระบบแนบสลิป ตรวจสอบสถานะการจ่ายเงินของ นศ.";
+    }
+  }
+
+  const descAll = document.getElementById("pageDescAll");
+  if (descAll) {
+    if (isAllOff) {
+      descAll.innerHTML = `<span class="text-amber-400 font-bold">⚠️ ${cfg.all.title || 'ปิดปรับปรุงทั้งระบบ'}</span> ${cfg.all.endTime ? `(เปิด: ${new Date(cfg.all.endTime).toLocaleString('th-TH')})` : ''}`;
+    } else {
+      descAll.textContent = "เปลี่ยนเส้นทางผู้ใช้ทั่วไปเข้า maintenance.html";
+    }
+  }
+}
+
+// ================= MODAL: MAINTENANCE SETTINGS & COUNTDOWN =================
+function openMaintenanceModal(scope = "all") {
+  const scopeSelect = document.getElementById("maintTargetScope");
+  if (scopeSelect) scopeSelect.value = scope;
+  loadMaintenanceFormByScope();
+
+  const modal = document.getElementById("modalMaintenanceSettings");
+  if (modal) modal.classList.remove("hidden");
+  if (typeof lucide !== "undefined") lucide.createIcons();
+}
+
+function closeMaintenanceModal() {
+  const modal = document.getElementById("modalMaintenanceSettings");
+  if (modal) modal.classList.add("hidden");
+}
+
+function loadMaintenanceFormByScope() {
+  const scope = document.getElementById("maintTargetScope")?.value || "all";
+  const cfg = getMaintenanceConfig();
+  const item = cfg[scope] || cfg["all"] || {};
+
+  const activeChk = document.getElementById("maintActiveCheckbox");
+  const titleIn = document.getElementById("maintTitleInput");
+  const reasonIn = document.getElementById("maintReasonInput");
+  const endIn = document.getElementById("maintEndTimeInput");
+
+  if (activeChk) activeChk.checked = !!item.active;
+  if (titleIn) titleIn.value = item.title || "";
+  if (reasonIn) reasonIn.value = item.reason || "";
+  if (endIn) {
+    if (item.endTime) {
+      endIn.value = item.endTime.slice(0, 16);
+    } else {
+      endIn.value = "";
+    }
+  }
+}
+
+function saveMaintenanceSettings(e) {
+  e.preventDefault();
+  const scope = document.getElementById("maintTargetScope")?.value || "all";
+  const cfg = getMaintenanceConfig();
+
+  const isActive = document.getElementById("maintActiveCheckbox")?.checked || false;
+  const title = document.getElementById("maintTitleInput")?.value.trim() || "กำลังปิดปรับปรุงระบบชั่วคราว";
+  const reason = document.getElementById("maintReasonInput")?.value.trim() || "ระบบกำลังอยู่ระหว่างการปรับปรุงและอัปเกรดฐานข้อมูลเพื่อเพิ่มความเสถียร";
+  const endTime = document.getElementById("maintEndTimeInput")?.value || "";
+
+  cfg[scope] = {
+    active: isActive,
+    title: title,
+    reason: reason,
+    endTime: endTime
+  };
+
+  localStorage.setItem(MAINT_CONFIG_KEY, JSON.stringify(cfg));
+  closeMaintenanceModal();
+  updateLivePageBadges();
+  syncMaintenanceConfigToCloud(cfg);
+  showToastNotification(`✨ บันทึกการตั้งค่า ${scope} (${isActive ? 'ปิดปรับปรุง' : 'เปิดปกติ'}) พร้อมซิงค์ Cloud เรียบร้อย!`);
 }
 
 function toggleSinglePageLive(scope) {

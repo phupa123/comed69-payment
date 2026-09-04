@@ -110,11 +110,14 @@
       </div>
 
       <!-- Live Countdown Clock -->
-      <div id="countdownContainer" class="p-4 rounded-3xl bg-slate-950/80 border border-slate-800/80 space-y-2">
-        <span class="text-[11px] font-bold text-slate-400 flex items-center justify-center gap-1.5">
-          <i data-lucide="timer" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span id="countdownLabel">คาดว่าจะเปิดให้บริการอีกใน:</span>
-        </span>
+      <div id="countdownContainer" class="p-4 rounded-3xl bg-slate-950/80 border border-slate-800/80 space-y-2.5">
+        <div class="flex flex-col items-center justify-center gap-1">
+          <span class="text-[11px] font-bold text-slate-400 flex items-center justify-center gap-1.5">
+            <i data-lucide="timer" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="countdownLabel">คาดว่าจะเปิดให้บริการอีกใน:</span>
+          </span>
+          <span id="targetOpenTimeDisplay" class="text-xs font-bold text-amber-300 font-mono px-3 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25"></span>
+        </div>
 
         <div class="grid grid-cols-4 gap-2 text-center pt-1 font-mono">
           <div class="countdown-box p-2.5 rounded-2xl">
@@ -239,6 +242,12 @@
     setInterval(checkCloudStatus, 6000);
 
     function initCountdown(targetTime) {
+      const openDate = new Date(targetTime);
+      const dateLabelEl = document.getElementById('targetOpenTimeDisplay');
+      if (dateLabelEl) {
+        dateLabelEl.textContent = `กำหนดเปิด: ${openDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })} เวลา ${openDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.`;
+      }
+
       function update() {
         const now = Date.now();
         const diff = targetTime - now;
