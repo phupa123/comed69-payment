@@ -8,18 +8,33 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.toLowerCase();
 
-    // 1. Rewrite clean routes to .html
+    // 1. Dynamic Campaign Routes (/payment/:id and /payment-admin/:id)
     let fetchUrl = request.url;
+    let campaignParam = "";
+
     if (path === "/" || path === "") {
       fetchUrl = new URL("/index.html", url.origin).toString();
-    } else if (path === "/payment") {
+    } else if (path === "/payment" || path === "/payment.html") {
       fetchUrl = new URL("/payment.html", url.origin).toString();
+    } else if (path.startsWith("/payment/")) {
+      campaignParam = path.replace("/payment/", "").split("/")[0].trim();
+      const targetUrl = new URL("/payment.html", url.origin);
+      if (campaignParam) targetUrl.searchParams.set("camp", campaignParam);
+      // Preserve any existing query parameters
+      url.searchParams.forEach((val, key) => targetUrl.searchParams.set(key, val));
+      fetchUrl = targetUrl.toString();
+    } else if (path === "/payment-admin" || path === "/payment-admin.html") {
+      fetchUrl = new URL("/payment-admin.html", url.origin).toString();
+    } else if (path.startsWith("/payment-admin/")) {
+      campaignParam = path.replace("/payment-admin/", "").split("/")[0].trim();
+      const targetUrl = new URL("/payment-admin.html", url.origin);
+      if (campaignParam) targetUrl.searchParams.set("camp", campaignParam);
+      url.searchParams.forEach((val, key) => targetUrl.searchParams.set(key, val));
+      fetchUrl = targetUrl.toString();
     } else if (path === "/admin") {
       fetchUrl = new URL("/admin.html", url.origin).toString();
     } else if (path === "/index-admin") {
       fetchUrl = new URL("/index-admin.html", url.origin).toString();
-    } else if (path === "/payment-admin") {
-      fetchUrl = new URL("/payment-admin.html", url.origin).toString();
     } else if (path === "/maintenance") {
       fetchUrl = new URL("/maintenance.html", url.origin).toString();
     } else if (path === "/404") {
@@ -38,10 +53,10 @@ export default {
     const GITHUB_RAW = "https://raw.githubusercontent.com/phupa123/kku-comed23/main";
     let target = "";
     if (path === "/" || path === "/index" || path === "/index.html") target = "/index.html";
-    else if (path === "/payment" || path === "/payment.html") target = "/payment.html";
+    else if (path === "/payment" || path === "/payment.html" || path.startsWith("/payment/")) target = "/payment.html";
     else if (path === "/admin" || path === "/admin.html") target = "/admin.html";
     else if (path === "/index-admin" || path === "/index-admin.html") target = "/index-admin.html";
-    else if (path === "/payment-admin" || path === "/payment-admin.html") target = "/payment-admin.html";
+    else if (path === "/payment-admin" || path === "/payment-admin.html" || path.startsWith("/payment-admin/")) target = "/payment-admin.html";
     else if (path === "/maintenance" || path === "/maintenance.html") target = "/maintenance.html";
     else if (path === "/404" || path === "/404.html") target = "/404.html";
     else if (path.startsWith("/assets/") || path.startsWith("/config/") || path.endsWith(".png") || path.endsWith(".js") || path.endsWith(".css")) {

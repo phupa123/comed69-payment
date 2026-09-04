@@ -70,6 +70,9 @@
   <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
   <!-- Campaigns Data Repo -->
   <script src="config/campaigns_repo.js"></script>
   <!-- Custom Payment CSS -->
@@ -386,6 +389,36 @@
   <!-- MAIN CONTAINER -->
   <main class="flex-grow max-w-6xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-8">
 
+    <!-- ================= 0. DYNAMIC CAMPAIGN SELECTOR & OVERVIEW HUB ================= -->
+    <section id="campaignSelectorSection" class="premium-glass rounded-3xl p-4 sm:p-6 border border-orange-200/80 shadow-card-premium space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-md shadow-orange-500/30 flex-shrink-0">
+            <i data-lucide="layers" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm sm:text-base font-black text-slate-900">เลือกรายการที่ต้องการชำระเงิน</h2>
+              <span id="campaignsTotalCountBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-100 text-orange-700 border border-orange-200">1 รายการ</span>
+            </div>
+            <p class="text-[11px] text-slate-500">คลิกเลือกรายการเพื่อเปิดหน้ารายละเอียดและบันทึกการชำระเงิน</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 self-end sm:self-auto">
+          <a href="payment.html" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5" title="แสดงรายการทั้งหมด">
+            <i data-lucide="grid" class="w-3.5 h-3.5 text-orange-500"></i>
+            <span>ดูทุกรายการ</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Campaign Dynamic Cards Grid -->
+      <div id="campaignsNavGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
     <!-- HERO & COUNTDOWN & STATS SECTION (MODERN LUXURY TECH AESTHETICS) -->
     <section
       class="hero-card-animate mobile-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-4 sm:p-8 md:p-10 shadow-2xl border border-slate-800">
@@ -409,22 +442,22 @@
         <div class="lg:col-span-7 space-y-3 sm:space-y-4">
 
           <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <span
+            <span id="heroCampaignAmountBadge"
               class="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 backdrop-blur-md border border-orange-400/40 text-[10px] sm:text-xs text-orange-300 font-bold shadow-sm">
               <i data-lucide="tag" class="w-3 h-3 text-orange-400"></i>
-              <span>ค่าทำป้าย คนละ ฿190</span>
+              <span id="heroAmountText">ค่าทำป้าย คนละ ฿190</span>
             </span>
 
-            <span
+            <span id="heroCampaignCategoryBadge"
               class="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1 rounded-full bg-sky-500/20 backdrop-blur-md border border-sky-400/30 text-[10px] sm:text-xs text-sky-300 font-semibold">
               <i data-lucide="sparkles" class="w-3 h-3 text-sky-400"></i>
-              <span>ปี 1 (รหัส 69)</span>
+              <span id="heroCategoryText">ปี 1 (รหัส 69)</span>
             </span>
           </div>
 
           <h2 class="text-xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
-            สาขาวิชาคอมพิวเตอร์ศึกษา<br>
-            <span
+            <span id="heroCampaignTitle">สาขาวิชาคอมพิวเตอร์ศึกษา</span><br>
+            <span id="heroCampaignSubtitle"
               class="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-amber-200 to-white font-medium text-sm sm:text-xl lg:text-2xl block mt-0.5 sm:mt-1.5">
               คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น
             </span>
@@ -437,7 +470,7 @@
               <span class="flex items-center gap-1.5 font-bold text-amber-300">
                 <i data-lucide="timer" class="w-3.5 h-3.5 animate-spin text-amber-400"
                   style="animation-duration: 10s;"></i>
-                ถึง 4 ก.ย. 69 (23:59 น.)
+                <span id="heroDeadlineText">ถึง 4 ก.ย. 69 (23:59 น.)</span>
               </span>
               <span id="countdownStatusBadge"
                 class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
@@ -694,8 +727,8 @@
                 <!-- Real QR Image Box with Click to Zoom -->
                 <div
                   class="relative p-2 bg-white rounded-2xl border-2 border-emerald-500/40 shadow-inner group cursor-pointer"
-                  onclick="openFullscreenModal('qr_payment.png')">
-                  <img src="qr_payment.png" alt="Thai QR Payment"
+                  onclick="openCurrentQrFullscreen()">
+                  <img id="bankQrImage" src="qr_payment.png" alt="Thai QR Payment"
                     class="w-56 h-auto object-contain rounded-xl shadow-sm transition-transform duration-300 group-hover:scale-102">
                   <div
                     class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white text-xs font-bold transition-opacity rounded-2xl">
@@ -705,7 +738,7 @@
                 </div>
 
                 <div class="mt-3 text-xs text-slate-700 font-medium">
-                  ยอดโอนตรงตามจำนวน: <strong class="text-emerald-700 text-base font-black">190 บาท</strong>
+                  ยอดโอนตรงตามจำนวน: <strong id="bankAmountHighlight" class="text-emerald-700 text-base font-black">฿190 บาท</strong>
                 </div>
               </div>
 
@@ -719,29 +752,26 @@
                   <ul class="space-y-3 text-xs sm:text-sm text-slate-700">
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>รายการ:</strong> ค่าทำป้ายสาขาวิชาเอกคอมพิวเตอร์ศึกษา (รหัส 69)</span>
+                      <span><strong>รายการ:</strong> <span id="bankDetailTitle">ค่าทำป้ายสาขาวิชาเอกคอมพิวเตอร์ศึกษา (รหัส 69)</span></span>
                     </li>
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>จำนวนเงิน:</strong> <span class="font-black text-emerald-700 text-base">฿190.00 บาท
-                          / คน</span></span>
+                      <span><strong>จำนวนเงิน:</strong> <span id="bankDetailAmount" class="font-black text-emerald-700 text-base">฿190.00 บาท / คน</span></span>
                     </li>
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>ธนาคาร:</strong> <span
-                          class="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">ธนาคารกสิกรไทย
-                          (KBank / K PLUS)</span></span>
+                      <span><strong>ธนาคาร:</strong> <span id="bankDetailBankName"
+                          class="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">ธนาคารกสิกรไทย (KBank / K PLUS)</span></span>
                     </li>
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>เลขที่บัญชี:</strong> <span
+                      <span><strong>เลขที่บัญชี:</strong> <span id="bankDetailAccountNum"
                           class="font-mono font-black text-emerald-950 bg-emerald-100/90 px-2.5 py-1 rounded-xl select-all border-2 border-emerald-300 tracking-wider text-sm sm:text-base">236-2-47817-3</span></span>
                     </li>
                     <li class="flex items-start gap-2.5">
                       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
-                      <span><strong>ชื่อบัญชี:</strong> <span
-                          class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">น.ส.
-                          พิชามญธุ์ สามสี</span></span>
+                      <span><strong>ชื่อบัญชี:</strong> <span id="bankDetailAccountName"
+                          class="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">น.ส. พิชามญธุ์ สามสี</span></span>
                     </li>
                   </ul>
                 </div>

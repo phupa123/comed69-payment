@@ -5,7 +5,18 @@
  * =========================================================================
  */
 
-const STORAGE_KEY = 'COMED_KKU69_PAYMENT_DATA_V1';
+// ================= DYNAMIC MULTI-CAMPAIGN CONTEXT =================
+const urlParams = new URLSearchParams(window.location.search);
+const currentCampaignId = urlParams.get("camp") || urlParams.get("id") || "paimai69";
+let currentAdminCampaign = (window.ComedCampaignManager ? window.ComedCampaignManager.getCampaignById(currentCampaignId) : null) || {
+  id: "paimai69",
+  title: "ค่าทำป้ายสาขาวิชาเอก",
+  amount: 190,
+  deadline: "2026-09-04T23:59:00+07:00",
+  gasApiUrl: "https://script.google.com/macros/s/AKfycbxEaT4wLt0Ohl1UF9tz5EH7L49LTgyKYf8jxlr17lFDwv0hZcacO04NK0Ra7Av5y2wT/exec"
+};
+
+const STORAGE_KEY = `COMED_KKU69_PAYMENT_DATA_${currentAdminCampaign.id.toUpperCase()}`;
 const ADMIN_SESSION_KEY = 'COMED_KKU69_ADMIN_LOGGED_USER';
 const ADMIN_ACCOUNTS_KEY = 'COMED_KKU69_ADMIN_ACCOUNTS_V2';
 const ADMIN_LOGS_KEY = 'COMED_KKU69_ADMIN_LOGS_V2';
@@ -332,6 +343,17 @@ async function showDashboard() {
   if (login) login.classList.add('hidden');
   if (dash) dash.classList.remove('hidden');
 
+  // 0. Cloud Sync: Fetch fresh campaigns list from Supabase
+  if (window.ComedCampaignManager && typeof window.ComedCampaignManager.fetchFromCloud === 'function') {
+    try {
+      await window.ComedCampaignManager.fetchFromCloud();
+      currentAdminCampaign = window.ComedCampaignManager.getCampaignById(currentCampaignId);
+    } catch (e) {}
+  }
+
+  // Render Campaigns Switcher Hub
+  renderAdminCampaignsNav();
+
   studentDatabase = (typeof window.STUDENTS_DATA !== 'undefined' && window.STUDENTS_DATA.length > 0) ? window.STUDENTS_DATA : DEFAULT_STUDENTS;
   
   const local = localStorage.getItem(STORAGE_KEY);
@@ -446,7 +468,172 @@ function handleAdminLogout() {
   }
 }
 
+// ================= CAMPAIGN MANAGEMENT LOGIC (ADMIN) =================
+function renderAdminCampaignsNav() {
+  const container = document.getElementById('adminCampaignsNav');
+  const countBadge = document.getElementById('adminCampaignCountBadge');
+  if (!container || !window.ComedCampaignManager) return;
+
+  const allCampaigns = window.ComedCampaignManager.getAllCampaigns();
+  if (countBadge) countBadge.textContent = `${allCampaigns.length} รายการ`;
+
+  container.innerHTML = allCampaigns.map(camp => {
+    const isSelected = (camp.id.toLowerCase() === currentAdminCampaign.id.toLowerCase());
+    let statusPill = '';
+
+    if (camp.status === 'completed') {
+      statusPill = '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1"><i data-lucide="check-check" class="w-3 h-3"></i> ครบแล้ว/ปิดรับ</span>';
+    } else if (camp.status === 'open') {
+      statusPill = '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-orange-500/20 text-orange-300 border border-orange-500/30 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse"></span> กำลังเปิดรับ</span>';
+    } else {
+      statusPill = '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-slate-800 text-slate-400 border border-slate-700">ปิดชั่วคราว</span>';
+    }
+
+    const adminLink = `payment-admin.html?camp=${encodeURIComponent(camp.id)}`;
+
+    return `
+      <div class="p-3.5 rounded-2xl transition-all relative overflow-hidden flex flex-col justify-between ${
+        isSelected
+          ? 'bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-slate-900 border-2 border-orange-500 shadow-lg'
+          : 'bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 shadow-xs'
+      }">
+        <div>
+          <div class="flex items-center justify-between gap-1 mb-1">
+            <span class="text-[9px] font-extrabold uppercase tracking-wider text-orange-400">${camp.category || 'กิจกรรม'}</span>
+            ${statusPill}
+          </div>
+          <h4 class="font-black text-xs text-white line-clamp-1">${camp.title}</h4>
+          <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
+            <span>เป้าหมายคนละ:</span>
+            <span class="font-bold text-orange-400 font-mono">฿${Number(camp.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
+          ${isSelected 
+            ? '<span class="text-[10px] font-black text-orange-400 flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ใช้งานอยู่นี้</span>'
+            : `<a href="${adminLink}" class="text-[10px] font-bold text-slate-300 hover:text-white px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 transition">สลับมาดูรายการนี้</a>`
+          }
+
+          <div class="flex items-center gap-1">
+            <button onclick="toggleCampaignStatus('${camp.id}')" class="text-[9px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="เปิด/ปิดการชำระเงิน">
+              ${camp.status === 'open' ? 'ปิดรับชั่วคราว' : 'เปิดรับชำระ'}
+            </button>
+            <a href="payment.html?camp=${encodeURIComponent(camp.id)}" target="_blank" class="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-orange-400" title="ดูหน้าชำระเงินของนศ.">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function openCreateCampaignModal() {
+  const modal = document.getElementById('modalCreateCampaign');
+  if (modal) modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeCreateCampaignModal() {
+  const modal = document.getElementById('modalCreateCampaign');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function handleSaveCampaignSubmit(e) {
+  e.preventDefault();
+  const title = document.getElementById('campTitleInput')?.value.trim();
+  const code = document.getElementById('campCodeInput')?.value.trim().toLowerCase();
+  const amount = parseFloat(document.getElementById('campAmountInput')?.value) || 0;
+  const subtitle = document.getElementById('campSubtitleInput')?.value.trim() || '';
+  const category = document.getElementById('campCategoryInput')?.value.trim() || 'กิจกรรมสาขา';
+  const deadline = document.getElementById('campDeadlineInput')?.value || '';
+  const bankName = document.getElementById('campBankNameInput')?.value.trim() || 'ธนาคารกสิกรไทย';
+  const accountNumber = document.getElementById('campAccountNumInput')?.value.trim() || '236-2-47817-3';
+  const accountName = document.getElementById('campAccountNameInput')?.value.trim() || 'น.ส. พิชามญธุ์ สามสี';
+  const qrImage = document.getElementById('campQrImageInput')?.value.trim() || 'qr_payment.png';
+  const isOpen = document.getElementById('campStatusOpenInput')?.checked;
+
+  if (!title || !code || amount <= 0) {
+    alert("⚠️ กรุณากรอกข้อมูลสำคัญให้ครบถ้วน (ชื่อรายการ, รหัส ID, และยอดเงิน)");
+    return;
+  }
+
+  const newCampaign = {
+    id: code,
+    code: code.toUpperCase(),
+    title: title,
+    subtitle: subtitle,
+    category: category,
+    amount: amount,
+    currency: "THB",
+    deadline: deadline || new Date(Date.now() + 7*24*3600*1000).toISOString(),
+    deadlineDisplay: deadline ? new Date(deadline).toLocaleDateString('th-TH') : '',
+    bankName: bankName,
+    accountNumber: accountNumber,
+    accountName: accountName,
+    qrImage: qrImage,
+    status: isOpen ? 'open' : 'temp_closed',
+    isDefault: false,
+    createdAt: new Date().toISOString()
+  };
+
+  // 1. Save in local & sync to Supabase
+  if (window.ComedCampaignManager) {
+    window.ComedCampaignManager.updateCampaign(newCampaign);
+  }
+
+  // 2. Log Admin Action
+  await logAdminAction("สร้างรายการเก็บเงินใหม่", `สร้างรายการ "${title}" (฿${amount}) รหัส ID: ${code}`);
+
+  closeCreateCampaignModal();
+  alert(`✨ สร้างรายการ "${title}" เรียบร้อยแล้ว! ข้อมูลจะปรากฏทั้งหน้า Payment และ Admin ทันที`);
+
+  // Redirect to newly created campaign dashboard
+  window.location.href = `payment-admin.html?camp=${encodeURIComponent(code)}`;
+}
+
+function toggleCampaignStatus(campId) {
+  if (!window.ComedCampaignManager) return;
+  const camp = window.ComedCampaignManager.getCampaignById(campId);
+  if (!camp) return;
+
+  const newStatus = (camp.status === 'open') ? 'temp_closed' : 'open';
+  camp.status = newStatus;
+  window.ComedCampaignManager.updateCampaign(camp);
+  logAdminAction("เปลี่ยนสถานะรายการชำระ", `เปลี่ยนสถานะ "${camp.title}" เป็น ${newStatus}`);
+  renderAdminCampaignsNav();
+  alert(`✨ เปลี่ยนสถานะของ "${camp.title}" เป็น ${newStatus === 'open' ? 'เปิดรับชำระ' : 'ปิดชั่วคราว'} เรียบร้อย!`);
+}
+
 async function loadAllPayments(silent = false) {
+  // Priority 1: Supabase
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  if (sb) {
+    try {
+      const { data, error } = await sb.from('payments').select('*').eq('campaign_id', currentAdminCampaign.id);
+      if (!error && Array.isArray(data)) {
+        paymentRecords = {};
+        data.forEach(item => {
+          paymentRecords[item.student_id] = {
+            paid: !!item.paid,
+            timestamp: item.timestamp || '',
+            slipUrl: item.slip_url || '',
+            refCode: item.ref_code || '',
+            amount: item.amount || currentAdminCampaign.amount
+          };
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentRecords));
+        return;
+      }
+    } catch(err) {
+      console.warn("Supabase fetch warning in admin:", err);
+    }
+  }
+
+  // Priority 2: Google Apps Script Web App
   if (googleAppsScriptUrl) {
     try {
       const res = await fetch(googleAppsScriptUrl);
@@ -490,11 +677,13 @@ function renderStats() {
     }
   });
 
+  const targetAmount = currentAdminCampaign.amount || 190;
   const unpaidCount = total - paidCount;
-  const moneyReceived = paidCount * 190;
-  const unpaidMoney = unpaidCount * 190;
-  const moneyPercent = Math.round((moneyReceived / (total * 190)) * 100);
-  const paidPercent = Math.round((paidCount / total) * 100);
+  const moneyReceived = paidCount * targetAmount;
+  const unpaidMoney = unpaidCount * targetAmount;
+  const totalTarget = total * targetAmount;
+  const moneyPercent = totalTarget > 0 ? Math.round((moneyReceived / totalTarget) * 100) : 0;
+  const paidPercent = total > 0 ? Math.round((paidCount / total) * 100) : 0;
 
   const elMoneyRec = document.getElementById('statMoneyReceived');
   const elMoneyPct = document.getElementById('statMoneyPercent');
@@ -503,14 +692,14 @@ function renderStats() {
   const elUnpaidCnt = document.getElementById('statUnpaidCount');
   const elUnpaidMon = document.getElementById('statUnpaidMoney');
 
-  if (elMoneyRec) elMoneyRec.textContent = `฿${moneyReceived.toLocaleString()}`;
+  if (elMoneyRec) elMoneyRec.textContent = `฿${moneyReceived.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
   if (elMoneyPct) elMoneyPct.textContent = `${moneyPercent}%`;
 
   if (elPaidCnt) elPaidCnt.innerHTML = `${paidCount} <span class="text-xs font-normal text-slate-400">คน</span>`;
   if (elPaidPct) elPaidPct.textContent = `${paidPercent}%`;
 
   if (elUnpaidCnt) elUnpaidCnt.innerHTML = `${unpaidCount} <span class="text-xs font-normal text-slate-400">คน</span>`;
-  if (elUnpaidMon) elUnpaidMon.textContent = `฿${unpaidMoney.toLocaleString()}`;
+  if (elUnpaidMon) elUnpaidMon.textContent = `฿${unpaidMoney.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
 
   const cFPaid = document.getElementById('countFPaid');
   const cFUnpaid = document.getElementById('countFUnpaid');

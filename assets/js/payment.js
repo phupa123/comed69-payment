@@ -192,6 +192,17 @@ async function executeIssueSubmission() {
 }
 
 async function initApp() {
+  // 0. Cloud Sync: Fetch fresh campaigns list from Supabase
+  if (window.ComedCampaignManager && typeof window.ComedCampaignManager.fetchFromCloud === 'function') {
+    try {
+      await window.ComedCampaignManager.fetchFromCloud();
+    } catch (e) {}
+  }
+
+  // Render Campaign Selector / Switcher Grid
+  renderCampaignsNav();
+  applyCampaignDetailsToUI();
+
   // 1. Load initial dataset
   if (typeof window.studentDatabaseRaw !== 'undefined') {
     studentDatabase = window.studentDatabaseRaw;
@@ -201,7 +212,7 @@ async function initApp() {
     studentDatabase = getFallbackStudents();
   }
 
-  // 2. Fetch payments from Cloud / Local Server / LocalStorage
+  // 2. Fetch payments from Supabase / Google Apps Script / LocalStorage
   await loadPaymentRecords();
 
   // 3. Setup UI & Listeners
@@ -213,17 +224,134 @@ async function initApp() {
   // GSAP Page Entrance Animation
   if (typeof gsap !== 'undefined') {
     gsap.from("header", { y: -30, opacity: 0, duration: 0.6, ease: "power3.out" });
-    gsap.from(".hero-card-animate", { y: 25, opacity: 0, duration: 0.7, delay: 0.15, ease: "power3.out" });
-    gsap.from(".search-card-animate", { y: 25, opacity: 0, duration: 0.7, delay: 0.25, ease: "power3.out" });
+    gsap.from("#campaignSelectorSection", { y: 20, opacity: 0, duration: 0.6, delay: 0.1, ease: "power3.out" });
+    gsap.from(".hero-card-animate", { y: 25, opacity: 0, duration: 0.7, delay: 0.2, ease: "power3.out" });
+    gsap.from(".search-card-animate", { y: 25, opacity: 0, duration: 0.7, delay: 0.3, ease: "power3.out" });
   }
 
   // Init Lucide icons
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-// --- REAL API & CLOUD SYNC ---
+// Render dynamic campaign switcher cards
+function renderCampaignsNav() {
+  const container = document.getElementById('campaignsNavGrid');
+  const countBadge = document.getElementById('campaignsTotalCountBadge');
+  if (!container || !window.ComedCampaignManager) return;
+
+  const allCampaigns = window.ComedCampaignManager.getAllCampaigns();
+  if (countBadge) countBadge.textContent = `${allCampaigns.length} รายการ`;
+
+  container.innerHTML = allCampaigns.map(camp => {
+    const isSelected = (camp.id.toLowerCase() === currentCampaign.id.toLowerCase());
+    let statusPill = '';
+
+    if (camp.status === 'completed') {
+      statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1"><i data-lucide="check-check" class="w-3 h-3"></i> ชำระครบแล้ว</span>';
+    } else if (camp.status === 'open') {
+      statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-orange-100 text-orange-800 border border-orange-300 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span> เปิดรับชำระ</span>';
+    } else {
+      statusPill = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-700 border border-slate-300">ปิดรับชั่วคราว</span>';
+    }
+
+    const campaignLink = `payment.html?camp=${encodeURIComponent(camp.id)}`;
+
+    return `
+      <a href="${campaignLink}" 
+        class="block p-3.5 rounded-2xl transition-all relative overflow-hidden group cursor-pointer ${
+          isSelected 
+            ? 'bg-gradient-to-br from-orange-500/10 via-amber-500/10 to-transparent border-2 border-orange-500 shadow-md ring-2 ring-orange-500/20' 
+            : 'bg-white hover:bg-slate-50 border border-slate-200 hover:border-orange-300 shadow-xs'
+        }">
+        ${isSelected ? '<div class="absolute top-0 right-0 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-bl-xl shadow-xs">รายการปัจจุบัน</div>' : ''}
+        <div class="flex items-start justify-between gap-2 mb-1.5">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">${camp.category || 'กิจกรรม'}</span>
+          <div class="pt-0.5">${statusPill}</div>
+        </div>
+        <h3 class="font-black text-xs sm:text-sm text-slate-900 group-hover:text-orange-600 transition line-clamp-1">${camp.title}</h3>
+        <p class="text-[11px] text-slate-500 line-clamp-1 mt-0.5">${camp.subtitle || 'คณะศึกษาศาสตร์ มข.'}</p>
+        <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-400 text-[10px]">ยอดชำระ</span>
+          <span class="font-black text-orange-600 font-mono text-sm">฿${Number(camp.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+        </div>
+      </a>
+    `;
+  }).join('');
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// Update Hero, Bank Details & QR according to current campaign
+function applyCampaignDetailsToUI() {
+  const c = currentCampaign;
+  if (!c) return;
+
+  const titleEl = document.getElementById('heroCampaignTitle');
+  const subEl = document.getElementById('heroCampaignSubtitle');
+  const amtText = document.getElementById('heroAmountText');
+  const catText = document.getElementById('heroCategoryText');
+  const dlineText = document.getElementById('heroDeadlineText');
+  const targetMoney = document.getElementById('targetMoney');
+
+  if (titleEl) titleEl.textContent = c.title || "ระบบชำระเงิน";
+  if (subEl) subEl.textContent = c.subtitle || "สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มข.";
+  if (amtText) amtText.textContent = `${c.title} คนละ ฿${Number(c.amount).toLocaleString()}`;
+  if (catText) catText.textContent = c.category || "COMED 69";
+  if (dlineText) dlineText.textContent = `ถึง ${c.deadlineDisplay || c.deadline || "กำหนดการปิดรับ"}`;
+  
+  const totalTarget = (c.amount || 190) * 60;
+  if (targetMoney) targetMoney.textContent = `/ ฿${totalTarget.toLocaleString()} (เป้าหมาย)`;
+
+  // Bank Info Update
+  const bTitle = document.getElementById('bankDetailTitle');
+  const bAmt = document.getElementById('bankDetailAmount');
+  const bBank = document.getElementById('bankDetailBankName');
+  const bAccNum = document.getElementById('bankDetailAccountNum');
+  const bAccName = document.getElementById('bankDetailAccountName');
+  const bAmtHi = document.getElementById('bankAmountHighlight');
+  const bQr = document.getElementById('bankQrImage');
+
+  if (bTitle) bTitle.textContent = `${c.title} (รหัส 69)`;
+  if (bAmt) bAmt.textContent = `฿${Number(c.amount).toFixed(2)} บาท / คน`;
+  if (bBank) bBank.textContent = c.bankName || "ธนาคารกสิกรไทย (KPlus)";
+  if (bAccNum) bAccNum.textContent = c.accountNumber || "236-2-47817-3";
+  if (bAccName) bAccName.textContent = c.accountName || "น.ส. พิชามญธุ์ สามสี";
+  if (bAmtHi) bAmtHi.textContent = `฿${Number(c.amount).toLocaleString()} บาท`;
+  if (bQr && c.qrImage) bQr.src = c.qrImage;
+}
+
+function openCurrentQrFullscreen() {
+  const qr = currentCampaign.qrImage || 'qr_payment.png';
+  openFullscreenModal(qr);
+}
+
+// --- REAL API & CLOUD SYNC (Supabase First, GAS Fallback, LocalStorage Fallback) ---
 async function loadPaymentRecords() {
-  // Priority 1: Google Apps Script Web App (Production Cloud Database)
+  // Priority 1: Supabase (Ultra-Fast PostgreSQL Realtime Database)
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  if (sb) {
+    try {
+      const { data, error } = await sb.from('payments').select('*').eq('campaign_id', currentCampaign.id);
+      if (!error && Array.isArray(data)) {
+        paymentRecords = {};
+        data.forEach(item => {
+          paymentRecords[item.student_id] = {
+            paid: !!item.paid,
+            timestamp: item.timestamp || '',
+            slipUrl: item.slip_url || '',
+            refCode: item.ref_code || '',
+            amount: item.amount || currentCampaign.amount
+          };
+        });
+        saveLocalBackup();
+        return;
+      }
+    } catch(e) {
+      console.warn("Supabase load payments warning:", e);
+    }
+  }
+
+  // Priority 2: Google Apps Script Web App (Production Cloud Database)
   if (googleAppsScriptUrl) {
     try {
       const res = await fetch(googleAppsScriptUrl);
@@ -237,7 +365,7 @@ async function loadPaymentRecords() {
     }
   }
 
-  // Priority 2: Localhost Development Server only (skip on cloud workers.dev / pages.dev)
+  // Priority 3: Localhost Development Server only
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     try {
       const res = await fetch('/api/payments');
@@ -249,7 +377,7 @@ async function loadPaymentRecords() {
     } catch (e) {}
   }
 
-  // Priority 3: LocalStorage Backup
+  // Priority 4: LocalStorage Backup
   loadFromLocal();
 }
 
@@ -857,13 +985,35 @@ async function executeSlipSubmission() {
     timestamp: timestamp,
     slipUrl: tempSlipDataUrl,
     refCode: refCode,
-    amount: 190
+    amount: currentCampaign.amount || 190
   };
   saveLocalBackup();
 
-  if (bar) bar.style.width = '65%';
+  if (bar) bar.style.width = '60%';
 
-  // 1. Send to Google Apps Script (Cloud)
+  // 1. Send to Supabase Database (Realtime Cloud Database)
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  if (sb) {
+    try {
+      await sb.from('payments').upsert({
+        campaign_id: currentCampaign.id,
+        student_id: studentId,
+        student_name: currentSelectedStudent.name,
+        student_nickname: currentSelectedStudent.nickname,
+        student_email: currentSelectedStudent.email,
+        amount: currentCampaign.amount || 190,
+        paid: true,
+        timestamp: timestamp,
+        slip_url: tempSlipDataUrl, // base64 or external CDN
+        ref_code: refCode,
+        verified: true
+      }, { onConflict: 'campaign_id,student_id' });
+    } catch(err) {
+      console.warn("Supabase insert payment warning:", err);
+    }
+  }
+
+  // 2. Send to Google Apps Script (Cloud)
   if (googleAppsScriptUrl) {
     try {
       await fetch(googleAppsScriptUrl, {
