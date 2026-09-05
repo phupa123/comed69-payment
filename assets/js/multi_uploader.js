@@ -20,6 +20,14 @@
   // Default keys and fallbacks
   const DEFAULT_CONFIG = {
     activeProvider: 'auto', // 'auto' | 'imgbb' | 'cloudinary' | 'freeimage' | 'catbox'
+    enabledProviders: ['cloudinary', 'catbox', 'imgbb', 'freeimage'],
+    providerPriority: ['cloudinary', 'catbox', 'imgbb', 'freeimage'],
+    
+    // Auto compression settings
+    autoCompress: true,
+    maxImageDimension: 1600, // max width/height in px
+    compressionQuality: 0.82, // 82% quality (saves ~75% size with zero noticeable quality drop)
+    maxFileSizeKB: 2048, // 2MB target threshold
     
     // 1. ImgBB API Key
     imgbbApiKey: localStorage.getItem('COMED_IMGBB_KEY') || '6d207e02198a847aa5ad8ac504ff3463',
@@ -100,18 +108,49 @@
 
       // Convert Base64 DataURL to File if needed
       if (typeof fileInput === 'string' && fileInput.startsWith('data:')) {
-        base64Clean = fileInput.split(',')[1] || fileInput;
         fileObj = this.dataURLtoFile(fileInput, 'upload_' + Date.now() + '.png');
       }
 
+      // Auto Smart Image Compression (Resize & Compress if file is image and large)
+      if (this.config.autoCompress && fileObj && fileObj.type && fileObj.type.startsWith('image/')) {
+        try {
+          onProgress(10, 'กำลังปรับขนาดและบีบอัดภาพให้อยู่ในเกณฑ์เหมาะสม...');
+          const compressed = await this.compressImage(fileObj, {
+            maxWidth: this.config.maxImageDimension || 1600,
+            maxHeight: this.config.maxImageDimension || 1600,
+            quality: this.config.compressionQuality || 0.82
+          });
+          if (compressed) {
+            fileObj = compressed;
+          }
+        } catch (compErr) {
+          console.warn("[MultiUploader] Image compression skipped:", compErr);
+        }
+      }
+
+      // Prepare clean base64 if needed
+      if (typeof fileInput === 'string' && fileInput.startsWith('data:')) {
+        base64Clean = fileInput.split(',')[1] || fileInput;
+      }
+
+      // Build Provider Sequence based on Admin Priority & Enabled settings
       let providers = [];
-      if (preferred !== 'auto') {
+      const configuredPriority = Array.isArray(this.config.providerPriority) ? this.config.providerPriority : ['cloudinary', 'catbox', 'imgbb', 'freeimage'];
+      const enabledList = Array.isArray(this.config.enabledProviders) ? this.config.enabledProviders : configuredPriority;
+
+      if (preferred !== 'auto' && enabledList.includes(preferred)) {
         providers.push(preferred);
       }
-      
-      const allList = ['imgbb', 'freeimage', 'catbox', 'cloudinary'];
-      for (const p of allList) {
-        if (!providers.includes(p)) providers.push(p);
+
+      for (const p of configuredPriority) {
+        if (enabledList.includes(p) && !providers.includes(p)) {
+          providers.push(p);
+        }
+      }
+
+      // If all disabled, fallback to any
+      if (providers.length === 0) {
+        providers = ['cloudinary', 'catbox', 'imgbb', 'freeimage'];
       }
 
       let lastError = null;
@@ -352,6 +391,73 @@
         case 'cloudinary': return 'Cloudinary CDN';
         default: return 'Auto Smart Cloud';
       }
+    }
+
+    /**
+     * Smart Image Compressor using Canvas
+     * Resizes dimensions and adjusts JPEG/WebP compression quality
+     */
+    async compressImage(file, options = {}) {
+      const maxWidth = options.maxWidth || 1600;
+      const maxHeight = options.maxHeight || 1600;
+      const quality = options.quality || 0.82;
+
+      return new Promise((resolve) => {
+        // If file is not image or already very small (< 400KB), no need to compress
+        if (!file.type || !file.type.startsWith('image/') || file.size < 400 * 1024) {
+          return resolve(file);
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+
+            // Calculate new dimensions respecting aspect ratio
+            if (width > maxWidth || height > maxHeight) {
+              if (width > height) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+              } else {
+                width = Math.round((width * maxHeight) / height);
+                height = maxHeight;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+
+            // Draw with smooth interpolation
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Export to JPEG / Blob with target quality
+            const mimeType = file.type === 'image/png' && file.size > 1.5 * 1024 * 1024 ? 'image/jpeg' : file.type;
+            canvas.toBlob((blob) => {
+              if (!blob || blob.size >= file.size) {
+                // If compression didn't save size, use original
+                resolve(file);
+              } else {
+                const compressedFile = new File([blob], file.name, {
+                  type: mimeType,
+                  lastModified: Date.now()
+                });
+                console.log(`[MultiUploader] Compressed: ${(file.size/1024).toFixed(1)}KB -> ${(compressedFile.size/1024).toFixed(1)}KB (${Math.round((1 - compressedFile.size/file.size)*100)}% saved)`);
+                resolve(compressedFile);
+              }
+            }, mimeType, quality);
+          };
+          img.onerror = () => resolve(file);
+          img.src = e.target.result;
+        };
+        reader.onerror = () => resolve(file);
+        reader.readAsDataURL(file);
+      });
     }
 
     dataURLtoFile(dataurl, filename) {

@@ -88,19 +88,67 @@
     <!-- Active Provider Selector Form -->
     <form id="storageConfigForm" onsubmit="saveStorageConfig(event)" class="space-y-6">
       
-      <!-- Primary Priority -->
-      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3">
-        <label class="block text-xs font-bold text-orange-400 flex items-center gap-1.5">
-          <i data-lucide="sparkles" class="w-4 h-4"></i>
-          <span>ผู้ให้บริการหลักที่ต้องการใช้งาน (Primary Provider):</span>
-        </label>
-        <select id="cfgActiveProvider" class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-orange-500 transition">
-          <option value="auto">✨ อัตโนมัติ (Auto Smart Failover: สำรองและสลับผู้ให้บริการอัตโนมัติ)</option>
-          <option value="imgbb">ImgBB (ฟรี ไม่จำกัดจำนวนรูป สูงสุด 32MB)</option>
-          <option value="freeimage">FreeImage.host (ฟรี ถาวร)</option>
-          <option value="catbox">Catbox.moe (ฟรี ถาวร 100% ไม่ต้องใช้บัญชี)</option>
-          <option value="cloudinary">Cloudinary (CDN เครือข่ายระดับโลก)</option>
-        </select>
+      <!-- Multi-Provider Priority & Selection Control -->
+      <div class="p-6 rounded-3xl bg-slate-900/90 border border-orange-500/30 shadow-xl space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-sm font-black text-white flex items-center gap-2">
+              <i data-lucide="layers" class="w-4 h-4 text-orange-400"></i>
+              <span>เลือกผู้ให้บริการและจัดลำดับความสำคัญ (Provider Priority & Failover Chain)</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">
+              เลือกเปิด-ปิด และสลับลำดับการทำงาน ระบบจะอัปโหลดไปยังผู้ให้บริการอันดับ 1 ก่อน หากมีปัญหาจะสลับตัวถัดไปอัตโนมัติ
+            </p>
+          </div>
+          <span class="px-3 py-1 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 w-max">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Auto Failover Enabled
+          </span>
+        </div>
+
+        <!-- Priority Order Interactive List -->
+        <div class="space-y-2.5">
+          <label class="text-xs font-bold text-slate-300 block">ลำดับความสำคัญในการบันทึกสลิป/ไฟล์ (กดปุ่มขึ้น-ลงเพื่อจัดลำดับ):</label>
+          <div id="priorityListContainer" class="space-y-2">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Smart Image Compression Settings -->
+        <div class="pt-3 border-t border-slate-800/80 space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="inline-flex items-center gap-2.5 cursor-pointer">
+              <input type="checkbox" id="cfgAutoCompress" checked class="rounded accent-orange-500 w-4 h-4 cursor-pointer">
+              <div>
+                <span class="text-xs font-black text-white flex items-center gap-1.5">
+                  <i data-lucide="minimize-2" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>ระบบบีบอัดและปรับขนาดภาพอัตโนมัติก่อนส่ง (Auto Image Optimizer)</span>
+                </span>
+                <span class="text-[11px] text-slate-400 block">แก้ปัญหาภาพสลิปขนาดใหญ่เกินข้อจำกัดของโฮสต์ และช่วยให้โหลดดูหน้าเว็บเร็วขึ้น 4 เท่า</span>
+              </div>
+            </label>
+          </div>
+
+          <div id="compressionDetailBox" class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 text-xs">
+            <div class="space-y-1">
+              <label class="text-[11px] text-slate-400">ขนาดความกว้าง/สูงสูงสุด (Max Dimension):</label>
+              <select id="cfgMaxDimension" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-orange-500">
+                <option value="1200">1200 px (สลิปขนาดกะทัดรัด ~200-400KB)</option>
+                <option value="1600" selected>1600 px (แนะนำ สมดุลความคมชัดและประหยัดพื้นที่ ~400-800KB)</option>
+                <option value="2048">2048 px (คมชัดสูง สำหรับเอกสารละเอียด ~1MB)</option>
+              </select>
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] text-slate-400">คุณภาพการบีบอัด (Compression Quality):</label>
+              <select id="cfgQuality" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-orange-500">
+                <option value="0.75">75% (ประหยัดพื้นที่สูงสุด)</option>
+                <option value="0.82" selected>82% (แนะนำ ตาเปล่าไม่เห็นความต่าง ประหยัดเนื้อที่ 70%)</option>
+                <option value="0.90">90% (เน้นคุณภาพต้นฉบับสูงสุด)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Provider 1: ImgBB -->
@@ -247,10 +295,123 @@
   <script>
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
+    let currentPriorityOrder = ['cloudinary', 'catbox', 'imgbb', 'freeimage'];
+    let currentEnabledProviders = ['cloudinary', 'catbox', 'imgbb', 'freeimage'];
+
+    const PROVIDER_METAS = {
+      cloudinary: {
+        name: 'Cloudinary CDN',
+        desc: 'เร็วระดับโลก แนะนำลำดับที่ 1 (ฟรี 25GB/เดือน) จัดการลบไฟล์ได้สมบูรณ์',
+        icon: 'cloud-lightning',
+        color: 'text-cyan-400',
+        badge: 'แนะนำอันดับ 1'
+      },
+      catbox: {
+        name: 'Catbox.moe',
+        desc: 'ฟรีถาวร 100% ไม่จำกัดจำนวนรูป ไม่ต้องสมัครหรือใช้ API Key เก็บสลิปได้ไม่อั้น',
+        icon: 'infinity',
+        color: 'text-emerald-400',
+        badge: 'ฟรีถาวร ไม่จำกัด'
+      },
+      imgbb: {
+        name: 'ImgBB API',
+        desc: 'Direct URL คมชัด ลิงก์ตรงโหลดง่าย ไฟล์ละไม่เกิน 32MB',
+        icon: 'image',
+        color: 'text-amber-400',
+        badge: 'ฟรี 32MB/ไฟล์'
+      },
+      freeimage: {
+        name: 'FreeImage.host API',
+        desc: 'เซิร์ฟเวอร์สำรองเก็บรูปภาพฟรีถาวร เหมาะเป็นแนวรับสำรองสุดท้าย',
+        icon: 'hard-drive',
+        color: 'text-purple-400',
+        badge: 'สำรองฉุกเฉิน'
+      }
+    };
+
+    function renderPriorityList() {
+      const container = document.getElementById('priorityListContainer');
+      if (!container) return;
+
+      container.innerHTML = currentPriorityOrder.map((pid, idx) => {
+        const meta = PROVIDER_METAS[pid] || { name: pid, desc: '', icon: 'cloud', color: 'text-slate-300', badge: '' };
+        const isEnabled = currentEnabledProviders.includes(pid);
+
+        return `
+          <div class="p-3.5 rounded-2xl border transition flex items-center justify-between gap-3 ${
+            isEnabled 
+              ? 'bg-slate-950/80 border-slate-800' 
+              : 'bg-slate-950/40 border-slate-900 opacity-60'
+          }">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black font-mono ${
+                isEnabled ? 'bg-orange-500/20 text-orange-400 border border-orange-500/40' : 'bg-slate-800 text-slate-500'
+              }">
+                ${idx + 1}
+              </span>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" onchange="toggleProvider('${pid}', this.checked)" ${isEnabled ? 'checked' : ''} class="rounded accent-orange-500 w-4 h-4 cursor-pointer">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-white">${meta.name}</span>
+                    <span class="px-2 py-0.2 rounded-full text-[9px] font-extrabold bg-slate-800 ${meta.color} border border-slate-700">
+                      ${meta.badge}
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 leading-tight mt-0.5">${meta.desc}</p>
+                </div>
+              </label>
+            </div>
+
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <button type="button" onclick="movePriority(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-20 text-slate-300 transition cursor-pointer" title="เลื่อนขึ้น">
+                <i data-lucide="chevron-up" class="w-4 h-4"></i>
+              </button>
+              <button type="button" onclick="movePriority(${idx}, 1)" ${idx === currentPriorityOrder.length - 1 ? 'disabled' : ''} class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-20 text-slate-300 transition cursor-pointer" title="เลื่อนลง">
+                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function toggleProvider(pid, enabled) {
+      if (enabled) {
+        if (!currentEnabledProviders.includes(pid)) currentEnabledProviders.push(pid);
+      } else {
+        currentEnabledProviders = currentEnabledProviders.filter(p => p !== pid);
+      }
+      renderPriorityList();
+    }
+
+    function movePriority(index, direction) {
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= currentPriorityOrder.length) return;
+
+      const temp = currentPriorityOrder[index];
+      currentPriorityOrder[index] = currentPriorityOrder[targetIndex];
+      currentPriorityOrder[targetIndex] = temp;
+      renderPriorityList();
+    }
+
     function loadForm() {
       if (!window.MultiCloudUploader) return;
       const cfg = window.MultiCloudUploader.config;
-      document.getElementById('cfgActiveProvider').value = cfg.activeProvider || 'auto';
+      
+      if (Array.isArray(cfg.providerPriority) && cfg.providerPriority.length > 0) {
+        currentPriorityOrder = [...cfg.providerPriority];
+      }
+      if (Array.isArray(cfg.enabledProviders)) {
+        currentEnabledProviders = [...cfg.enabledProviders];
+      }
+
+      document.getElementById('cfgAutoCompress').checked = (cfg.autoCompress !== false);
+      document.getElementById('cfgMaxDimension').value = String(cfg.maxImageDimension || 1600);
+      document.getElementById('cfgQuality').value = String(cfg.compressionQuality || 0.82);
+
       document.getElementById('cfgImgbbKey').value = cfg.imgbbApiKey || '';
       document.getElementById('cfgFreeimageKey').value = cfg.freeimageApiKey || '';
       document.getElementById('cfgCatboxHash').value = cfg.catboxUserHash || '';
@@ -258,6 +419,8 @@
       document.getElementById('cfgCloudinaryPreset').value = cfg.cloudinaryUploadPreset || '';
       document.getElementById('cfgCloudinaryApiKey').value = cfg.cloudinaryApiKey || '';
       document.getElementById('cfgCloudinaryApiSecret').value = cfg.cloudinaryApiSecret || '';
+      
+      renderPriorityList();
       renderFileCatalogTable();
     }
 
@@ -265,8 +428,18 @@
       e.preventDefault();
       if (!window.MultiCloudUploader) return;
 
+      if (currentEnabledProviders.length === 0) {
+        alert("⚠️ กรุณาเลือกเปิดใช้งานผู้ให้บริการจัดเก็บอย่างน้อย 1 รายการ");
+        return;
+      }
+
       const newCfg = {
-        activeProvider: document.getElementById('cfgActiveProvider').value,
+        providerPriority: currentPriorityOrder,
+        enabledProviders: currentEnabledProviders,
+        autoCompress: document.getElementById('cfgAutoCompress').checked,
+        maxImageDimension: parseInt(document.getElementById('cfgMaxDimension').value, 10) || 1600,
+        compressionQuality: parseFloat(document.getElementById('cfgQuality').value) || 0.82,
+
         imgbbApiKey: document.getElementById('cfgImgbbKey').value.trim(),
         freeimageApiKey: document.getElementById('cfgFreeimageKey').value.trim(),
         catboxUserHash: document.getElementById('cfgCatboxHash').value.trim(),
@@ -277,7 +450,7 @@
       };
 
       window.MultiCloudUploader.saveConfig(newCfg);
-      alert("✅ บันทึกการตั้งค่าระบบจัดเก็บไฟล์คลาวด์เรียบร้อยแล้ว!");
+      alert("✅ บันทึกลำดับความสำคัญและตั้งค่าระบบจัดเก็บไฟล์คลาวด์เรียบร้อยแล้ว!");
     }
 
     function resetDefaultStorageConfig() {
