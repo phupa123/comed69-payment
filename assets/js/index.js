@@ -650,6 +650,245 @@ function filterRoster() {
   renderRoster(filtered);
 }
 
+// ================= DYNAMIC CAMPAIGNS RENDERING FOR INDEX.HTML =================
+async function renderIndexCampaigns() {
+  const container = document.getElementById('indexCampaignsContainer');
+  if (!container) return;
+
+  // 1. Fetch fresh campaigns from Supabase if available
+  if (window.ComedCampaignManager && typeof window.ComedCampaignManager.fetchFromCloud === 'function') {
+    try {
+      await window.ComedCampaignManager.fetchFromCloud();
+    } catch (e) {}
+  }
+
+  const campaigns = (window.ComedCampaignManager ? window.ComedCampaignManager.getAllCampaigns() : [])
+    .filter(c => !String(c.id).startsWith("system_"));
+
+  if (!campaigns || campaigns.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-12 text-center text-slate-400 text-sm">
+        ยังไม่มีรายการเรียกเก็บเงินที่เปิดใช้งานในขณะนี้
+      </div>
+    `;
+    return;
+  }
+
+  // Check login session for individual card status
+  let userSession = null;
+  try {
+    const rawUser = localStorage.getItem('COMED_USER_SESSION');
+    if (rawUser) userSession = JSON.parse(rawUser);
+  } catch (e) {}
+
+  // Fetch all payment records for campaigns from Supabase / Local
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  let allPaymentsData = [];
+  if (sb) {
+    try {
+      const { data, error } = await sb.from('payments').select('*');
+      if (!error && Array.isArray(data)) {
+        allPaymentsData = data;
+      }
+    } catch (e) {}
+  }
+
+  const myId = userSession?.studentId ? userSession.studentId.replace(/-/g, '').trim() : '';
+  const myEmail = (userSession?.email || '').toLowerCase().trim();
+
+  container.innerHTML = campaigns.map((camp, idx) => {
+    const isCompleted = (camp.status === 'completed');
+    const isOpen = (camp.status === 'open' || !camp.status);
+    const amount = Number(camp.amount) || 0;
+    const targetTotalAmount = amount * 60;
+
+    // Filter payments for this campaign
+    const campPayments = allPaymentsData.filter(p => p.campaign_id === camp.id && p.paid);
+    const paidCount = campPayments.length;
+    const paidAmount = paidCount * amount;
+    const remainingCount = Math.max(0, 60 - paidCount);
+    const percent = targetTotalAmount > 0 ? Math.min(100, Math.round((paidAmount / targetTotalAmount) * 100)) : 0;
+
+    // Check if current user has paid this campaign
+    let userHasPaid = false;
+    let userSlipInfo = null;
+    if (userSession) {
+      userSlipInfo = campPayments.find(p => {
+        const pId = (p.student_id || '').replace(/-/g, '').trim();
+        const pEmail = (p.email || '').toLowerCase().trim();
+        return (myId && pId && pId === myId) || (myEmail && pEmail && pEmail === myEmail);
+      });
+      if (userSlipInfo) userHasPaid = true;
+    }
+
+    // Status Badge Top Right
+    let topBadge = '';
+    if (isCompleted) {
+      topBadge = '<div class="absolute top-0 right-0 bg-emerald-600 text-white text-[11px] font-black px-4 py-1 rounded-bl-2xl shadow-sm flex items-center gap-1"><i data-lucide="check-check" class="w-3.5 h-3.5"></i> ครบตามเป้าแล้ว</div>';
+    } else if (isOpen) {
+      topBadge = '<div class="absolute top-0 right-0 bg-gradient-to-l from-orange-500 to-amber-500 text-white text-[11px] font-black px-4 py-1 rounded-bl-2xl shadow-sm flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> เปิดรับชำระอยู่</div>';
+    } else {
+      topBadge = '<div class="absolute top-0 right-0 bg-slate-600 text-white text-[11px] font-black px-4 py-1 rounded-bl-2xl shadow-sm">ปิดรับชั่วคราว</div>';
+    }
+
+    // Personal user status strip
+    let userStatusBox = '';
+    if (userSession) {
+      if (userHasPaid) {
+        userStatusBox = `
+          <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-xs flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-sm">
+                <i data-lucide="check" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <span class="font-black text-emerald-900 block text-xs">คุณชำระเงินแล้ว</span>
+                <span class="text-[11px] text-emerald-700">${userSlipInfo?.timestamp || 'มีบันทึกในระบบแล้ว'}</span>
+              </div>
+            </div>
+            <a href="payment.html?camp=${encodeURIComponent(camp.id)}&tab=status" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] rounded-xl transition shadow-sm">
+              ดูสลิป
+            </a>
+          </div>
+        `;
+      } else {
+        userStatusBox = `
+          <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-300 text-xs flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <span class="font-bold text-slate-800 block text-xs">รอการชำระเงิน</span>
+                <span class="text-[11px] text-slate-500">ยอดที่ต้องชำระ ฿${amount.toLocaleString()}</span>
+              </div>
+            </div>
+            <a href="payment.html?camp=${encodeURIComponent(camp.id)}&auto=pay" class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[11px] rounded-xl transition shadow-sm">
+              ชำระเงิน
+            </a>
+          </div>
+        `;
+      }
+    } else {
+      userStatusBox = `
+        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-slate-200 text-slate-600 flex items-center justify-center font-bold">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <span class="font-bold text-slate-800 block text-xs">สถานะของฉัน</span>
+              <span class="text-[11px] text-slate-500">กรุณาเข้าสู่ระบบเพื่อเช็คสถานะ</span>
+            </div>
+          </div>
+          <button onclick="openGoogleLoginModal()" class="px-3 py-1.5 bg-white border border-slate-200 hover:border-orange-500 text-slate-800 font-bold text-[11px] rounded-xl transition shadow-sm cursor-pointer">
+            เข้าสู่ระบบ
+          </button>
+        </div>
+      `;
+    }
+
+    // Action button
+    let actionBtn = '';
+    if (userHasPaid) {
+      actionBtn = `
+        <div class="pt-1 flex items-center gap-2">
+          <a href="payment.html?camp=${encodeURIComponent(camp.id)}" class="flex-grow py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm text-center shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 cursor-pointer">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <span>คุณชำระเงินแล้ว (ดูรายละเอียด)</span>
+          </a>
+        </div>
+      `;
+    } else {
+      actionBtn = `
+        <div class="pt-1 flex items-center gap-2">
+          <a href="payment.html?camp=${encodeURIComponent(camp.id)}&auto=pay" class="flex-grow py-3 px-4 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm text-center shadow-md shadow-orange-500/25 transition flex items-center justify-center gap-2 cursor-pointer">
+            <i data-lucide="upload" class="w-4 h-4"></i>
+            <span>คลิกเพื่อแนบสลิปชำระเงิน</span>
+          </a>
+          <a href="payment.html?camp=${encodeURIComponent(camp.id)}&tab=status" class="py-3 px-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center justify-center" title="ดูรายชื่อ">
+            <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+          </a>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="bg-white rounded-3xl p-6 sm:p-7 border-2 ${isOpen ? 'border-orange-300 shadow-xl shadow-orange-500/10 hover:border-orange-500' : 'border-slate-200 opacity-95'} space-y-4 relative overflow-hidden group transition-all">
+        ${topBadge}
+
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 p-1.5 flex items-center justify-center flex-shrink-0 border border-orange-200 shadow-sm">
+            <img src="${camp.qrImage && !camp.qrImage.includes('data:') ? camp.qrImage : 'logo.png'}" alt="Logo" class="w-full h-full object-contain">
+          </div>
+          <div class="pr-12">
+            <span class="text-[10px] font-bold text-orange-600 uppercase tracking-wider block">${camp.category || 'กิจกรรมสาขาวิชา'}</span>
+            <h3 class="text-base font-black text-slate-900 leading-tight">${camp.title}</h3>
+            <p class="text-xs text-slate-500 mt-0.5">${camp.subtitle || 'คณะศึกษาศาสตร์ มข.'}</p>
+          </div>
+        </div>
+
+        <!-- Basic Info Box -->
+        <div class="bg-slate-50/90 p-3.5 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 flex items-center gap-1.5"><i data-lucide="tag" class="w-3.5 h-3.5 text-orange-500"></i> ยอดที่ต้องชำระ:</span>
+            <span class="font-black text-slate-900 text-base text-orange-600">฿${amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 flex items-center gap-1.5"><i data-lucide="calendar" class="w-3.5 h-3.5 text-rose-500"></i> กำหนดชำระ:</span>
+            <span class="font-bold text-rose-600">${camp.deadlineDisplay || camp.deadline || 'ตามที่สาขากำหนด'}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 flex items-center gap-1.5"><i data-lucide="credit-card" class="w-3.5 h-3.5 text-slate-400"></i> บัญชีปลายทาง:</span>
+            <span class="font-semibold text-slate-700 truncate max-w-[180px]">${camp.bankName || ''} ${camp.accountNumber || ''}</span>
+          </div>
+        </div>
+
+        <!-- Progress Stats -->
+        <div class="p-3.5 rounded-2xl bg-gradient-to-br from-orange-50/70 via-amber-50/40 to-slate-50 border border-orange-200/90 space-y-2.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-700 flex items-center gap-1">
+              <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-orange-500"></i>
+              <span>ความคืบหน้าการชำระเงิน</span>
+            </span>
+            <span class="text-[10px] font-extrabold text-orange-600">${percent}%</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <div class="bg-white/80 p-2 rounded-xl border border-orange-100">
+              <span class="text-[10px] font-semibold text-slate-500 block">ยอดชำระแล้ว</span>
+              <div class="flex items-baseline gap-1 mt-0.5">
+                <span class="text-sm font-black text-orange-600">฿${paidAmount.toLocaleString()}</span>
+                <span class="text-[9px] text-slate-400">/ ฿${targetTotalAmount.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <div class="bg-white/80 p-2 rounded-xl border border-emerald-100">
+              <span class="text-[10px] font-semibold text-slate-500 block">จำนวนผู้ชำระ</span>
+              <div class="flex items-baseline gap-1 mt-0.5">
+                <span class="text-sm font-black text-emerald-600">${paidCount} คน</span>
+                <span class="text-[9px] text-slate-400">/ 60</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden p-0.5 border border-slate-200">
+            <div class="h-full bg-gradient-to-r from-orange-500 to-emerald-500 rounded-full transition-all duration-700" style="width: ${percent}%;"></div>
+          </div>
+        </div>
+
+        <!-- Personal User Status Widget -->
+        ${userStatusBox}
+
+        <!-- Action Button -->
+        ${actionBtn}
+      </div>
+    `;
+  }).join('');
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
 // ================= REAL-TIME STATS CALCULATION & SYNC =================
 async function fetchIndexRealtimeStats() {
   const refreshIcon = document.getElementById('statsRefreshIcon');
@@ -857,7 +1096,10 @@ document.addEventListener('DOMContentLoaded', () => {
   checkUserSession();
   renderRoster(window.STUDENTS_DATA || []);
   
-  // 2. Fetch Real-time Progress Stats
+  // 2. Render all dynamic campaigns from Cloud/Repository
+  renderIndexCampaigns();
+  
+  // 3. Fetch Real-time Progress Stats
   fetchIndexRealtimeStats();
 
   // Auto-trigger Google One-Tap Top-Right Prompt if user is not logged in
