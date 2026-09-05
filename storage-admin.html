@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบตรวจสอบและจัดการคลังไฟล์คลาวด์ (Cloud Storage Admin) | COMED KKU</title>
+  <meta name="description" content="ระบบศูนย์กลางตรวจสอบไฟล์ทั้งหมด คัดกรองตามผู้ให้บริการ (Catbox, Cloudinary, ImgBB, FreeImage) และติดตามว่าผู้ใช้หรือนักศึกษาคนไหนเป็นคนอัปโหลด">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- GSAP Smooth Animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- Supabase JS Client & Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase_config.js"></script>
+
+  <!-- Strict Admin Security Guard -->
+  <script src="config/admin_guard.js"></script>
+
+  <!-- Multi-Cloud Engine -->
+  <script src="assets/js/multi_uploader.js"></script>
+</head>
+
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white font-sans antialiased overflow-x-hidden">
+
+  <!-- Glow Background Orbs -->
+  <div class="fixed top-0 left-1/3 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-2xl border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <div class="flex items-center gap-3.5">
+        <a href="admin.html" class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition shadow-sm" title="กลับสู่ Central Admin Hub">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+              CLOUD AUDIT & MONITORING
+            </span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          </div>
+          <h1 class="text-base sm:text-lg font-black text-white leading-tight">ตรวจสอบไฟล์คลาวด์และติดตามผู้ใช้ (Storage Admin)</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="upload-admin.html" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 transition flex items-center gap-1.5">
+          <i data-lucide="sliders" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span class="hidden sm:inline">ตั้งค่า API</span>
+        </a>
+        <a href="upload.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span>หน้าอัปโหลด</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow space-y-8">
+    
+    <!-- Hero Summary Bar -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      
+      <!-- Total Files -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-2 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-bold">
+          <span>ไฟล์ทั้งหมดในระบบ</span>
+          <i data-lucide="files" class="w-4 h-4 text-orange-400"></i>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-white font-mono" id="statTotalFiles">0</div>
+        <span class="text-[11px] text-slate-400 block">ทั้งสลิปและไฟล์ทั่วไป</span>
+      </div>
+
+      <!-- Cloudinary Count -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-2 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-bold">
+          <span>Cloudinary CDN</span>
+          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-cyan-400 font-mono" id="statCloudinaryFiles">0</div>
+        <span class="text-[11px] text-slate-400 block">จัดการลบ/โหลดได้</span>
+      </div>
+
+      <!-- Catbox Count -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-2 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-bold">
+          <span>Catbox.moe</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-emerald-400 font-mono" id="statCatboxFiles">0</div>
+        <span class="text-[11px] text-slate-400 block">ถาวร ไม่จำกัด</span>
+      </div>
+
+      <!-- ImgBB / FreeImage Count -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-2 relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-bold">
+          <span>ImgBB & FreeImage</span>
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+        </div>
+        <div class="text-2xl sm:text-3xl font-black text-amber-400 font-mono" id="statOtherFiles">0</div>
+        <span class="text-[11px] text-slate-400 block">API สำรอง</span>
+      </div>
+
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        
+        <!-- Search -->
+        <div class="relative flex-grow max-w-md">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-500"></i>
+          <input type="text" id="searchInput" oninput="renderStorageTable()" placeholder="ค้นหาชื่อไฟล์, รหัสนักศึกษา, ชื่อผู้ใช้, หรืออีเมล..."
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 text-white text-xs outline-none transition font-sans">
+        </div>
+
+        <!-- Provider Filters Tabs -->
+        <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 sm:pb-0">
+          <button onclick="setProviderFilter('all')" id="btnFilterAll" class="px-3 py-2 rounded-xl text-xs font-black transition cursor-pointer bg-orange-500 text-white shadow-md">
+            ทั้งหมด (<span id="countAll">0</span>)
+          </button>
+          <button onclick="setProviderFilter('cloudinary')" id="btnFilterCloudinary" class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800">
+            Cloudinary (<span id="countCloudinary">0</span>)
+          </button>
+          <button onclick="setProviderFilter('catbox')" id="btnFilterCatbox" class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800">
+            Catbox (<span id="countCatbox">0</span>)
+          </button>
+          <button onclick="setProviderFilter('imgbb')" id="btnFilterImgbb" class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800">
+            ImgBB (<span id="countImgbb">0</span>)
+          </button>
+          <button onclick="setProviderFilter('freeimage')" id="btnFilterFreeimage" class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800">
+            FreeImage (<span id="countFreeimage">0</span>)
+          </button>
+        </div>
+
+        <!-- Refresh Button -->
+        <button onclick="refreshAllStorageData()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer flex-shrink-0">
+          <i data-lucide="rotate-cw" id="refreshIcon" class="w-3.5 h-3.5"></i>
+          <span>ดึงข้อมูลล่าสุด</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Main Files Audit Table -->
+    <div class="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-2">
+          <h2 class="text-base sm:text-lg font-black text-white">ตารางตรวจสอบไฟล์และผู้รับผิดชอบการอัปโหลด</h2>
+          <span id="showingCountBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">กำลังแสดง 0 รายการ</span>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-800">
+              <th class="p-3 text-center w-12">ภาพตัวอย่าง</th>
+              <th class="p-3">ชื่อไฟล์ / หมวดหมู่</th>
+              <th class="p-3">ผู้ใช้ที่เป็นคนอัปโหลด (Uploader)</th>
+              <th class="p-3 text-center">ผู้ให้บริการคลาวด์</th>
+              <th class="p-3">วันและเวลาที่ส่ง</th>
+              <th class="p-3 text-center w-36">การจัดการไฟล์</th>
+            </tr>
+          </thead>
+          <tbody id="storageTableBody">
+            <tr>
+              <td colspan="6" class="text-center py-12 text-slate-500 text-xs font-bold flex-col items-center justify-center">
+                <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-orange-500 mx-auto mb-2"></i>
+                <span>กำลังโหลดข้อมูลคลังไฟล์จากทุกช่องทาง...</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= MODAL: FILE DETAIL & PREVIEW ================= -->
+  <div id="modalFileDetail" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="relative bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-6">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i data-lucide="file-check" class="w-5 h-5 text-emerald-400"></i>
+          <span>รายละเอียดไฟล์และหลักฐานการอัปโหลด</span>
+        </h3>
+        <button onclick="closeFileDetailModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+        <!-- Image Container -->
+        <div class="bg-slate-950 rounded-2xl border border-slate-800 p-2 flex items-center justify-center max-h-72 overflow-hidden">
+          <img id="detailModalImg" src="" alt="File Preview" class="max-h-64 max-w-full object-contain rounded-xl">
+        </div>
+
+        <!-- Metadata List -->
+        <div class="space-y-3 text-xs">
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+            <span class="text-slate-400 block text-[11px]">ผู้ส่งไฟล์ / นักศึกษา:</span>
+            <span id="detailModalUser" class="font-bold text-white text-sm block">-</span>
+            <span id="detailModalEmail" class="font-mono text-orange-400 block text-[11px]">-</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+              <span class="text-slate-400 block text-[10px]">ผู้ให้บริการคลาวด์:</span>
+              <span id="detailModalProvider" class="font-bold text-white block text-xs">-</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+              <span class="text-slate-400 block text-[10px]">หมวดหมู่:</span>
+              <span id="detailModalCategory" class="font-bold text-emerald-400 block text-xs">-</span>
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+            <span class="text-slate-400 block text-[10px]">วัน-เวลา:</span>
+            <span id="detailModalDate" class="font-mono text-slate-300 block text-xs">-</span>
+          </div>
+
+          <div class="space-y-1 pt-1">
+            <label class="text-slate-400 text-[10px] font-bold block">Direct Public URL:</label>
+            <input type="text" id="detailModalUrl" readonly class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-[11px] outline-none">
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+        <a id="detailModalOpenBtn" href="" target="_blank" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold text-xs transition flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span>เปิดแท็บใหม่</span>
+        </a>
+        <button onclick="copyDetailModalUrl()" class="px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <span>คัดลอกลิงก์</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allStorageFiles = [];
+    let currentProviderFilter = 'all';
+
+    async function loadAllStorageData() {
+      allStorageFiles = [];
+
+      // 1. Load from MultiCloudUploader Local Catalog
+      if (window.MultiCloudUploader) {
+        const localCatalog = window.MultiCloudUploader.getAllFiles();
+        if (Array.isArray(localCatalog)) {
+          allStorageFiles.push(...localCatalog);
+        }
+      }
+
+      // 2. Load Real-time Slips from Supabase `payments` table
+      if (window.getSupabaseClient) {
+        const sb = window.getSupabaseClient();
+        if (sb) {
+          try {
+            const { data, error } = await sb.from('payments').select('*').order('timestamp', { ascending: false });
+            if (data && Array.isArray(data)) {
+              data.forEach(p => {
+                if (p.slip_url && (p.slip_url.startsWith('http://') || p.slip_url.startsWith('https://'))) {
+                  
+                  // Check if already in catalog by URL
+                  if (!allStorageFiles.some(f => f.url === p.slip_url)) {
+                    let inferredProvider = 'catbox';
+                    if (p.slip_url.includes('cloudinary.com')) inferredProvider = 'cloudinary';
+                    else if (p.slip_url.includes('ibb.co')) inferredProvider = 'imgbb';
+                    else if (p.slip_url.includes('freeimage.host')) inferredProvider = 'freeimage';
+                    else if (p.slip_url.includes('catbox.moe')) inferredProvider = 'catbox';
+
+                    allStorageFiles.push({
+                      id: 'PAY_' + p.id,
+                      name: `สลิป_${p.student_id}_${p.campaign_id || 'paimai69'}.png`,
+                      url: p.slip_url,
+                      provider: inferredProvider,
+                      category: `สลิปชำระเงิน (฿${p.amount})`,
+                      uploaderId: p.student_id,
+                      uploaderName: p.student_name + (p.student_nickname ? ` (น้อง${p.student_nickname})` : ''),
+                      uploaderEmail: p.student_email || '-',
+                      uploadedAt: p.timestamp || '-'
+                    });
+                  }
+                }
+              });
+            }
+          } catch(e) {
+            console.warn("Supabase payments load error:", e);
+          }
+        }
+      }
+
+      updateSummaryCounts();
+      renderStorageTable();
+    }
+
+    function updateSummaryCounts() {
+      const total = allStorageFiles.length;
+      const cCloudinary = allStorageFiles.filter(f => f.provider === 'cloudinary').length;
+      const cCatbox = allStorageFiles.filter(f => f.provider === 'catbox').length;
+      const cImgbb = allStorageFiles.filter(f => f.provider === 'imgbb').length;
+      const cFreeimage = allStorageFiles.filter(f => f.provider === 'freeimage').length;
+
+      document.getElementById('statTotalFiles').textContent = total;
+      document.getElementById('statCloudinaryFiles').textContent = cCloudinary;
+      document.getElementById('statCatboxFiles').textContent = cCatbox;
+      document.getElementById('statOtherFiles').textContent = (cImgbb + cFreeimage);
+
+      document.getElementById('countAll').textContent = total;
+      document.getElementById('countCloudinary').textContent = cCloudinary;
+      document.getElementById('countCatbox').textContent = cCatbox;
+      document.getElementById('countImgbb').textContent = cImgbb;
+      document.getElementById('countFreeimage').textContent = cFreeimage;
+    }
+
+    function setProviderFilter(p) {
+      currentProviderFilter = p;
+      const buttons = ['All', 'Cloudinary', 'Catbox', 'Imgbb', 'Freeimage'];
+      buttons.forEach(b => {
+        const btn = document.getElementById('btnFilter' + b);
+        if (btn) {
+          if (b.toLowerCase() === p) {
+            btn.className = 'px-3 py-2 rounded-xl text-xs font-black transition cursor-pointer bg-orange-500 text-white shadow-md';
+          } else {
+            btn.className = 'px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-slate-950 text-slate-400 hover:text-white border border-slate-800';
+          }
+        }
+      });
+      renderStorageTable();
+    }
+
+    function renderStorageTable() {
+      const tbody = document.getElementById('storageTableBody');
+      const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+      const badge = document.getElementById('showingCountBadge');
+      if (!tbody) return;
+
+      let list = allStorageFiles;
+
+      // Filter by provider
+      if (currentProviderFilter !== 'all') {
+        list = list.filter(f => f.provider === currentProviderFilter);
+      }
+
+      // Filter by search query
+      if (q) {
+        list = list.filter(f => 
+          (f.name && f.name.toLowerCase().includes(q)) ||
+          (f.uploaderId && f.uploaderId.toLowerCase().includes(q)) ||
+          (f.uploaderName && f.uploaderName.toLowerCase().includes(q)) ||
+          (f.uploaderEmail && f.uploaderEmail.toLowerCase().includes(q)) ||
+          (f.provider && f.provider.toLowerCase().includes(q)) ||
+          (f.category && f.category.toLowerCase().includes(q))
+        );
+      }
+
+      if (badge) badge.textContent = `กำลังแสดง ${list.length} รายการ`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-slate-500 text-xs font-bold">ไม่พบไฟล์ที่ตรงกับเงื่อนไขการค้นหา</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map((f, idx) => {
+        let providerBadge = '';
+        if (f.provider === 'cloudinary') {
+          providerBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">Cloudinary CDN</span>';
+        } else if (f.provider === 'catbox') {
+          providerBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Catbox.moe</span>';
+        } else if (f.provider === 'imgbb') {
+          providerBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">ImgBB</span>';
+        } else {
+          providerBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">FreeImage</span>';
+        }
+
+        return `
+          <tr class="hover:bg-slate-800/40 border-b border-slate-800/60 transition">
+            <td class="p-3 text-center">
+              <img src="${f.url}" alt="Preview" class="w-10 h-10 object-cover rounded-lg bg-slate-950 border border-slate-800 mx-auto cursor-pointer hover:scale-110 transition" onclick="openFileDetailModal('${f.id}')" onerror="this.src='logo.png'">
+            </td>
+            <td class="p-3">
+              <span class="font-bold text-white text-xs block truncate max-w-xs cursor-pointer hover:text-orange-400 transition" onclick="openFileDetailModal('${f.id}')">${f.name || 'ไฟล์ไม่มีชื่อ'}</span>
+              <span class="text-[10px] text-slate-400 block">${f.category || 'ทั่วไป'}</span>
+            </td>
+            <td class="p-3">
+              <div class="space-y-0.5">
+                <span class="font-bold text-amber-300 text-xs block">${f.uploaderName || 'บุคคลทั่วไป'}</span>
+                <div class="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
+                  <span>${f.uploaderId || '-'}</span>
+                  <span>•</span>
+                  <span>${f.uploaderEmail || '-'}</span>
+                </div>
+              </div>
+            </td>
+            <td class="p-3 text-center">
+              ${providerBadge}
+            </td>
+            <td class="p-3 text-slate-400 text-xs font-mono">
+              ${f.uploadedAt || '-'}
+            </td>
+            <td class="p-3 text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <button onclick="openFileDetailModal('${f.id}')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 transition cursor-pointer" title="ดูรายละเอียด">
+                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="copyDirectUrl('${f.url}')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 transition cursor-pointer" title="คัดลอกลิงก์">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="deleteStorageFile('${f.id}')" class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition cursor-pointer border border-rose-500/20" title="สั่งลบไฟล์">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function openFileDetailModal(id) {
+      const target = allStorageFiles.find(f => f.id === id);
+      if (!target) return;
+
+      document.getElementById('detailModalImg').src = target.url;
+      document.getElementById('detailModalUser').textContent = target.uploaderName || 'บุคคลทั่วไป';
+      document.getElementById('detailModalEmail').textContent = `${target.uploaderId || '-'} • ${target.uploaderEmail || '-'}`;
+      document.getElementById('detailModalProvider').textContent = target.provider.toUpperCase();
+      document.getElementById('detailModalCategory').textContent = target.category || 'ทั่วไป';
+      document.getElementById('detailModalDate').textContent = target.uploadedAt || '-';
+      document.getElementById('detailModalUrl').value = target.url;
+      document.getElementById('detailModalOpenBtn').href = target.url;
+
+      const modal = document.getElementById('modalFileDetail');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeFileDetailModal() {
+      const modal = document.getElementById('modalFileDetail');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function copyDirectUrl(url) {
+      navigator.clipboard.writeText(url);
+      alert("📋 คัดลอกลิงก์ไฟล์เรียบร้อยแล้ว!");
+    }
+
+    function copyDetailModalUrl() {
+      const val = document.getElementById('detailModalUrl').value;
+      navigator.clipboard.writeText(val);
+      alert("📋 คัดลอกลิงก์เรียบร้อยแล้ว!");
+    }
+
+    async function deleteStorageFile(id) {
+      if (!confirm("คุณต้องการลบไฟล์นี้ออกจากระบบคลังข้อมูลใช่หรือไม่?")) return;
+      const target = allStorageFiles.find(f => f.id === id);
+      if (!target) return;
+
+      if (window.MultiCloudUploader) {
+        await window.MultiCloudUploader.deleteFile(target);
+      }
+
+      allStorageFiles = allStorageFiles.filter(f => f.id !== id);
+      updateSummaryCounts();
+      renderStorageTable();
+      alert("🗑️ ลบไฟล์เรียบร้อยแล้ว!");
+    }
+
+    async function refreshAllStorageData() {
+      const icon = document.getElementById('refreshIcon');
+      if (icon) icon.classList.add('animate-spin');
+      await loadAllStorageData();
+      if (icon) icon.classList.remove('animate-spin');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAllStorageData();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

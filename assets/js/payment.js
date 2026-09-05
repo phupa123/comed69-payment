@@ -1040,6 +1040,11 @@ async function executeSlipSubmission() {
     try {
       if (title) title.textContent = '☁️ กำลังส่งสลิปไปยังระบบ Cloud ถาวร...';
       const cloudRes = await window.MultiCloudUploader.upload(tempSlipDataUrl, {
+        customName: `Slip_${currentSelectedStudent.id}_${currentCampaign.id}.png`,
+        category: `สลิป: ${currentCampaign.title || 'ชำระเงิน'}`,
+        uploaderId: currentSelectedStudent.id,
+        uploaderName: currentSelectedStudent.name,
+        uploaderEmail: currentSelectedStudent.email,
         onProgress: (pct, msg) => {
           if (subtitle) subtitle.textContent = msg;
         }

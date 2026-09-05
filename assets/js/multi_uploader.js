@@ -135,6 +135,12 @@
             onProgress(100, `อัปโหลดสำเร็จผ่าน ${this.getProviderName(provider)}!`);
 
             // Save to File Catalog for Full Management
+            const uploaderInfo = options.uploader || {
+              id: options.uploaderId || (sessionStorage.getItem('COMED_KKU69_USER_ID') || 'Anonymous'),
+              name: options.uploaderName || (sessionStorage.getItem('COMED_KKU69_USER_NAME') || 'บุคคลทั่วไป'),
+              email: options.uploaderEmail || (sessionStorage.getItem('COMED_KKU69_USER_EMAIL') || '-')
+            };
+
             const fileItem = {
               id: 'FILE_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
               name: fileName,
@@ -144,9 +150,25 @@
               deleteToken: uploadResult.deleteToken || '',
               size: fileObj.size || 0,
               type: fileObj.type || 'image/png',
+              category: options.category || 'สลิปการชำระเงิน',
+              uploaderId: uploaderInfo.id,
+              uploaderName: uploaderInfo.name,
+              uploaderEmail: uploaderInfo.email,
               uploadedAt: new Date().toLocaleString('th-TH')
             };
             this.addToFileCatalog(fileItem);
+
+            // Cloud sync to Supabase file log table if available
+            if (window.getSupabaseClient) {
+              const sb = window.getSupabaseClient();
+              if (sb) {
+                sb.from('admin_logs').insert({
+                  admin_email: uploaderInfo.email || 'system',
+                  action: `Upload [${provider}]`,
+                  detail: JSON.stringify(fileItem)
+                }).catch(() => {});
+              }
+            }
 
             return {
               url: uploadResult.url,
