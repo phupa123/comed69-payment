@@ -551,13 +551,18 @@ async function handleQrFileUpload(event, previewImgId, inputId) {
   const localUrl = URL.createObjectURL(file);
   if (preview) preview.src = localUrl;
 
-  // 2. Upload to Cloud Multi-Provider (ImgBB / FreeImage / Catbox / Cloudinary)
+  // 2. Upload to Cloud Provider explicitly chosen by Admin
   if (window.MultiCloudUploader) {
+    const selectedProvider = document.getElementById('campQrProviderSelect')?.value || 'cloudinary';
+    const providerLabel = window.MultiCloudUploader.getProviderName(selectedProvider);
+
     if (typeof showToastNotification === 'function') {
-      showToastNotification("☁️ กำลังอัปโหลดภาพ QR Code ขึ้นคลาวด์ถาวร...");
+      showToastNotification(`☁️ กำลังส่งขึ้น ${providerLabel}...`);
     }
     try {
       const res = await window.MultiCloudUploader.upload(file, {
+        preferredProvider: selectedProvider,
+        category: 'QR Code รับชำระเงิน',
         onProgress: (pct, msg) => {
           if (typeof showToastNotification === 'function' && pct < 100) {
             showToastNotification(`☁️ ${msg}`);
@@ -569,7 +574,7 @@ async function handleQrFileUpload(event, previewImgId, inputId) {
         if (input) input.value = res.url;
         if (preview) preview.src = res.url;
         if (typeof showToastNotification === 'function') {
-          showToastNotification(`🎉 อัปโหลดขึ้น ${window.MultiCloudUploader.getProviderName(res.provider)} สำเร็จถาวรแล้ว!`);
+          showToastNotification(`🎉 อัปโหลดขึ้น ${window.MultiCloudUploader.getProviderName(res.provider)} สำเร็จแล้ว!`);
         }
         return;
       }

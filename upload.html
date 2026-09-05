@@ -106,6 +106,34 @@
       </div>
     </div>
 
+    <!-- Provider Selector Bar with Advice -->
+    <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <label class="text-xs font-bold text-white flex items-center gap-1.5">
+          <i data-lucide="server" class="w-4 h-4 text-orange-400"></i>
+          <span>เลือกผู้ให้บริการจัดเก็บข้อมูลที่คุณต้องการ (Select Storage Provider):</span>
+        </label>
+        <select id="userPreferredProvider" class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-bold text-xs outline-none focus:border-orange-500 transition">
+          <option value="cloudinary" selected>⚡ Cloudinary CDN (แนะนำ - โหลดเร็วที่สุด จัดการลบไฟล์ได้)</option>
+          <option value="catbox">🚀 Catbox.moe (แนะนำ - ฟรีถาวรตลอดกาล ไม่จำกัดพื้นที่)</option>
+          <option value="imgbb">🖼️ ImgBB API (ภาพเดี่ยว คมชัด ลิงก์ตรงง่าย)</option>
+          <option value="freeimage">📦 FreeImage.host (ฟรี ถาวร เก็บสำรองยาวนาน)</option>
+        </select>
+      </div>
+
+      <!-- Live Advice Note -->
+      <div class="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex items-start gap-2.5 text-xs">
+        <i data-lucide="info" class="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5"></i>
+        <div class="text-[11px] text-slate-300 space-y-0.5">
+          <span class="font-bold text-white">คำแนะนำเพื่อช่วยตัดสินใจ:</span>
+          <p class="text-slate-400">
+            • <strong>Cloudinary:</strong> เร็วระดับโลก รูปภาพจะถูกส่งผ่าน CDN ใกล้ผู้ใช้ที่สุด เหมาะกับสลิปและไฟล์ที่เปิดบ่อย<br>
+            • <strong>Catbox.moe:</strong> อิสระ 100% ฟรีถาวร ไม่ต้องกลัวโควต้าเต็ม เหมาะสำหรับเก็บถาวรระยะยาว
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Upload Dropzone Card -->
     <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl backdrop-blur-xl">
       
@@ -217,8 +245,12 @@
       progressBar.style.width = '20%';
       percentText.textContent = '20%';
 
+      const chosenProvider = document.getElementById('userPreferredProvider')?.value || 'cloudinary';
+
       try {
         const res = await window.MultiCloudUploader.upload(file, {
+          preferredProvider: chosenProvider,
+          category: 'อัปโหลดทั่วไป',
           onProgress: (pct, msg) => {
             progressBar.style.width = pct + '%';
             percentText.textContent = pct + '%';

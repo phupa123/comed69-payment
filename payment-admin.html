@@ -784,32 +784,59 @@
           <input type="text" id="campAccountNameInput" placeholder="ชื่อบัญชี (เช่น น.ส. พิชามญธุ์ สามสี)"
             class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-orange-500">
           
-          <!-- Dual QR Code Option: Upload or URL Link -->
-          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-700/80 space-y-2">
-            <label class="block font-bold text-slate-300 text-[11px] flex items-center justify-between">
-              <span class="flex items-center gap-1.5"><i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i> รูปภาพ QR Code</span>
-              <span class="text-[10px] text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
-                <i data-lucide="cloud" class="w-2.5 h-2.5"></i> Cloud Auto (ImgBB / FreeImage / Catbox / Cloudinary)
-              </span>
-            </label>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
+          <!-- Dedicated QR Code Option: Choose Provider, Upload or URL Link -->
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-700/80 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2">
+              <label class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+                <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
+                <span>รูปภาพ QR Code สำหรับการชำระเงิน</span>
+              </label>
+              
+              <!-- Provider Picker Dropdown -->
+              <div class="flex items-center gap-1.5 text-[11px]">
+                <span class="text-slate-400 font-medium">เลือกคลาวด์ที่จะเก็บ:</span>
+                <select id="campQrProviderSelect" class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-700 text-white font-bold text-xs outline-none focus:border-orange-500">
+                  <option value="cloudinary">⚡ Cloudinary (แนะนำ - โหลดไว CDN ทั่วโลก)</option>
+                  <option value="catbox">🚀 Catbox.moe (ฟรีถาวร ไม่จำกัด ไม่ใช้คีย์)</option>
+                  <option value="imgbb">🖼️ ImgBB (ฟรี 32MB Direct URL ชัดเจน)</option>
+                  <option value="freeimage">📦 FreeImage.host (ฟรี ถาวร)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Provider Advice Pill -->
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-start gap-2 text-[11px] text-slate-300">
+              <i data-lucide="lightbulb" class="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5"></i>
+              <div class="space-y-0.5">
+                <span class="font-bold text-white block">คำแนะนำในการเลือก:</span>
+                <span class="text-slate-400 block">
+                  • <strong>Cloudinary:</strong> แนะนำอันดับ 1 ภาพ QR คมชัด สแกนติดง่ายที่สุด โหลดไวมาก<br>
+                  • <strong>Catbox:</strong> เหมาะสำหรับบันทึกถาวรตลอดกาล ไม่ต้องกังวลเรื่องโควต้าหรือวันหมดอายุ
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center pt-1">
               <div>
-                <span class="text-[10px] text-slate-400 block mb-0.5">1. อัปโหลดขึ้นคลาวด์ถาวรฟรี (Auto Cloud):</span>
+                <span class="text-[11px] font-bold text-slate-300 block mb-1">1. เลือกไฟล์ภาพเพื่ออัปโหลดขึ้นคลาวด์ที่เลือก:</span>
                 <input type="file" id="campQrFileInput" accept="image/*" onchange="handleQrFileUpload(event, 'campQrPreviewImg', 'campQrImageInput')"
-                  class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-orange-500/20 file:text-orange-300 hover:file:bg-orange-500/30 cursor-pointer">
+                  class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-orange-500/20 file:text-orange-300 hover:file:bg-orange-500/30 cursor-pointer">
               </div>
               <div>
-                <span class="text-[10px] text-slate-400 block mb-0.5">2. หรือ วางลิงก์รูปภาพโดยตรง (URL):</span>
-                <input type="text" id="campQrImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campQrPreviewImg')" placeholder="https://i.ibb.co/... หรือ https://..."
-                  class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
+                <span class="text-[11px] font-bold text-slate-300 block mb-1">2. หรือ วางลิงก์รูปภาพโดยตรง (Direct URL):</span>
+                <input type="text" id="campQrImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campQrPreviewImg')" placeholder="https://res.cloudinary.com/... หรือ https://..."
+                  class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
               </div>
             </div>
             <!-- Live QR Preview -->
-            <div class="flex items-center gap-2.5 pt-1.5 border-t border-slate-800">
-              <div class="w-12 h-12 rounded-lg bg-white p-1 border border-slate-700 flex items-center justify-center flex-shrink-0">
+            <div class="flex items-center gap-3 pt-2 border-t border-slate-800">
+              <div class="w-14 h-14 rounded-xl bg-white p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 shadow-md">
                 <img id="campQrPreviewImg" src="qr_payment.png" alt="QR Preview" class="w-full h-full object-contain">
               </div>
-              <span class="text-[11px] text-slate-400">ตัวอย่าง QR Code ที่จะแสดงให้ นศ. สแกน</span>
+              <div class="text-[11px] text-slate-400 space-y-0.5">
+                <span class="font-bold text-slate-300 block">พรีวิว QR Code ที่ นศ. จะเห็น</span>
+                <span>ภาพจะถูกปรับขนาดและบีบอัดให้อัตโนมัติ เพื่อให้สแกนติดง่ายที่สุด</span>
+              </div>
             </div>
           </div>
         </div>
