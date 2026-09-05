@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จัดการระบบคลาวด์และ API เก็บไฟล์ (Cloud API Admin) | COMED KKU</title>
+  <meta name="description" content="แผงควบคุมและตั้งค่า API สำหรับ Cloudinary, ImgBB, FreeImage และ Catbox.moe">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Multi-Cloud File Uploader Core -->
+  <script src="assets/js/multi_uploader.js"></script>
+</head>
+
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white font-sans antialiased overflow-x-hidden">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-2xl border-b border-slate-800/80">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="admin.html" class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-black uppercase tracking-wider text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded-full">
+              ADMIN CONTROL PANEL
+            </span>
+          </div>
+          <h1 class="text-sm sm:text-base font-black text-white">ตั้งค่าระบบจัดเก็บไฟล์คลาวด์ (Multi-Cloud Storage)</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="upload.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-800 transition flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span>หน้าอัปโหลด User</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 flex-grow space-y-6">
+    
+    <!-- Info Banner -->
+    <div class="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>ระบบพร้อมใช้งานทันที (Default Ready)</span>
+        </div>
+        <h2 class="text-lg font-black text-white">แผงควบคุมและกุญแจ API คลาวด์</h2>
+        <p class="text-xs text-slate-400">
+          ระบบมีกุญแจ Public Key ฟรีและตั้งค่าเริ่มต้นไว้ให้แล้ว หากคุณต้องการใช้บัญชีของตนเอง สามารถนำ API Key มาใส่แทนได้เลย
+        </p>
+      </div>
+
+      <button onclick="testUploadConnection()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-black transition flex items-center gap-2 shadow-md cursor-pointer active:scale-95 flex-shrink-0">
+        <i data-lucide="zap" class="w-4 h-4"></i>
+        <span>ทดสอบการเชื่อมต่อ</span>
+      </button>
+    </div>
+
+    <!-- Active Provider Selector Form -->
+    <form id="storageConfigForm" onsubmit="saveStorageConfig(event)" class="space-y-6">
+      
+      <!-- Primary Priority -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3">
+        <label class="block text-xs font-bold text-orange-400 flex items-center gap-1.5">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>ผู้ให้บริการหลักที่ต้องการใช้งาน (Primary Provider):</span>
+        </label>
+        <select id="cfgActiveProvider" class="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white text-xs outline-none focus:border-orange-500 transition">
+          <option value="auto">✨ อัตโนมัติ (Auto Smart Failover: สำรองและสลับผู้ให้บริการอัตโนมัติ)</option>
+          <option value="imgbb">ImgBB (ฟรี ไม่จำกัดจำนวนรูป สูงสุด 32MB)</option>
+          <option value="freeimage">FreeImage.host (ฟรี ถาวร)</option>
+          <option value="catbox">Catbox.moe (ฟรี ถาวร 100% ไม่ต้องใช้บัญชี)</option>
+          <option value="cloudinary">Cloudinary (CDN เครือข่ายระดับโลก)</option>
+        </select>
+      </div>
+
+      <!-- Provider 1: ImgBB -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-bold text-white flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            1. ImgBB API
+          </span>
+          <a href="https://api.imgbb.com/" target="_blank" class="text-xs text-orange-400 hover:underline flex items-center gap-1">
+            <span>ขอ API Key ฟรี</span>
+            <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-400">API Key:</label>
+          <input type="text" id="cfgImgbbKey" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono outline-none focus:border-orange-500">
+        </div>
+      </div>
+
+      <!-- Provider 2: FreeImage -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-bold text-white flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            2. FreeImage.host API
+          </span>
+          <a href="https://freeimage.host/page/api" target="_blank" class="text-xs text-orange-400 hover:underline flex items-center gap-1">
+            <span>ขอ API Key ฟรี</span>
+            <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-400">API Key:</label>
+          <input type="text" id="cfgFreeimageKey" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono outline-none focus:border-orange-500">
+        </div>
+      </div>
+
+      <!-- Provider 3: Catbox.moe -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-bold text-white flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            3. Catbox.moe (ถาวร ไม่ต้องสมัคร)
+          </span>
+          <span class="text-[11px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full">พร้อมใช้ทันที</span>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs text-slate-400">User Hash (ใส่หรือไม่ใส่ก็ได้ เว้นว่างไว้คืออัปโหลดสาธารณะถาวร):</label>
+          <input type="text" id="cfgCatboxHash" placeholder="เว้นว่างได้ หรือ ใส่ Userhash จาก Catbox" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono outline-none focus:border-orange-500">
+        </div>
+      </div>
+
+      <!-- Provider 4: Cloudinary -->
+      <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-bold text-white flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+            4. Cloudinary CDN
+          </span>
+          <a href="https://cloudinary.com/" target="_blank" class="text-xs text-cyan-400 hover:underline flex items-center gap-1">
+            <span>ไปที่ Cloudinary</span>
+            <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="text-xs text-slate-400">Cloud Name:</label>
+            <input type="text" id="cfgCloudinaryName" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono outline-none focus:border-orange-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs text-slate-400">Upload Preset (Unsigned):</label>
+            <input type="text" id="cfgCloudinaryPreset" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono outline-none focus:border-orange-500">
+          </div>
+        </div>
+      </div>
+
+      <!-- Save & Reset Buttons -->
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button type="button" onclick="resetDefaultStorageConfig()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+          รีเซ็ตเป็นค่าเริ่มต้น
+        </button>
+        <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-lg transition flex items-center gap-2 active:scale-95 cursor-pointer">
+          <i data-lucide="save" class="w-4 h-4"></i>
+          <span>บันทึกการตั้งค่า</span>
+        </button>
+      </div>
+
+    </form>
+
+  </main>
+
+  <script>
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    function loadForm() {
+      if (!window.MultiCloudUploader) return;
+      const cfg = window.MultiCloudUploader.config;
+      document.getElementById('cfgActiveProvider').value = cfg.activeProvider || 'auto';
+      document.getElementById('cfgImgbbKey').value = cfg.imgbbApiKey || '';
+      document.getElementById('cfgFreeimageKey').value = cfg.freeimageApiKey || '';
+      document.getElementById('cfgCatboxHash').value = cfg.catboxUserHash || '';
+      document.getElementById('cfgCloudinaryName').value = cfg.cloudinaryCloudName || '';
+      document.getElementById('cfgCloudinaryPreset').value = cfg.cloudinaryUploadPreset || '';
+    }
+
+    function saveStorageConfig(e) {
+      e.preventDefault();
+      if (!window.MultiCloudUploader) return;
+
+      const newCfg = {
+        activeProvider: document.getElementById('cfgActiveProvider').value,
+        imgbbApiKey: document.getElementById('cfgImgbbKey').value.trim(),
+        freeimageApiKey: document.getElementById('cfgFreeimageKey').value.trim(),
+        catboxUserHash: document.getElementById('cfgCatboxHash').value.trim(),
+        cloudinaryCloudName: document.getElementById('cfgCloudinaryName').value.trim(),
+        cloudinaryUploadPreset: document.getElementById('cfgCloudinaryPreset').value.trim(),
+      };
+
+      window.MultiCloudUploader.saveConfig(newCfg);
+      alert("✅ บันทึกการตั้งค่าระบบจัดเก็บไฟล์คลาวด์เรียบร้อยแล้ว!");
+    }
+
+    function resetDefaultStorageConfig() {
+      if (!confirm("ต้องการรีเซ็ตค่ากลับเป็นค่าเริ่มต้นหรือไม่?")) return;
+      localStorage.removeItem('COMED_MULTI_STORAGE_CONFIG_V1');
+      location.reload();
+    }
+
+    async function testUploadConnection() {
+      const dummyBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+      try {
+        const res = await window.MultiCloudUploader.upload(dummyBase64, {
+          onProgress: (pct, msg) => {}
+        });
+        alert(`🎉 ทดสอบสำเร็จ!\nผู้ให้บริการ: ${window.MultiCloudUploader.getProviderName(res.provider)}\nURL ทดสอบ: ${res.url}`);
+      } catch (err) {
+        alert("⚠️ เกิดข้อผิดพลาดในการทดสอบ: " + err.message);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadForm);
+  </script>
+</body>
+</html>

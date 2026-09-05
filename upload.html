@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บริการอัปโหลดและจัดเก็บไฟล์สาธารณะ (Cloud File Storage) | COMED KKU</title>
+  <meta name="description" content="บริการอัปโหลดรูปภาพ สลิป และไฟล์ขึ้นคลาวด์ถาวรฟรี รองรับ ImgBB, FreeImage, Catbox และ Cloudinary">
+
+  <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- Multi-Cloud File Uploader Core -->
+  <script src="assets/js/multi_uploader.js"></script>
+</head>
+
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-orange-500 selection:text-white font-sans antialiased overflow-x-hidden">
+
+  <!-- Background Glowing Orbs -->
+  <div class="fixed top-0 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-10 right-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-2xl border-b border-slate-800/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
+              FREE PERMANENT CLOUD
+            </span>
+          </div>
+          <h1 class="text-sm sm:text-base font-black text-white">ศูนย์อัปโหลดและจัดเก็บไฟล์สาธารณะ</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="upload-admin.html" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-800 transition flex items-center gap-1.5">
+          <i data-lucide="sliders" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span class="hidden sm:inline">ตั้งค่า API คลาวด์</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 flex-grow space-y-8">
+    
+    <!-- Hero Box -->
+    <div class="text-center space-y-3 pt-4">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-slate-800 text-xs text-slate-300">
+        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+        <span>อัปโหลดฟรีตลอดชีพ • ไม่ลบไฟล์ • สลับ 4 คลาวด์อัตโนมัติ</span>
+      </div>
+      <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
+        อัปโหลดไฟล์และรูปภาพขึ้นคลาวด์ถาวร
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
+        ระบบเชื่อมต่อกับ <strong>ImgBB, FreeImage, Catbox.moe และ Cloudinary</strong> ให้อัตโนมัติ<br>
+        ใช้งานได้ทันทีโดยไม่ต้องสมัครสมาชิกใดๆ ทั้งสิ้น
+      </p>
+    </div>
+
+    <!-- Provider Badges -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+      <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+        <span class="text-xs font-bold text-white block">ImgBB API</span>
+        <span class="text-[10px] text-emerald-400">ฟรี 32MB / ถาวร</span>
+      </div>
+      <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+        <span class="text-xs font-bold text-white block">FreeImage API</span>
+        <span class="text-[10px] text-emerald-400">ภาพคมชัด / ถาวร</span>
+      </div>
+      <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+        <span class="text-xs font-bold text-white block">Catbox.moe</span>
+        <span class="text-[10px] text-emerald-400">ทุกไฟล์ / ไม่หมดอายุ</span>
+      </div>
+      <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+        <span class="text-xs font-bold text-white block">Cloudinary CDN</span>
+        <span class="text-[10px] text-emerald-400">ความเร็วสูงระดับโลก</span>
+      </div>
+    </div>
+
+    <!-- Upload Dropzone Card -->
+    <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl backdrop-blur-xl">
+      
+      <!-- Drop Area -->
+      <div id="dropArea" 
+        class="border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-3xl p-8 sm:p-12 text-center transition-all cursor-pointer bg-slate-950/40 group relative overflow-hidden"
+        onclick="document.getElementById('fileInput').click()">
+        
+        <input type="file" id="fileInput" class="hidden" onchange="handleFileSelect(event)">
+
+        <div class="space-y-4 relative z-10">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-3xl bg-gradient-to-tr from-orange-500/20 to-amber-500/10 text-orange-400 border border-orange-500/30 flex items-center justify-center group-hover:scale-110 transition duration-300 shadow-xl">
+            <i data-lucide="cloud-upload" class="w-8 h-8 sm:w-10 sm:h-10"></i>
+          </div>
+
+          <div class="space-y-1.5">
+            <h3 class="text-base sm:text-lg font-bold text-white">ลากและวางไฟล์ที่นี่ หรือ <span class="text-orange-400 underline">คลิกเพื่อเลือกไฟล์</span></h3>
+            <p class="text-xs text-slate-400">รองรับรูปภาพ JPG, PNG, GIF, WebP และไฟล์ทั่วไป (สูงสุด 32 MB)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload Progress Container -->
+      <div id="uploadProgressBox" class="hidden space-y-2 p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+        <div class="flex items-center justify-between text-xs">
+          <span id="uploadStatusText" class="font-bold text-slate-300 flex items-center gap-2">
+            <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-orange-500"></i>
+            <span>กำลังเตรียมไฟล์...</span>
+          </span>
+          <span id="uploadPercentText" class="font-mono text-orange-400 font-bold">0%</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+          <div id="uploadProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-300" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Result Card (Hidden until uploaded) -->
+      <div id="uploadResultCard" class="hidden space-y-4 p-5 rounded-2xl bg-slate-950/90 border border-emerald-500/30">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 text-emerald-400 text-xs font-bold">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            <span>อัปโหลดขึ้นคลาวด์ถาวรสำเร็จแล้ว!</span>
+          </div>
+          <span id="resultProviderBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Catbox.moe</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+          <div class="sm:col-span-3">
+            <img id="resultPreviewImg" src="" alt="Preview" class="w-full h-24 object-contain rounded-xl bg-slate-900 border border-slate-800 p-1">
+          </div>
+          <div class="sm:col-span-9 space-y-2">
+            <label class="text-[11px] font-bold text-slate-400 block">ลิงก์ไฟล์ถาวร (Permanent Direct URL):</label>
+            <div class="flex items-center gap-2">
+              <input type="text" id="resultUrlInput" readonly class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs outline-none focus:border-orange-500">
+              <button onclick="copyResultUrl()" class="px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer active:scale-95">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span id="copyBtnText">คัดลอก</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500">
+    สาขาวิชาคอมพิวเตอร์ศึกษา คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น (COMED KKU)
+  </footer>
+
+  <script>
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Drag & Drop
+    const dropArea = document.getElementById('dropArea');
+    ['dragenter', 'dragover'].forEach(name => {
+      dropArea.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropArea.classList.add('border-orange-500', 'bg-orange-500/5');
+      });
+    });
+    ['dragleave', 'drop'].forEach(name => {
+      dropArea.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('border-orange-500', 'bg-orange-500/5');
+      });
+    });
+    dropArea.addEventListener('drop', (e) => {
+      const file = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) startUpload(file);
+    });
+
+    function handleFileSelect(e) {
+      const file = e.target.files && e.target.files[0];
+      if (file) startUpload(file);
+    }
+
+    async function startUpload(file) {
+      const progressBox = document.getElementById('uploadProgressBox');
+      const progressBar = document.getElementById('uploadProgressBar');
+      const percentText = document.getElementById('uploadPercentText');
+      const statusText = document.getElementById('uploadStatusText');
+      const resultCard = document.getElementById('uploadResultCard');
+
+      resultCard.classList.add('hidden');
+      progressBox.classList.remove('hidden');
+      progressBar.style.width = '20%';
+      percentText.textContent = '20%';
+
+      try {
+        const res = await window.MultiCloudUploader.upload(file, {
+          onProgress: (pct, msg) => {
+            progressBar.style.width = pct + '%';
+            percentText.textContent = pct + '%';
+            statusText.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-orange-500"></i> <span>${msg}</span>`;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+          }
+        });
+
+        if (res && res.url) {
+          progressBar.style.width = '100%';
+          percentText.textContent = '100%';
+          statusText.innerHTML = `<span>✨ อัปโหลดสำเร็จแล้ว</span>`;
+
+          setTimeout(() => {
+            progressBox.classList.add('hidden');
+            resultCard.classList.remove('hidden');
+            document.getElementById('resultUrlInput').value = res.url;
+            document.getElementById('resultProviderBadge').textContent = window.MultiCloudUploader.getProviderName(res.provider);
+            const previewImg = document.getElementById('resultPreviewImg');
+            if (file.type.startsWith('image/')) {
+              previewImg.src = res.url;
+              previewImg.classList.remove('hidden');
+            } else {
+              previewImg.classList.add('hidden');
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+          }, 500);
+        }
+      } catch (err) {
+        statusText.innerHTML = `<span class="text-rose-400">⚠️ เกิดข้อผิดพลาด: ${err.message}</span>`;
+      }
+    }
+
+    function copyResultUrl() {
+      const input = document.getElementById('resultUrlInput');
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      const btnText = document.getElementById('copyBtnText');
+      btnText.textContent = 'คัดลอกแล้ว!';
+      setTimeout(() => {
+        btnText.textContent = 'คัดลอก';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
