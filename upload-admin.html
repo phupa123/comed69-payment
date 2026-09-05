@@ -172,8 +172,16 @@
             <input type="text" id="cfgCloudinaryName" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono outline-none focus:border-orange-500">
           </div>
           <div class="space-y-1">
-            <label class="text-xs text-slate-400">Upload Preset (Unsigned):</label>
+            <label class="text-xs text-slate-400">Upload Preset (Unsigned สำหรับอัปโหลด):</label>
             <input type="text" id="cfgCloudinaryPreset" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono outline-none focus:border-orange-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs text-slate-400">API Key (สำหรับจัดการดึง/ลบไฟล์):</label>
+            <input type="text" id="cfgCloudinaryApiKey" placeholder="เช่น 748392184928192" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono outline-none focus:border-orange-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs text-slate-400">API Secret (สำหรับยืนยันสิทธิ์ลบไฟล์):</label>
+            <input type="password" id="cfgCloudinaryApiSecret" placeholder="••••••••••••••••••••••••" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono outline-none focus:border-orange-500">
           </div>
         </div>
       </div>
@@ -191,6 +199,49 @@
 
     </form>
 
+    <!-- ================= FILE CATALOG & MANAGEMENT HUB ================= -->
+    <div class="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold">
+            <i data-lucide="folder-kanban" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base sm:text-lg font-black text-white">ศูนย์จัดการไฟล์คลาวด์ (Cloud File Manager)</h3>
+              <span id="filesCountBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">0 ไฟล์</span>
+            </div>
+            <p class="text-xs text-slate-400">ดึงไฟล์, ดูภาพตัวอย่าง, คัดลอกลิงก์ตรง, ดาวน์โหลด และสั่งลบไฟล์ได้อย่างอิสระ</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="refreshFileCatalogTable()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+            <span>รีเฟรชรายการ</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- File Table -->
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-800">
+              <th class="p-3 text-center w-12">ตัวอย่าง</th>
+              <th class="p-3">ชื่อไฟล์ / ID</th>
+              <th class="p-3">ผู้ให้บริการ</th>
+              <th class="p-3">วัน-เวลาที่อัปโหลด</th>
+              <th class="p-3 text-center w-36">การจัดการไฟล์</th>
+            </tr>
+          </thead>
+          <tbody id="filesTableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 
   <script>
@@ -205,6 +256,9 @@
       document.getElementById('cfgCatboxHash').value = cfg.catboxUserHash || '';
       document.getElementById('cfgCloudinaryName').value = cfg.cloudinaryCloudName || '';
       document.getElementById('cfgCloudinaryPreset').value = cfg.cloudinaryUploadPreset || '';
+      document.getElementById('cfgCloudinaryApiKey').value = cfg.cloudinaryApiKey || '';
+      document.getElementById('cfgCloudinaryApiSecret').value = cfg.cloudinaryApiSecret || '';
+      renderFileCatalogTable();
     }
 
     function saveStorageConfig(e) {
@@ -218,6 +272,8 @@
         catboxUserHash: document.getElementById('cfgCatboxHash').value.trim(),
         cloudinaryCloudName: document.getElementById('cfgCloudinaryName').value.trim(),
         cloudinaryUploadPreset: document.getElementById('cfgCloudinaryPreset').value.trim(),
+        cloudinaryApiKey: document.getElementById('cfgCloudinaryApiKey').value.trim(),
+        cloudinaryApiSecret: document.getElementById('cfgCloudinaryApiSecret').value.trim(),
       };
 
       window.MultiCloudUploader.saveConfig(newCfg);
@@ -234,12 +290,86 @@
       const dummyBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
       try {
         const res = await window.MultiCloudUploader.upload(dummyBase64, {
+          customName: 'test_ping.png',
           onProgress: (pct, msg) => {}
         });
         alert(`🎉 ทดสอบสำเร็จ!\nผู้ให้บริการ: ${window.MultiCloudUploader.getProviderName(res.provider)}\nURL ทดสอบ: ${res.url}`);
+        renderFileCatalogTable();
       } catch (err) {
         alert("⚠️ เกิดข้อผิดพลาดในการทดสอบ: " + err.message);
       }
+    }
+
+    // ================= FILE CATALOG RENDERING =================
+    function renderFileCatalogTable() {
+      const tbody = document.getElementById('filesTableBody');
+      const badge = document.getElementById('filesCountBadge');
+      if (!tbody || !window.MultiCloudUploader) return;
+
+      const files = window.MultiCloudUploader.getAllFiles();
+      if (badge) badge.textContent = `${files.length} ไฟล์`;
+
+      if (files.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-500 text-xs">ยังไม่มีไฟล์ในประวัติระบบ (เมื่อมีการอัปโหลดสลิป หรือไฟล์ จะแสดงที่นี่)</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = files.map(f => {
+        return `
+          <tr class="hover:bg-slate-800/40 border-b border-slate-800/60 transition">
+            <td class="p-3 text-center">
+              <img src="${f.url}" alt="Preview" class="w-10 h-10 object-cover rounded-lg bg-slate-950 border border-slate-800 mx-auto" onerror="this.src='logo.png'">
+            </td>
+            <td class="p-3">
+              <span class="font-bold text-white text-xs block truncate max-w-xs">${f.name || 'ไฟล์ไม่มีชื่อ'}</span>
+              <span class="font-mono text-[10px] text-slate-500">${f.publicId || f.id}</span>
+            </td>
+            <td class="p-3">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-orange-400 border border-slate-700">
+                ${window.MultiCloudUploader.getProviderName(f.provider)}
+              </span>
+            </td>
+            <td class="p-3 text-slate-400 text-xs font-mono">
+              ${f.uploadedAt || '-'}
+            </td>
+            <td class="p-3 text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <a href="${f.url}" target="_blank" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 transition" title="เปิดดูไฟล์ต้นฉบับ">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                </a>
+                <button onclick="copyFileUrl('${f.url}')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 transition cursor-pointer" title="คัดลอกลิงก์">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="handleDeleteFileAction('${f.id}')" class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition cursor-pointer border border-rose-500/20" title="สั่งลบไฟล์นี้">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function refreshFileCatalogTable() {
+      renderFileCatalogTable();
+    }
+
+    function copyFileUrl(url) {
+      navigator.clipboard.writeText(url);
+      alert("📋 คัดลอกลิงก์ไฟล์เรียบร้อยแล้ว!");
+    }
+
+    async function handleDeleteFileAction(fileId) {
+      if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์นี้ออกจากระบบ?")) return;
+      const files = window.MultiCloudUploader.getAllFiles();
+      const target = files.find(f => f.id === fileId);
+      if (!target) return;
+
+      await window.MultiCloudUploader.deleteFile(target);
+      renderFileCatalogTable();
+      alert("🗑️ ดำเนินการลบไฟล์เรียบร้อยแล้ว!");
     }
 
     document.addEventListener('DOMContentLoaded', loadForm);
