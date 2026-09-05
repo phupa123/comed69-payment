@@ -516,8 +516,12 @@ function renderAdminCampaignsNav() {
           }
 
           <div class="flex items-center gap-1">
+            <button onclick="openEditCampaignModal('${camp.id}')" class="text-[9px] px-2 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 font-bold transition flex items-center gap-1" title="แก้ไขรายละเอียดแคมเปญ">
+              <i data-lucide="edit-3" class="w-3 h-3"></i>
+              <span>แก้ไข</span>
+            </button>
             <button onclick="toggleCampaignStatus('${camp.id}')" class="text-[9px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="เปิด/ปิดการชำระเงิน">
-              ${camp.status === 'open' ? 'ปิดรับชั่วคราว' : 'เปิดรับชำระ'}
+              ${camp.status === 'open' ? 'ปิดรับ' : 'เปิดรับ'}
             </button>
             <a href="payment.html?camp=${encodeURIComponent(camp.id)}" target="_blank" class="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-orange-400" title="ดูหน้าชำระเงินของนศ.">
               <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
@@ -603,10 +607,93 @@ function updateQrPreviewFromUrl(url, previewImgId) {
 function openCreateCampaignModal() {
   const form = document.getElementById('createCampaignForm');
   if (form) form.reset();
+  
+  const editIdInput = document.getElementById('campEditId');
+  if (editIdInput) editIdInput.value = '';
+
+  const codeInput = document.getElementById('campCodeInput');
+  if (codeInput) codeInput.readOnly = false;
+
+  const modalTitle = document.getElementById('modalCampaignTitle');
+  if (modalTitle) {
+    modalTitle.innerHTML = `
+      <i data-lucide="plus-circle" class="w-5 h-5 text-orange-400"></i>
+      <span>สร้างรายการเก็บเงินใหม่ (New Campaign)</span>
+    `;
+  }
+
   const qrPreview = document.getElementById('campQrPreviewImg');
   if (qrPreview) qrPreview.src = 'qr_payment.png';
   const qrInput = document.getElementById('campQrImageInput');
   if (qrInput) qrInput.value = 'qr_payment.png';
+
+  const modal = document.getElementById('modalCreateCampaign');
+  if (modal) modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function openEditCampaignModal(campId) {
+  if (!window.ComedCampaignManager) return;
+  const camp = window.ComedCampaignManager.getCampaignById(campId);
+  if (!camp) return;
+
+  const editIdInput = document.getElementById('campEditId');
+  if (editIdInput) editIdInput.value = camp.id;
+
+  const titleInput = document.getElementById('campTitleInput');
+  if (titleInput) titleInput.value = camp.title || '';
+
+  const codeInput = document.getElementById('campCodeInput');
+  if (codeInput) {
+    codeInput.value = camp.id;
+    codeInput.readOnly = true; // Protect ID from breaking relationship
+  }
+
+  const amountInput = document.getElementById('campAmountInput');
+  if (amountInput) amountInput.value = camp.amount || 0;
+
+  const subtitleInput = document.getElementById('campSubtitleInput');
+  if (subtitleInput) subtitleInput.value = camp.subtitle || '';
+
+  const categoryInput = document.getElementById('campCategoryInput');
+  if (categoryInput) categoryInput.value = camp.category || '';
+
+  const deadlineInput = document.getElementById('campDeadlineInput');
+  if (deadlineInput && camp.deadline) {
+    try {
+      const dt = new Date(camp.deadline);
+      const localIso = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      deadlineInput.value = localIso;
+    } catch(e) {
+      deadlineInput.value = '';
+    }
+  }
+
+  const bankNameInput = document.getElementById('campBankNameInput');
+  if (bankNameInput) bankNameInput.value = camp.bankName || '';
+
+  const accountNumInput = document.getElementById('campAccountNumInput');
+  if (accountNumInput) accountNumInput.value = camp.accountNumber || '';
+
+  const accountNameInput = document.getElementById('campAccountNameInput');
+  if (accountNameInput) accountNameInput.value = camp.accountName || '';
+
+  const qrInput = document.getElementById('campQrImageInput');
+  if (qrInput) qrInput.value = camp.qrImage || 'qr_payment.png';
+
+  const qrPreview = document.getElementById('campQrPreviewImg');
+  if (qrPreview) qrPreview.src = camp.qrImage || 'qr_payment.png';
+
+  const statusOpenInput = document.getElementById('campStatusOpenInput');
+  if (statusOpenInput) statusOpenInput.checked = (camp.status === 'open');
+
+  const modalTitle = document.getElementById('modalCampaignTitle');
+  if (modalTitle) {
+    modalTitle.innerHTML = `
+      <i data-lucide="edit-3" class="w-5 h-5 text-orange-400"></i>
+      <span>แก้ไขรายการเก็บเงิน: ${camp.title}</span>
+    `;
+  }
 
   const modal = document.getElementById('modalCreateCampaign');
   if (modal) modal.classList.remove('hidden');
@@ -620,8 +707,9 @@ function closeCreateCampaignModal() {
 
 async function handleSaveCampaignSubmit(e) {
   e.preventDefault();
+  const editId = document.getElementById('campEditId')?.value.trim();
   const title = document.getElementById('campTitleInput')?.value.trim();
-  const code = document.getElementById('campCodeInput')?.value.trim().toLowerCase();
+  const code = (editId || document.getElementById('campCodeInput')?.value.trim() || '').toLowerCase();
   const amount = parseFloat(document.getElementById('campAmountInput')?.value) || 0;
   const subtitle = document.getElementById('campSubtitleInput')?.value.trim() || '';
   const category = document.getElementById('campCategoryInput')?.value.trim() || 'กิจกรรมสาขา';
@@ -640,7 +728,10 @@ async function handleSaveCampaignSubmit(e) {
     return;
   }
 
-  const newCampaign = {
+  let existingCampaign = editId && window.ComedCampaignManager ? window.ComedCampaignManager.getCampaignById(editId) : null;
+
+  const campaignPayload = {
+    ...(existingCampaign || {}),
     id: code,
     code: code.toUpperCase(),
     title: title,
@@ -648,29 +739,34 @@ async function handleSaveCampaignSubmit(e) {
     category: category,
     amount: amount,
     currency: "THB",
-    deadline: deadline || new Date(Date.now() + 7*24*3600*1000).toISOString(),
-    deadlineDisplay: deadline ? new Date(deadline).toLocaleDateString('th-TH') : '',
+    deadline: deadline || (existingCampaign ? existingCampaign.deadline : new Date(Date.now() + 7*24*3600*1000).toISOString()),
+    deadlineDisplay: deadline ? new Date(deadline).toLocaleDateString('th-TH') : (existingCampaign ? existingCampaign.deadlineDisplay : ''),
     bankName: bankName,
     accountNumber: accountNumber,
     accountName: accountName,
     qrImage: qrImage,
-    status: isOpen ? 'open' : 'temp_closed',
-    isDefault: false,
-    createdAt: new Date().toISOString()
+    status: isOpen ? 'open' : (existingCampaign && existingCampaign.status === 'completed' ? 'completed' : 'temp_closed'),
+    updatedAt: new Date().toISOString()
   };
+
+  if (!editId) {
+    campaignPayload.createdAt = new Date().toISOString();
+    campaignPayload.isDefault = false;
+  }
 
   // 1. Save in local & sync to Supabase
   if (window.ComedCampaignManager) {
-    window.ComedCampaignManager.updateCampaign(newCampaign);
+    window.ComedCampaignManager.updateCampaign(campaignPayload);
   }
 
   // 2. Log Admin Action
-  await logAdminAction("สร้างรายการเก็บเงินใหม่", `สร้างรายการ "${title}" (฿${amount}) รหัส ID: ${code}`);
+  const actionName = editId ? "แก้ไขรายการเก็บเงิน" : "สร้างรายการเก็บเงินใหม่";
+  await logAdminAction(actionName, `${actionName} "${title}" (฿${amount}) รหัส ID: ${code}`);
 
   closeCreateCampaignModal();
-  alert(`✨ สร้างรายการ "${title}" เรียบร้อยแล้ว! ข้อมูลจะปรากฏทั้งหน้า Payment และ Admin ทันที`);
+  alert(`✨ บันทึกรายการ "${title}" เรียบร้อยแล้ว!`);
 
-  // Redirect to newly created campaign dashboard
+  // Reload or redirect to active campaign dashboard
   window.location.href = `payment-admin.html?camp=${encodeURIComponent(code)}`;
 }
 
