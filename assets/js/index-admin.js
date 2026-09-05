@@ -103,6 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch(e) {}
   }
   
+  await loadStudentPaymentStatuses();
   renderCampaignsList();
   renderStudentsTable();
   if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -690,8 +691,30 @@ function deleteCampaign(id) {
   }
 }
 
-// ================= 3. STUDENTS ROSTER MANAGEMENT =================
-function renderStudentsTable() {
+// ================= 3. STUDENTS ROSTER & USER MANAGEMENT =================
+let userPaymentStatusMap = {};
+
+async function loadStudentPaymentStatuses() {
+  const sb = window.getSupabaseClient ? window.getSupabaseClient() : null;
+  if (sb) {
+    try {
+      const { data } = await sb.from('payments').select('student_id, campaign_id, paid, amount, slip_url');
+      if (data && Array.isArray(data)) {
+        userPaymentStatusMap = {};
+        data.forEach(row => {
+          if (row.paid) {
+            if (!userPaymentStatusMap[row.student_id]) userPaymentStatusMap[row.student_id] = [];
+            userPaymentStatusMap[row.student_id].push(row);
+          }
+        });
+      }
+    } catch (e) {
+      console.warn("loadStudentPaymentStatuses error:", e);
+    }
+  }
+}
+
+async function renderStudentsTable() {
   const tbody = document.getElementById('indexStudentsTableBody');
   if (!tbody) return;
   const q = (document.getElementById('searchStudentInput')?.value || '').toLowerCase().trim();
@@ -710,29 +733,103 @@ function renderStudentsTable() {
   if (countEl) countEl.textContent = `${list.length} / ${studentsList.length} คน`;
 
   if (list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500 text-xs font-bold">ไม่พบรายชื่อนักศึกษาที่ค้นหา</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500 text-xs font-bold">ไม่พบรายชื่อนักศึกษาที่ค้นหา</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = list.map((st, idx) => `
-    <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50">
-      <td class="p-3.5 text-center text-slate-500 font-mono text-xs">${idx + 1}</td>
-      <td class="p-3.5 font-mono font-bold text-orange-400 text-xs">${st.id}</td>
-      <td class="p-3.5 font-bold text-white text-xs">${st.name}</td>
-      <td class="p-3.5">
-        <span class="px-2.5 py-0.5 rounded-lg bg-orange-500/10 text-orange-300 font-bold text-xs border border-orange-500/20">
-          น้อง${st.nickname}
-        </span>
-      </td>
-      <td class="p-3.5 font-mono text-slate-400 text-xs">${st.email}</td>
-      <td class="p-3.5 text-center">
-        <button onclick="openEditStudentModal('${st.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-xl text-xs font-bold transition inline-flex items-center gap-1 cursor-pointer">
-          <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> แก้ไข
-        </button>
-      </td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = list.map((st, idx) => {
+    const paidRecords = userPaymentStatusMap[st.id] || [];
+    let statusBadge = '';
+    if (paidRecords.length > 0) {
+      statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center gap-1">
+        <i data-lucide="check-circle" class="w-3 h-3"></i> จ่ายแล้ว ${paidRecords.length} รายการ
+      </span>`;
+    } else {
+      statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700/80 flex items-center justify-center gap-1">
+        <i data-lucide="clock" class="w-3 h-3"></i> ยังไม่มียอด
+      </span>`;
+    }
+
+    return `
+      <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50">
+        <td class="p-3.5 text-center text-slate-500 font-mono text-xs">${idx + 1}</td>
+        <td class="p-3.5 font-mono font-bold text-orange-400 text-xs">${st.id}</td>
+        <td class="p-3.5 font-bold text-white text-xs">${st.name}</td>
+        <td class="p-3.5">
+          <span class="px-2.5 py-0.5 rounded-lg bg-orange-500/10 text-orange-300 font-bold text-xs border border-orange-500/20">
+            น้อง${st.nickname}
+          </span>
+        </td>
+        <td class="p-3.5 font-mono text-slate-400 text-xs">${st.email}</td>
+        <td class="p-3.5 text-center">
+          ${statusBadge}
+        </td>
+        <td class="p-3.5 text-center">
+          <div class="flex items-center justify-center gap-1.5">
+            <button onclick="openEditStudentModal('${st.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-xl text-xs font-bold transition inline-flex items-center gap-1 cursor-pointer" title="แก้ไขข้อมูล">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            </button>
+            <a href="payment-admin.html?search=${encodeURIComponent(st.id)}" target="_blank" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-xl text-xs font-bold transition inline-flex items-center gap-1" title="ตรวจสอบสลิปของคนนี้">
+              <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+            </a>
+            <button onclick="deleteStudent('${st.id}')" class="px-2 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-xs font-bold transition border border-rose-500/20" title="ลบรายชื่อ">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
   if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function openAddStudentModal() {
+  document.getElementById('newStudentId').value = "";
+  document.getElementById('newStudentName').value = "";
+  document.getElementById('newStudentNickname').value = "";
+  document.getElementById('newStudentEmail').value = "";
+  const modal = document.getElementById('modalAddStudent');
+  if (modal) modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeAddStudentModal() {
+  const modal = document.getElementById('modalAddStudent');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleCreateNewStudent(e) {
+  e.preventDefault();
+  const id = document.getElementById('newStudentId').value.trim();
+  const name = document.getElementById('newStudentName').value.trim();
+  const nickname = document.getElementById('newStudentNickname').value.trim();
+  const email = document.getElementById('newStudentEmail').value.trim().toLowerCase();
+
+  if (studentsList.some(s => s.id === id)) {
+    alert("⚠️ มีรหัสนักศึกษานี้อยู่ในระบบแล้ว!");
+    return;
+  }
+
+  const newSt = { id, name, nickname, email };
+  studentsList.push(newSt);
+  localStorage.setItem('COMED_CUSTOM_STUDENTS_DATA', JSON.stringify(studentsList));
+
+  closeAddStudentModal();
+  renderStudentsTable();
+  showToastNotification(`🎉 เพิ่มรายชื่อ "${name}" เข้าระบบสำเร็จแล้ว!`);
+}
+
+function deleteStudent(id) {
+  const st = studentsList.find(s => s.id === id);
+  if (!st) return;
+
+  if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบรายชื่อ "${st.name}" (${st.id}) ออกจากระบบ?`)) {
+    studentsList = studentsList.filter(s => s.id !== id);
+    localStorage.setItem('COMED_CUSTOM_STUDENTS_DATA', JSON.stringify(studentsList));
+    renderStudentsTable();
+    showToastNotification(`🗑️ ลบรายชื่อ "${st.name}" เรียบร้อยแล้ว`);
+  }
 }
 
 let editingStudentId = null;
