@@ -786,17 +786,19 @@
           <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-700/80 space-y-2">
             <label class="block font-bold text-slate-300 text-[11px] flex items-center justify-between">
               <span class="flex items-center gap-1.5"><i data-lucide="qr-code" class="w-3.5 h-3.5 text-orange-400"></i> รูปภาพ QR Code</span>
-              <span class="text-[10px] text-slate-400 font-normal">อัปโหลดไฟล์ หรือใส่ลิงก์รูป</span>
+              <span class="text-[10px] text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                <i data-lucide="cloud" class="w-2.5 h-2.5"></i> Cloud Auto (ImgBB / FreeImage / Catbox / Cloudinary)
+              </span>
             </label>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
               <div>
-                <span class="text-[10px] text-slate-400 block mb-0.5">1. เลือกรูปภาพจากเครื่อง:</span>
+                <span class="text-[10px] text-slate-400 block mb-0.5">1. อัปโหลดขึ้นคลาวด์ถาวรฟรี (Auto Cloud):</span>
                 <input type="file" id="campQrFileInput" accept="image/*" onchange="handleQrFileUpload(event, 'campQrPreviewImg', 'campQrImageInput')"
                   class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-orange-500/20 file:text-orange-300 hover:file:bg-orange-500/30 cursor-pointer">
               </div>
               <div>
-                <span class="text-[10px] text-slate-400 block mb-0.5">2. หรือ วางลิงก์รูป (URL):</span>
-                <input type="text" id="campQrImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campQrPreviewImg')" placeholder="qr_payment.png หรือ https://..."
+                <span class="text-[10px] text-slate-400 block mb-0.5">2. หรือ วางลิงก์รูปภาพโดยตรง (URL):</span>
+                <input type="text" id="campQrImageInput" oninput="updateQrPreviewFromUrl(this.value, 'campQrPreviewImg')" placeholder="https://i.ibb.co/... หรือ https://..."
                   class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-xs outline-none focus:border-orange-500">
               </div>
             </div>
@@ -834,7 +836,8 @@
 
   <!-- Load Student Database -->
   <script src="students_data.js"></script>
-
+  <!-- Multi-Cloud File Uploader (Cloudinary, ImgBB, FreeImage, Catbox) -->
+  <script src="assets/js/multi_uploader.js"></script>
   <!-- Admin Dashboard Logic -->
   <script src="assets/js/admin.js"></script>
 </body>

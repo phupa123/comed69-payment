@@ -1033,11 +1033,30 @@ async function executeSlipSubmission() {
     refCode: refCode
   };
 
+  let uploadedSlipUrl = tempSlipDataUrl;
+
+  // Upload slip to Cloud Multi-Provider (ImgBB / FreeImage / Catbox / Cloudinary)
+  if (window.MultiCloudUploader) {
+    try {
+      if (title) title.textContent = '☁️ กำลังส่งสลิปไปยังระบบ Cloud ถาวร...';
+      const cloudRes = await window.MultiCloudUploader.upload(tempSlipDataUrl, {
+        onProgress: (pct, msg) => {
+          if (subtitle) subtitle.textContent = msg;
+        }
+      });
+      if (cloudRes && cloudRes.url) {
+        uploadedSlipUrl = cloudRes.url;
+      }
+    } catch (cErr) {
+      console.warn("MultiCloud slip upload fallback:", cErr);
+    }
+  }
+
   // บันทึกลงหน่วยความจำและ LocalStorage ทันที
   paymentRecords[studentId] = {
     paid: true,
     timestamp: timestamp,
-    slipUrl: tempSlipDataUrl,
+    slipUrl: uploadedSlipUrl,
     refCode: refCode,
     amount: currentCampaign.amount || 190
   };
@@ -1058,7 +1077,7 @@ async function executeSlipSubmission() {
         amount: currentCampaign.amount || 190,
         paid: true,
         timestamp: timestamp,
-        slip_url: tempSlipDataUrl, // base64 or external CDN
+        slip_url: uploadedSlipUrl,
         ref_code: refCode,
         verified: true
       }, { onConflict: 'campaign_id,student_id' });

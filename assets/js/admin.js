@@ -531,22 +531,57 @@ function renderAdminCampaignsNav() {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-function handleQrFileUpload(event, previewImgId, inputId) {
+async function handleQrFileUpload(event, previewImgId, inputId) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
 
-  if (file.size > 5 * 1024 * 1024) {
-    alert("⚠️ ขนาดไฟล์ภาพใหญ่เกินไป กรุณาเลือกภาพขนาดไม่เกิน 5MB");
+  if (file.size > 20 * 1024 * 1024) {
+    alert("⚠️ ขนาดไฟล์ภาพใหญ่เกินไป กรุณาเลือกภาพขนาดไม่เกิน 20MB");
     event.target.value = "";
     return;
   }
 
+  // 1. Show local preview immediately
+  const preview = document.getElementById(previewImgId);
+  const input = document.getElementById(inputId);
+  const localUrl = URL.createObjectURL(file);
+  if (preview) preview.src = localUrl;
+
+  // 2. Upload to Cloud Multi-Provider (ImgBB / FreeImage / Catbox / Cloudinary)
+  if (window.MultiCloudUploader) {
+    if (typeof showToastNotification === 'function') {
+      showToastNotification("☁️ กำลังอัปโหลดภาพ QR Code ขึ้นคลาวด์ถาวร...");
+    }
+    try {
+      const res = await window.MultiCloudUploader.upload(file, {
+        onProgress: (pct, msg) => {
+          if (typeof showToastNotification === 'function' && pct < 100) {
+            showToastNotification(`☁️ ${msg}`);
+          }
+        }
+      });
+
+      if (res && res.url) {
+        if (input) input.value = res.url;
+        if (preview) preview.src = res.url;
+        if (typeof showToastNotification === 'function') {
+          showToastNotification(`🎉 อัปโหลดขึ้น ${window.MultiCloudUploader.getProviderName(res.provider)} สำเร็จถาวรแล้ว!`);
+        }
+        return;
+      }
+    } catch (err) {
+      console.warn("MultiCloud upload error, fallback to base64:", err);
+      if (typeof showToastNotification === 'function') {
+        showToastNotification("⚠️ คลาวด์ภายนอกมีปัญหา กำลังบันทึกเป็น Base64 สำรอง...");
+      }
+    }
+  }
+
+  // Fallback to Base64 data URL
   const reader = new FileReader();
   reader.onload = function(e) {
     const dataUrl = e.target.result;
-    const preview = document.getElementById(previewImgId);
     if (preview) preview.src = dataUrl;
-    const input = document.getElementById(inputId);
     if (input) input.value = dataUrl;
     if (typeof showToastNotification === 'function') {
       showToastNotification("📸 โหลดรูปภาพ QR Code พร้อมใช้งานแล้ว!");
